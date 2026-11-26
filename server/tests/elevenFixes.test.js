@@ -6,13 +6,7 @@ const {
   DiaryEntry,
   CheckIn,
   HabitLog,
-  GratitudeEntry,
-  ChatMessage,
-  ThoughtRecord,
-  SelfCheck,
-  CounselorReport,
-  Exam,
-  SmallWin
+  ChatMessage
 } = require('../config/models');
 const { stripAllTags } = require('../utils/sanitize');
 const { evaluateBurnout } = require('../utils/burnout');

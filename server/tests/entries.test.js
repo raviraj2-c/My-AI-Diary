@@ -3,13 +3,12 @@ const app = require('../index');
 const { DiaryEntry } = require('../config/models');
 
 describe('Diary Entries API & Data Integrity', () => {
-  let user, token;
+  let token;
 
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .send({ name: 'Journaler', email: 'journaler@test.com', password: 'Password123' });
-    user = res.body.user;
     token = res.body.token;
   });
 

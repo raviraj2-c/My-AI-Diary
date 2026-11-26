@@ -8,12 +8,32 @@ const { startOfDay, endOfDay } = require('../utils/dates');
 
 function evenlySample(arr, maxCount) {
   if (arr.length <= maxCount) return arr;
-  const result = [];
-  const step = (arr.length - 1) / (maxCount - 1);
-  for (let i = 0; i < maxCount; i++) {
-    result.push(arr[Math.round(i * step)]);
+
+  const indexed = arr.map((item, idx) => ({ item, idx }));
+  const favorites = indexed.filter((x) => Boolean(x.item?.isFavorite));
+  const nonFavorites = indexed.filter((x) => !x.item?.isFavorite);
+
+  const sampleList = (list, count) => {
+    if (count <= 0) return [];
+    if (list.length <= count) return list;
+    if (count === 1) return [list[0]];
+    const picked = [];
+    const step = (list.length - 1) / (count - 1);
+    for (let i = 0; i < count; i++) {
+      picked.push(list[Math.round(i * step)]);
+    }
+    return picked;
+  };
+
+  let chosen;
+  if (favorites.length >= maxCount) {
+    chosen = sampleList(favorites, maxCount);
+  } else {
+    const remaining = maxCount - favorites.length;
+    chosen = [...favorites, ...sampleList(nonFavorites, remaining)].sort((a, b) => a.idx - b.idx);
   }
-  return result;
+
+  return chosen.map((x) => x.item);
 }
 
 const generateStorybookController = async (req, res, next) => {
@@ -222,6 +242,7 @@ const generateStorybookController = async (req, res, next) => {
       message: 'Storybook generated successfully',
       safety: storybookData.safety,
       excludedCount: storybookData.excludedCount || 0,
+      entriesUsed: entriesForAI.length,
       data: {
         id: storybook._id,
         title: storybook.title,
@@ -235,6 +256,7 @@ const generateStorybookController = async (req, res, next) => {
         chapters: storybook.chapters,
         wordCount: storybook.wordCount,
         pageCount: storybook.pageCount,
+        entriesUsed: entriesForAI.length,
         createdAt: storybook.createdAt
       }
     });

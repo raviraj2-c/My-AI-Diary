@@ -1,7 +1,7 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const app = require('../app');
-const { User, DiaryEntry, CheckIn, HabitLog } = require('../config/models');
+const { User, DiaryEntry, CheckIn } = require('../config/models');
 const {
   keyOf,
   todayKey,
@@ -10,7 +10,6 @@ const {
   endOfDay,
   isValidTimezone
 } = require('../utils/dates');
-const llmClient = require('../services/llmClient');
 
 describe('Timezone, Local Date Keys, and Calendar Boundary Hardening', () => {
   describe('1. Date utilities in server/utils/dates.js', () => {

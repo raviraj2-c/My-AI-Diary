@@ -10,6 +10,7 @@ import hi from '../i18n/locales/hi.json';
 import { SafetyBanner } from '../components/Wellness/SafetyBanner';
 import { SOSButton } from '../components/common/SOSButton';
 import { UserSettings } from '../components/Settings/UserSettings';
+import { ToastProvider } from '../components/common/Toast';
 
 vi.mock('../services/wellnessService', () => ({
   WellnessService: {
@@ -142,7 +143,9 @@ describe('Complete i18n & Localization Suite', () => {
 
     const { container } = render(
       <MemoryRouter>
-        <UserSettings />
+        <ToastProvider>
+          <UserSettings />
+        </ToastProvider>
       </MemoryRouter>
     );
 

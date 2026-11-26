@@ -2,10 +2,10 @@ const { checkRisk, normalizeText, stripFalsePositives } = require('../utils/risk
 const AIService = require('../services/aiService');
 
 describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
-  // Labelled test corpus of 85+ test cases:
-  // >= 28 true HIGH, >= 32 true NONE, >= 25 CONCERN.
+  // Labelled test corpus of 150+ test cases:
+  // English, Hinglish, Devanagari; with/without apostrophes; typos/stretched; mixed case.
   const CORPUS = [
-    // --- TRUE HIGH: English (with and without apostrophes) ---
+    // --- TRUE HIGH: English (with and without apostrophes, slang, mixed case) ---
     { text: 'I want to kill myself, I cannot take this anymore', expected: 'high', label: 'EN High: kill myself' },
     { text: 'Thinking about suicide every night', expected: 'high', label: 'EN High: suicide' },
     { text: 'I want to end my life', expected: 'high', label: 'EN High: end my life' },
@@ -25,6 +25,21 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'I want to disappear forever', expected: 'high', label: 'EN High: want to disappear' },
     { text: 'I just want to end it all tonight', expected: 'high', label: 'EN High: end it all' },
     { text: 'I have no reason to live', expected: 'high', label: 'EN High: no reason to live' },
+    { text: 'i wanna die', expected: 'high', label: 'EN High: slang wanna die' },
+    { text: 'I WANNA DIE RIGHT NOW', expected: 'high', label: 'EN High: mixed case WANNA DIE' },
+    { text: 'I dont want to be alive', expected: 'high', label: 'EN High: dont want to be alive' },
+    { text: "I don't want to be alive anymore", expected: 'high', label: "EN High: don't want to be alive" },
+    { text: 'I want to hurt myself', expected: 'high', label: 'EN High: want to hurt myself' },
+    { text: 'I wish to hurt myself tonight', expected: 'high', label: 'EN High: wish to hurt myself' },
+    { text: 'I took too many pills on purpose', expected: 'high', label: 'EN High: took too many pills on purpose' },
+    { text: 'there is no point in living', expected: 'high', label: 'EN High: no point in living' },
+    { text: 'There is no point going on anymore', expected: 'high', label: 'EN High: no point going on' },
+    { text: 'nobody would miss me if I was gone', expected: 'high', label: 'EN High: nobody would miss me' },
+    { text: 'No one would miss me if I disappeared', expected: 'high', label: 'EN High: no one would miss me' },
+    { text: 'I wish to die peacefully', expected: 'high', label: 'EN High: wish to die' },
+    { text: 'I just want to be dead', expected: 'high', label: 'EN High: want to be dead' },
+    { text: 'Im gonna hurt myself tonight', expected: 'high', label: 'EN High: gonna hurt myself' },
+    { text: 'WANNA DISAPPEAR FOREVER', expected: 'high', label: 'EN High: mixed case wanna disappear' },
 
     // --- TRUE HIGH: Stretched & HTML wrapped ---
     { text: 'Thinking about suuuicide again', expected: 'high', label: 'EN High: suuuicide (stretched)' },
@@ -42,6 +57,11 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'फांसी लगा लूंगी सब कुछ छोड़ कर', expected: 'high', label: 'HI High: फांसी लगा लूंगी' },
     { text: 'अब और नहीं जी सकता सब खत्म', expected: 'high', label: 'HI High: अब और नहीं जी सकता' },
     { text: 'मरनााा चाहता हूँ बहुत दर्द है', expected: 'high', label: 'HI High: मरनााा (stretched matra)' },
+    { text: 'मुझे मरना है', expected: 'high', label: 'HI High: मुझे मरना है' },
+    { text: 'मैं खुद को नुकसान पहुँचाना चाहता हूँ', expected: 'high', label: 'HI High: खुद को नुकसान' },
+    { text: 'अब मुझे और जीना नहीं है', expected: 'high', label: 'HI High: जीना नहीं है' },
+    { text: 'मैं सब खत्म कर देना चाहता हूँ', expected: 'high', label: 'HI High: सब खत्म कर' },
+    { text: 'मैं खुद को चोट पहुँचाने जा रही हूँ', expected: 'high', label: 'HI High: खुद को चोट' },
 
     // --- TRUE HIGH: Hinglish ---
     { text: 'Mujhe ab marne ka man kar raha hai', expected: 'high', label: 'Hinglish High: marne ka man kar raha' },
@@ -52,6 +72,12 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'marna chahta hu sab se door', expected: 'high', label: 'Hinglish High: marna chahta hu' },
     { text: 'jeene ka mann nahi kar raha ab', expected: 'high', label: 'Hinglish High: jeene ka mann nahi' },
     { text: 'khud ko khatam karne ka soch raha hu', expected: 'high', label: 'Hinglish High: khud ko khatam' },
+    { text: 'mujhe marna hai', expected: 'high', label: 'Hinglish High: mujhe marna hai' },
+    { text: 'Mujhe Jeena Nahi Hai Ab', expected: 'high', label: 'Hinglish High: mixed case jeena nahi hai' },
+    { text: 'sab khatam kar dena chahta hu', expected: 'high', label: 'Hinglish High: sab khatam kar dena chahta hu' },
+    { text: 'main sab khatam kar dunga aaj', expected: 'high', label: 'Hinglish High: sab khatam kar dunga' },
+    { text: 'sab khatam kar lungi main', expected: 'high', label: 'Hinglish High: sab khatam kar lungi' },
+    { text: 'MUJHE MARNA CHAHTI HU', expected: 'high', label: 'Hinglish High: mixed case marna chahti hu' },
 
     // --- TRUE NONE: Context Guards, Benign Idioms, Everyday Life ---
     { text: 'Search query: how to diet', expected: 'none', label: 'NONE Guard: how to diet' },
@@ -69,6 +95,23 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'Creating self harmony in my daily routine', expected: 'none', label: 'NONE Guard: self harmony' },
     { text: 'I was killing it at the gym today with heavy squats!', expected: 'none', label: 'NONE Guard: killing it at the gym' },
     { text: 'The presentation went great, I was killing it at work', expected: 'none', label: 'NONE Guard: killing it at work' },
+    { text: 'She totally killed it in the final exam!', expected: 'none', label: 'NONE Guard: killed it' },
+    { text: 'I want to die laughing at this meme', expected: 'none', label: 'NONE Guard: want to die laughing' },
+    { text: 'I was dying of embarrassment during that speech', expected: 'none', label: 'NONE Guard: dying of embarrassment' },
+    { text: 'My battery is dying, need to find a charger', expected: 'none', label: 'NONE Guard: my battery is dying' },
+    { text: 'My phone is dead and my laptop battery is dying', expected: 'none', label: 'NONE: phone dead battery dying' },
+    { text: 'Main apna homework khatam kar dunga aaj shaam tak', expected: 'none', label: 'NONE Hinglish: homework khatam kar dunga' },
+    { text: 'Main football khelte hue gir gaya aur chot lag gayi', expected: 'none', label: 'NONE Hinglish: sports injury' },
+    { text: 'Aaj ka khana bahut tasty tha, maza aa gaya', expected: 'none', label: 'NONE Hinglish: tasty food' },
+    { text: 'आज मौसम बहुत अच्छा है, शाम को टहलने गया', expected: 'none', label: 'NONE HI: pleasant weather walk' },
+    { text: 'मैंने आज अपनी किताब पढ़ना खत्म कर दिया', expected: 'none', label: 'NONE HI: finished reading book' },
+    { text: 'परीक्षा की तैयारी अच्छी चल रही है', expected: 'none', label: 'NONE HI: exam prep going well' },
+    { text: 'Wrote five pages in my novel draft today feeling motivated', expected: 'none', label: 'NONE: creative writing' },
+    { text: 'Going to sleep early after a good workout', expected: 'none', label: 'NONE: good workout' },
+    { text: 'Gonna watch a comedy movie with friends tonight', expected: 'none', label: 'NONE: slang gonna watch movie' },
+    { text: 'I wanna try that new coffee shop downtown', expected: 'none', label: 'NONE: slang wanna try coffee' },
+    { text: 'Do not forget to water the plants tomorrow', expected: 'none', label: 'NONE: water plants' },
+    { text: "Don't worry about the small typos in the draft", expected: 'none', label: "NONE: don't worry about typos" },
     { text: 'We had a killer workout this morning with sprint intervals', expected: 'none', label: 'NONE Guard: killer workout' },
     { text: 'That designer created a killer routine for core strength', expected: 'none', label: 'NONE Guard: killer routine' },
     { text: 'I was dying of laughter watching that comedy show.', expected: 'none', label: 'NONE Guard: dying of laughter' },
@@ -112,10 +155,24 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'सब बेकार है मैं किसी काम का नहीं', expected: 'concern', label: 'HI Concern: किसी काम का नहीं' },
     { text: 'bohot udaas hu koi ummeed nahi bachi', expected: 'concern', label: 'Hinglish Concern: koi ummeed nahi' },
     { text: 'sab bekaar hai main kisi kaam ka nahi', expected: 'concern', label: 'Hinglish Concern: sab bekaar hai' },
-    { text: 'andar se toot gaya hu koi sahara nahi', expected: 'concern', label: 'Hinglish Concern: andar se toot gaya' }
+    { text: 'andar se toot gaya hu koi sahara nahi', expected: 'concern', label: 'Hinglish Concern: andar se toot gaya' },
+    { text: "I can't do this anymore, everything feels heavy", expected: 'concern', label: "EN Concern: can't do this anymore" },
+    { text: 'I feel like giving up on my goals lately', expected: 'concern', label: 'EN Concern: feel like giving up' },
+    { text: 'Completely alone in the world and exhausted', expected: 'concern', label: 'EN Concern: completely alone' },
+    { text: 'No reason to go on with this project', expected: 'concern', label: 'EN Concern: no reason to go on' },
+    { text: 'मैं हार मान चुका हूँ अब कुछ नहीं हो सकता', expected: 'concern', label: 'HI Concern: हार मान चुका हूँ' },
+    { text: 'बहुत अकेली हूँ और कोई उम्मीद नहीं है', expected: 'concern', label: 'HI Concern: कोई उम्मीद नहीं' },
+    { text: 'kisi ko meri parwah nahi hai is duniya mein', expected: 'concern', label: 'Hinglish Concern: kisi ko meri parwah nahi' },
+    { text: 'seh nahi paa raha hu ye akelapan', expected: 'concern', label: 'Hinglish Concern: seh nahi paa raha' },
+    { text: 'I am tired of trying and failing every week', expected: 'concern', label: 'EN Concern: tired of trying' },
+    { text: 'Feeling utterly hopeless about tomorrow', expected: 'concern', label: 'EN Concern: utterly hopeless' },
+    { text: 'सब खत्म लग रहा है मन बहुत भारी है', expected: 'concern', label: 'HI Concern: सब खत्म लग रहा' },
+    { text: 'drowning in darkness with no way out', expected: 'concern', label: 'EN Concern: drowning in darkness' },
+    { text: 'I hate existing like this every single day', expected: 'concern', label: 'EN Concern: hate existing' }
   ];
 
-  it('runs the 85+ labeled corpus and outputs precision/recall table with 0 FN on HIGH and 0 FP on NONE', () => {
+  it('runs the 150+ labeled corpus and outputs precision/recall table with 0 FN on HIGH and 0 FP on NONE', () => {
+    expect(CORPUS.length).toBeGreaterThanOrEqual(150);
     let highTP = 0, highFP = 0, highFN = 0;
     let noneTP = 0, noneFP = 0, noneFN = 0;
     let concernTP = 0, concernFP = 0, concernFN = 0;
@@ -211,15 +268,20 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
       expect(normalizeText('pleaseeeee')).toBe('please');
     });
 
-    it('removes ASCII and Unicode apostrophes so contractions match canonical forms', () => {
+    it('removes ASCII and Unicode apostrophes and expands slang forms', () => {
       // ASCII apostrophe
       expect(normalizeText("can't")).toBe('cant');
-      expect(normalizeText("don't")).toBe('dont');
+      expect(normalizeText("don't")).toBe('do not');
 
       // Unicode curly apostrophes
       expect(normalizeText('can’t')).toBe('cant');
-      expect(normalizeText('don’t')).toBe('dont');
+      expect(normalizeText('don’t')).toBe('do not');
       expect(normalizeText('can`t')).toBe('cant');
+
+      // Slang normalization
+      expect(normalizeText('I wanna sleep')).toBe('i want to sleep');
+      expect(normalizeText('I gonna run')).toBe('i going to run');
+      expect(normalizeText('I dont know')).toBe('i do not know');
     });
 
     it('strips HTML tags and script elements prior to evaluation', () => {
@@ -262,6 +324,26 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
       expect(result.safety.level).toBe('high');
       expect(result.starters.length).toBe(3);
       expect(result.starters[0]).toContain('caring');
+    });
+  });
+
+  describe('Idiom & Context Guards', () => {
+    it.each([
+      ['I want to die laughing at this meme'],
+      ['dying of laughter watching standup'],
+      ['dying of embarrassment at the party'],
+      ['dead tired after finals'],
+      ['dying to see the new movie'],
+      ['she killed it on stage'],
+      ['killing it at the gym'],
+      ['my battery is dying'],
+      ['overdosed on coffee this morning'],
+      ['how to diet safely'],
+      ['cut myself shaving today'],
+      ['took a pain killer'],
+      ['giving up sugar for a month']
+    ])('returns none for benign idiom: %s', (phrase) => {
+      expect(checkRisk(phrase).level).toBe('none');
     });
   });
 });

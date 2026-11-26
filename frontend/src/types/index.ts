@@ -294,6 +294,8 @@ export interface BurnoutStatus {
   code?: 'BURNOUT_WARNING' | 'BURNOUT_SAFE';
   params?: {
     highStressDays: number;
+    checkedDays?: number;
+    windowDays?: number;
     avgSleepHours: number;
   };
   message: string;

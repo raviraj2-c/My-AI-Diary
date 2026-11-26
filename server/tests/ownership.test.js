@@ -6,7 +6,7 @@ const {
 } = require('../config/models');
 
 describe('Resource Ownership Enforcement (User B cannot access User A data)', () => {
-  let userA, tokenA, userB, tokenB;
+  let userA, tokenA, tokenB;
 
   beforeEach(async () => {
     // Register User A
@@ -20,7 +20,6 @@ describe('Resource Ownership Enforcement (User B cannot access User A data)', ()
     const resB = await request(app)
       .post('/api/auth/register')
       .send({ name: 'User B', email: 'userB@test.com', password: 'Password123' });
-    userB = resB.body.user;
     tokenB = resB.body.token;
   });
 

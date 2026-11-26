@@ -19,6 +19,7 @@ This guide covers deploying the **MindDiary** full-stack system:
 | Variable Name | Required | Description / Example Value |
 | :--- | :---: | :--- |
 | `NODE_ENV` | Yes | `production` |
+| `NODE_VERSION` | Yes | `20` (ensures Node >=20.19 on Render) |
 | `PORT` | Yes | `5000` (or leave default assigned by Render) |
 | `MONGODB_URI` | Yes | `mongodb+srv://<user>:<password>@cluster0.xxx.mongodb.net/minddiary?retryWrites=true&w=majority` |
 | `JWT_SECRET` | Yes | Cryptographic secret (minimum 32 characters). Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
@@ -30,7 +31,7 @@ This guide covers deploying the **MindDiary** full-stack system:
 | `CLOUDINARY_API_KEY` | Yes | Cloudinary API Key |
 | `CLOUDINARY_API_SECRET` | Yes | Cloudinary API Secret |
 | `ANTHROPIC_API_KEY` | Optional | `sk-ant-api03-...` (required for Claude AI reflections and chat) |
-| `AI_MODEL` | Optional | `claude-3-haiku-20240307` |
+| `AI_MODEL` | Optional | `claude-haiku-4-5` |
 | `SMTP_HOST` | Optional | E.g. `smtp.sendgrid.net` or `smtp.gmail.com` |
 | `SMTP_PORT` | Optional | `587` |
 | `SMTP_USER` | Optional | SMTP username |
@@ -48,6 +49,7 @@ This guide covers deploying the **MindDiary** full-stack system:
 * **Root Directory:** `frontend`
 * **Build Command:** `npm run build`
 * **Output Directory:** `dist`
+* **SPA Routing:** Configured via `frontend/vercel.json` (`{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}`) so deep links and page refreshes never 404 while keeping static assets working.
 
 | Variable Name | Required | Description / Example Value |
 | :--- | :---: | :--- |
@@ -91,7 +93,9 @@ Run through this test sequence immediately after deploying to production:
 - [ ] **Step 9: Hindi Switch (i18n)**  
   In Settings or top navigation, toggle language between English (`en`) and Hindi (`hi`). Verify full interface localization across navigation, buttons, forms, tooltips, and prompts without broken layout.
 - [ ] **Step 10: App Lock**  
-  In Settings, configure a 4-digit PIN lock. Lock the application or wait for inactivity timeout, then verify that the PIN screen protects the interface and correctly unlocks upon entering the right PIN.
+  In Settings, configure a 4–6 digit PIN lock. Lock the application or wait for inactivity timeout, then verify that the PIN screen protects the interface and correctly unlocks upon entering the right PIN.
+- [ ] **Step 11: Vercel SPA Routing & Deep Links**  
+  Open `https://your-app.vercel.app/reset-password/test` and `https://your-app.vercel.app/shared/test` directly in the browser, and refresh `https://your-app.vercel.app/calendar`. Confirm all three load the SPA cleanly without a Vercel 404.
 
 ---
 

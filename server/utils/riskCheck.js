@@ -13,8 +13,9 @@ const FALSE_POSITIVE_PATTERNS = [
   /\bcut\s+myself\s+(?:shaving|cooking|chopping|peeling|while\s+cutting\s+vegetables|while\s+chopping|while\s+cooking|on\s+paper|with\s+paper|by\s+accident|accidentally)\b/i,
 
   // Idiomatic performance/metaphors
-  /\bkilling\s+it(?:\s+(?:at|in|with|on))?\b/i,
+  /\b(?:killing|killed)\s+it(?:\s+(?:at|in|with|on))?\b/i,
   /\bkiller\s+(?:workout|run|routine|speed|shot|deal|feature|move|looks|outfit)\b/i,
+  /\b(?:want\s+to|wanna|going\s+to|gonna)?\s*die\s+laughing\b/i,
   /\bdying\s+of\s+(?:laughter|laughing|thirst|boredom|curiosity|embarrassment)\b/i,
   /\bdying\s+to\s+(?:see|try|meet|know|watch|learn|hear|go|visit)\b/i,
   /\bpain\s*killer\b/i,
@@ -56,6 +57,9 @@ function normalizeText(text) {
     .replace(/<[^>]*>/g, ' ')
     .replace(/['\u2018\u2019\u02BC\u02BB\u201B\u0060\u00B4]/gu, '')
     .replace(/[^\p{L}\p{M}\p{N}\s]/gu, ' ')
+    .replace(/\bwanna\b/g, 'want to')
+    .replace(/\bgonna\b/g, 'going to')
+    .replace(/\bdont\b/g, 'do not')
     .replace(/([^\s])\1{2,}/gu, '$1')
     .replace(/\s+/g, ' ')
     .trim();

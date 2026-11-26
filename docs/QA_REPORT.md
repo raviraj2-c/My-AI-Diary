@@ -44,17 +44,17 @@
 ## 3. Automated Test Verification Summary
 
 * **Frontend Test Suite (Vitest + React Testing Library + JSDOM):**
-  - **12 Test Files Passed** (12 total, 0 failed)
-  - **31 Tests Passed** (31 total, 0 failures, 0 flaky)
-  - Includes: `sanitize` (DOMPurify script stripping), `EmotionWheel`, `CheckIn` form, `SafetyBanner` (helplines & Esc key), `SOSButton`, `AppLockScreen` (lockout freeze), `useSettings` (rollback on failure), `AuthContext` (auto-logout on 401), `i18n` (EN/HI key parity), `storage`, `newFeatures` (Year in Pixels, Future Letters, Coping Plan), `DiaryEntryReflect` (Reflect with me, AI-off link, SafetyBanner on high-risk, hide on aiExcluded).
-  - Execution time: ~3.4s
+  - **14 Test Files Passed** (14 total, 0 failed)
+  - **45 Tests Passed** (45 total, 0 failures, 0 flaky)
+  - Includes: `sanitize` (5), `EmotionWheel` (3), `CheckIn` (1), `SafetyBanner` (4), `SOSButton` (6), `AppLockScreen` (2), `useSettings` (3), `AuthContext` (2), `authSafeguards` (4), `i18n` (1), `i18nComplete` (6), `storage` (2), `newFeatures` (3), `DiaryEntryReflect` (3).
+  - Execution time: ~3.1s
 * **Backend Test Suite (Jest + Supertest + In-Memory MongoDB):**
-  - **15 Test Suites Passed** (15 total, 0 failed)
-  - **154 Tests Passed** (154 total, 0 failures, 0 flaky)
-  - Includes: `boot`, `auth`, `ownership` (User B isolation across every collection), `entries`, `encryption` (`enc:v1:` at-rest validation and coping plan migration), `insights` (math & 7-point threshold), `riskCheck` (crisis & false positive guards), `ai` (mocked LLM boundaries, quota, 503 handling, Ask My Diary, Storybooks), `passwordAndAppLock` (matchPassword, lockout freeze, reset), `threeFeatures` (Year in Pixels, Future Letters, Coping Plan), `upload` (magic-byte validation), `accountExport` (JSON export & cascading deletion), `partL` (date boundaries, aiExcluded, storybook safety), `askDiary` (retrieval, safety, memory), `modules` (syntax and import validation).
-  - Execution time: ~52.3s
-* **Total Automated Tests:** **185 tests passed with 100% success rate**.
+  - **19 Test Suites Passed** (19 total, 0 failed)
+  - **217 Tests Passed** (217 total, 0 failures, 0 flaky)
+  - Includes: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (22), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (8), `modules` (36), `boot` (3), `insights` (4).
+  - Execution time: ~124.4s (verified without `server/.env`)
+* **Total Automated Tests:** **262 tests passed with 100% success rate**.
 * **Linting & Compilation Quality:**
-  - `server`: ESLint reported **0 errors** (14 unused variable warnings).
-  - `frontend`: ESLint reported **0 errors** (417 i18n literal string warnings).
+  - `server`: ESLint reported **0 errors**, **9 warnings** (0 warnings in test files).
+  - `frontend`: ESLint reported **0 errors**, **0 warnings**.
   - `TypeScript`: `tsc -b && vite build` completed with **0 type errors**.

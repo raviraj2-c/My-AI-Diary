@@ -6,15 +6,8 @@ const {
   CheckIn,
   HabitLog,
   GratitudeEntry,
-  CalmSession,
-  SelfCheck,
-  Storybook,
-  ChatMessage,
-  ThoughtRecord,
-  StudySession,
   Exam,
-  SmallWin,
-  CounselorReport
+  SmallWin
 } = require('../config/models');
 
 describe('User matchPassword, Delete-Account & App Lock Verification', () => {

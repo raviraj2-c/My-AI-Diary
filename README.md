@@ -195,12 +195,12 @@ MindDiary provides an **SOS button** on every view and automated compassionate s
 Unlike legacy mocks, all tests run against **real Express routes, real MongoDB schemas (via in-memory replica), and real React components**:
 
 * **Backend Test Suite (`Jest` + `Supertest` + `mongodb-memory-server`):**
-  - **15 Test Suites**, **154 Tests Passed** (100% pass rate)
-  - Suites: `boot`, `auth`, `ownership` (User B isolation across every collection), `entries`, `encryption` (`enc:v1:` at-rest validation and coping plan migration), `insights` (math & 7-point threshold), `riskCheck` (crisis & false positive guards), `ai` (mocked LLM boundaries, quota, 503 handling, Ask My Diary, Storybooks), `passwordAndAppLock` (matchPassword, lockout freeze, reset), `threeFeatures` (Year in Pixels, Future Letters, Coping Plan), `upload` (magic-byte validation), `accountExport` (JSON export & cascading deletion), `partL` (date boundaries, aiExcluded, storybook safety), `askDiary` (retrieval, safety, memory), `modules` (syntax and import validation across all controllers, routes, services, utils, and middleware).
+  - **19 Test Suites**, **217 Tests Passed** (100% pass rate)
+  - Suites: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (22), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (8), `modules` (36), `boot` (3), `insights` (4).
 * **Frontend Test Suite (`Vitest` + `@testing-library/react` + `jsdom`):**
-  - **12 Test Files**, **31 Tests Passed** (100% pass rate)
-  - Suites: `sanitize` (DOMPurify script stripping), `EmotionWheel`, `CheckIn` form, `SafetyBanner` (helplines & Esc key), `SOSButton`, `AppLockScreen` (lockout freeze), `useSettings` (rollback on failure), `AuthContext` (auto-logout on 401), `i18n` (EN/HI key parity), `storage`, `newFeatures` (Year in Pixels, Future Letters, Coping Plan), `DiaryEntryReflect` (Reflect with me button, AI-off link, SafetyBanner on high-risk, hide on aiExcluded).
-* **Total Automated Tests:** **185 tests passed, 0 failures, 0 skipped**.
+  - **14 Test Files**, **45 Tests Passed** (100% pass rate)
+  - Suites: `sanitize` (5), `EmotionWheel` (3), `CheckIn` (1), `SafetyBanner` (4), `SOSButton` (6), `AppLockScreen` (2), `useSettings` (3), `AuthContext` (2), `authSafeguards` (4), `i18n` (1), `i18nComplete` (6), `storage` (2), `newFeatures` (3), `DiaryEntryReflect` (3).
+* **Total Automated Tests:** **262 tests passed, 0 failures, 0 skipped**.
 
 ### Real Lighthouse Production Audit
 Generated via headless Chrome audit against production preview build ([view HTML report](docs/lighthouse/report.report.html)):
@@ -233,7 +233,7 @@ Generated via headless Chrome audit against production preview build ([view HTML
 | **Multi-Language UI (EN / HI)** | ✅ **Done** | Complete translation key parity (200+ keys) between English and Hindi via `react-i18next`. |
 | **Counselor Summary Sharing** | ✅ **Done** | 7-day expiring token link showing **only** statistical averages and scores; **zero raw diary text is exposed**. |
 | **Data Export & Right to Erasure** | ✅ **Done** | One-click JSON backup export; password-verified account deletion cascading across all 16 MongoDB collections and Cloudinary. |
-| **Automated Test Coverage & CI** | ✅ **Done** | 185 tests across Jest (154) and Vitest (31); GitHub Actions workflow for Node 20/22 with lint, type-check, test, and build. |
+| **Automated Test Coverage & CI** | ✅ **Done** | 262 tests across Jest (217) and Vitest (45); GitHub Actions workflow for Node 20/22 with lint, type-check, test, and build. |
 | **Demo Seeder & Script** | ✅ **Done** | `npm run seed:demo` generates 30 days of realistic reflections and trends for viva evaluation. |
 | **Media Delivery** | 🟡 **Partly Done** | Files upload to user-scoped folders (`mydiary/user_<id>/`) with random unguessable IDs, but deliver over public CDN URLs rather than signed tokens. |
 | **App Lock Scope** | 🟡 **Partly Done** | 4-digit PIN lock provides a device-level UI privacy gate against physical snooping, but is not a second cryptographic key derivation layer. |
@@ -273,7 +273,7 @@ For project evaluation and viva examinations, present the application following 
 5. **Minute 5: Privacy Sovereignty & Counselor Summary Sharing:**
    - Go to Insights and click **Share Summary with Counselor**: generate a 7-day expiring link.
    - Open the link in an Incognito window (`/shared/:token`): show that the therapist sees **only** numerical averages, screening scores, and sleep-mood correlations; **zero personal diary text is exposed**.
-   - Show `docs/PROJECT_REPORT_OUTLINE.md`, `docs/API.md`, `docs/VIVA_QA.md`, and run `npm test` and `npm run test:frontend` in the terminal to demonstrate all 157 automated tests passing across Jest (129) and Vitest (28).
+   - Show `docs/PROJECT_REPORT_OUTLINE.md`, `docs/API.md`, `docs/VIVA_QA.md`, and run `npm test` and `npm run test:frontend` in the terminal to demonstrate all 262 automated tests passing across Jest (217) and Vitest (45).
 
 ---
 

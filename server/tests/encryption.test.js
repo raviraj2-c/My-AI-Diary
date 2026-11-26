@@ -32,7 +32,7 @@ describe('Field-Level Encryption at Rest', () => {
     // Read directly from MongoDB bypassing Mongoose schema getters
     const rawCreated = await mongoose.connection.collection('diaryentries').findOne({ _id: entryId });
     expect(rawCreated.content).toBeDefined();
-    expect(rawCreated.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawCreated.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawCreated.content).not.toContain(secretContent);
 
     // 2. Update
@@ -48,7 +48,7 @@ describe('Field-Level Encryption at Rest', () => {
     expect(updateRes.status).toBe(200);
 
     const rawUpdated = await mongoose.connection.collection('diaryentries').findOne({ _id: entryId });
-    expect(rawUpdated.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawUpdated.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawUpdated.content).not.toContain(updatedSecret);
     expect(rawUpdated.content).not.toBe(rawCreated.content);
   });
@@ -67,7 +67,7 @@ describe('Field-Level Encryption at Rest', () => {
 
     const raw = await mongoose.connection.collection('checkins').findOne({ _id: checkInId });
     expect(raw.note).toBeDefined();
-    expect(raw.note).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(raw.note).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(raw.note).not.toContain(secretNote);
   });
 
@@ -82,7 +82,7 @@ describe('Field-Level Encryption at Rest', () => {
     const gratId = new mongoose.Types.ObjectId(gratRes.body.data.id || gratRes.body.data._id);
 
     const rawGrat = await mongoose.connection.collection('gratitudeentries').findOne({ _id: gratId });
-    expect(rawGrat.items[0]).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawGrat.items[0]).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawGrat.items[0]).not.toContain(secretGratitude);
 
     // Thought Record
@@ -99,7 +99,7 @@ describe('Field-Level Encryption at Rest', () => {
     const thoughtId = new mongoose.Types.ObjectId(thoughtRes.body.data.id || thoughtRes.body.data._id);
 
     const rawThought = await mongoose.connection.collection('thoughtrecords').findOne({ _id: thoughtId });
-    expect(rawThought.thought).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawThought.thought).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawThought.thought).not.toContain(secretThought);
   });
 
@@ -120,7 +120,7 @@ describe('Field-Level Encryption at Rest', () => {
     // 1. Check raw MongoDB document directly
     const rawDoc = await mongoose.connection.collection('selfchecks').findOne({ _id: checkId });
     expect(typeof rawDoc.answers).toBe('string');
-    expect(rawDoc.answers).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawDoc.answers).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawDoc.score).toBe(14);
     expect(rawDoc.severity).toBe('Moderate');
 
@@ -152,7 +152,7 @@ describe('Field-Level Encryption at Rest', () => {
     const examId = new mongoose.Types.ObjectId(examRes.body.data._id || examRes.body.data.id);
 
     const rawExam = await mongoose.connection.collection('exams').findOne({ _id: examId });
-    expect(rawExam.notes).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawExam.notes).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawExam.notes).not.toContain(secretNotes);
 
     const getExams = await request(app)
@@ -174,7 +174,7 @@ describe('Field-Level Encryption at Rest', () => {
     expect(winRes.status).toBe(200);
 
     const rawWin = await mongoose.connection.collection('smallwins').findOne({ dateKey: '2026-11-20' });
-    expect(rawWin.tasks[0].text).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(rawWin.tasks[0].text).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(rawWin.tasks[0].text).not.toContain(secretTask);
 
     const getWins = await request(app)
@@ -270,7 +270,7 @@ describe('Field-Level Encryption at Rest', () => {
 
     // Check DB document is now encrypted
     const docAfterLive = await mongoose.connection.collection('diaryentries').findOne({ _id: testDocId });
-    expect(docAfterLive.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(docAfterLive.content).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
     expect(docAfterLive.content).not.toContain(plainLegacyText);
 
     // 3. Second run must change 0 rows (idempotence)
@@ -304,10 +304,10 @@ describe('Field-Level Encryption at Rest', () => {
     expect(liveRun.copingplans).toBe(1);
 
     const docLive = await mongoose.connection.collection('copingplans').findOne({ _id: rawPlanId });
-    expect(docLive.warningSigns).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
-    expect(docLive.copingStrategies).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
-    expect(docLive.safePlaces).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
-    expect(docLive.reasonsToKeepGoing).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_\-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(docLive.warningSigns).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(docLive.copingStrategies).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(docLive.safePlaces).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    expect(docLive.reasonsToKeepGoing).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
 
     // 3. Second run changes 0 rows
     const secondRun = await runMigration({ dryRun: false, collection: 'copingplans' });

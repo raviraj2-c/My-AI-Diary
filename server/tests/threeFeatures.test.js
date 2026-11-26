@@ -1,7 +1,6 @@
 const request = require('supertest');
 const app = require('../index');
 const {
-  User,
   DiaryEntry,
   CheckIn,
   FutureLetter,
@@ -9,7 +8,7 @@ const {
 } = require('../config/models');
 
 describe('Three Small Features: Year in Pixels, Letters to Future Self, Coping Plan', () => {
-  let userA, tokenA, userB, tokenB;
+  let userA, tokenA, tokenB;
   const userPassword = 'TestPassword123!';
 
   beforeEach(async () => {
@@ -22,7 +21,6 @@ describe('Three Small Features: Year in Pixels, Letters to Future Self, Coping P
     const resB = await request(app)
       .post('/api/auth/register')
       .send({ name: 'User B', email: `userB-${Date.now()}@test.com`, password: userPassword });
-    userB = resB.body.user;
     tokenB = resB.body.token;
   });
 

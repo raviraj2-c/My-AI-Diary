@@ -175,6 +175,7 @@ export const StudentPage: React.FC = () => {
                 {burnout.code === 'BURNOUT_WARNING'
                   ? t('student.burnoutMessage', {
                       highStressDays: burnout.params?.highStressDays ?? burnout.highStressDays,
+                      checkedDays: burnout.params?.checkedDays ?? 7,
                       avgSleepHours: burnout.params?.avgSleepHours ?? burnout.avgSleep
                     })
                   : burnout.message || t('student.burnoutDesc')}

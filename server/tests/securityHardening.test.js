@@ -1,14 +1,14 @@
-import request from 'supertest';
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import app from '../app.js';
-import { User, DiaryEntry, CheckIn, FutureLetter, CopingPlan } from '../config/models.js';
-import { encryptText, decryptText, getEncryptionKey } from '../utils/encrypt.js';
-import { isValidPassword } from '../utils/validate.js';
-import { isValidCloudinaryUrl, cloudinary } from '../config/cloudinary.js';
-import { sendPasswordResetEmail } from '../utils/email.js';
-import { runKeyRotation } from '../scripts/rotateKeys.js';
+const request = require('supertest');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const app = require('../app');
+const { User, DiaryEntry, CheckIn } = require('../config/models');
+const { encryptText, decryptText, getEncryptionKey } = require('../utils/encrypt');
+const { isValidPassword } = require('../utils/validate');
+const { isValidCloudinaryUrl, cloudinary } = require('../config/cloudinary');
+const { sendPasswordResetEmail } = require('../utils/email');
+const { runKeyRotation } = require('../scripts/rotateKeys');
 
 describe('Security Hardening Tests', () => {
   let userToken;
@@ -202,7 +202,7 @@ describe('Security Hardening Tests', () => {
     test('encrypts using enc:v2 format with key id', () => {
       const plaintext = 'Secret diary thoughts';
       const ciphertext = encryptText(plaintext);
-      expect(ciphertext).toMatch(/^enc:v2:[a-zA-Z0-9_\-]+:[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+      expect(ciphertext).toMatch(/^enc:v2:[a-zA-Z0-9_-]+:[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
       const decrypted = decryptText(ciphertext);
       expect(decrypted).toBe(plaintext);
     });

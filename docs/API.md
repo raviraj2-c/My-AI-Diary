@@ -37,7 +37,7 @@ Rate Limit on Auth: 10 requests per 15 minutes per IP (`429 Too Many Requests`).
 | `POST` | `/api/auth/reset-password` | Public | Reset password with token. Body: `{ token, newPassword }` |
 | `POST` | `/api/auth/change-password`| User | Update password. Body: `{ currentPassword, newPassword }` |
 | `POST` | `/api/auth/logout-all` | User | Invalidate all active tokens (increments tokenVersion) |
-| `POST` | `/api/auth/app-lock/setup` | User | Enable 4-digit PIN lock. Body: `{ pin, password }` |
+| `POST` | `/api/auth/app-lock/setup` | User | Enable 4–6 digit PIN lock. Body: `{ pin, password }` |
 | `POST` | `/api/auth/app-lock/verify` | User | Verify PIN lock. Body: `{ pin }` |
 | `POST` | `/api/auth/app-lock/disable`| User | Disable PIN lock. Body: `{ password }` |
 | `GET` | `/api/auth/export-data` | User | Export complete decrypted backup JSON archive |

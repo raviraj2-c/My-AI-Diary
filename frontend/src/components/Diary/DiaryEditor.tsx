@@ -423,10 +423,10 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
                       onClick={handleCheckMood}
                       disabled={isCheckingMood}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 hover:text-primary-600 dark:hover:text-primary-400 disabled:opacity-50 transition-colors"
-                      title="Analyze emotional tone of current writing"
+                      title={t('diary.checkMoodTitle')}
                     >
                       <Sparkles className={`w-3.5 h-3.5 text-primary-500 ${isCheckingMood ? 'animate-spin' : ''}`} />
-                      <span>{isCheckingMood ? 'Checking tone...' : 'Check my mood'}</span>
+                      <span>{isCheckingMood ? t('diary.checkingTone') : t('diary.checkMood')}</span>
                     </button>
                   </div>
                 )}

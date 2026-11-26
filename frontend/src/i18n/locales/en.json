@@ -479,7 +479,7 @@
     "pauseReminder": "A gentle reminder to pause",
     "highStressDays": "High stress: {{count}} of last 7 days",
     "avgSleep": "Average sleep: {{count}} hrs",
-    "burnoutMessage": "Burnout risk detected ({{highStressDays}} high-stress days, {{avgSleepHours}}h average sleep). Please take a rest.",
+    "burnoutMessage": "Burnout risk detected ({{highStressDays}} high-stress days out of {{checkedDays}} logged days, {{avgSleepHours}}h average sleep). Please take a rest.",
     "smallWinsSubtitle": "Tiny steps count just as much",
     "smallWinsDesc": "Break down the overwhelming into three bite-sized intentions. Keep them small enough that you can easily cross them off today.",
     "saveIntentions": "Save intentions",
@@ -567,7 +567,10 @@
     "selectEmotionsHint": "Select up to 5 nuanced emotions to capture how you are experiencing this moment:",
     "sentenceStarters": "Sentence Starters",
     "untitled": "Untitled reflection",
-    "editorEmoji": "✍️"
+    "editorEmoji": "✍️",
+    "checkMood": "Check my mood",
+    "checkingTone": "Checking tone...",
+    "checkMoodTitle": "Analyze emotional tone of current writing"
   },
   "gratitude": {
     "title": "Three Good Things",

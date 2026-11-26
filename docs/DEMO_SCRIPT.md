@@ -27,7 +27,7 @@
   > "Good morning, respected examiners. Today I am presenting **MindDiary**, a private, AI-supported mental wellness journal built with Express, MongoDB, React, and TypeScript.
   > Mental health records are among the most sensitive personal data. Unlike traditional journal apps, MindDiary treats security and safety as first-class constraints. 
   > All private diary text, check-in notes, gratitude lists, and thought records are encrypted at rest using authenticated **AES-256-GCM** before touching MongoDB. Even database administrators cannot read user reflections in plaintext."
-* **Action:** Sign in with `demo@minddiary.app` and enter the 4-digit PIN when prompted.
+* **Action:** Sign in with `demo@minddiary.app` and enter the 4–6 digit PIN when prompted.
 
 ---
 

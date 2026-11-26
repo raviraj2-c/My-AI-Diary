@@ -1,15 +1,19 @@
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
+// Ensure deterministic test env vars are set before any app/config module is required
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'a'.repeat(32);
+process.env.ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.AI_MODEL = process.env.AI_MODEL || 'claude-haiku-4-5';
+process.env.PORT = process.env.PORT || '5055';
+process.env.CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || 'mydiary_dev';
+process.env.CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || '123456789012345';
+process.env.CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || 'test_secret_key_for_cloudinary';
+
 let mongoServer;
 
 beforeAll(async () => {
-  process.env.NODE_ENV = 'test';
-  process.env.JWT_SECRET = 'a'.repeat(32);
-  process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
-  process.env.AI_MODEL = 'claude-3-haiku-20240307';
-  process.env.PORT = '5055';
-
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);

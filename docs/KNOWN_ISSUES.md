@@ -19,19 +19,23 @@ Examiners appreciate intellectual honesty. No production system is without trade
 
 ## 2. App Lock Scope (Device UI Gate vs. Key Derivation)
 
-* **Current Architecture:** The 4-digit PIN lock (`AppLockScreen.tsx`) stores a session unlock state and verifies the PIN against `/api/auth/app-lock/verify`.
+* **Current Architecture:** The 4–6 digit PIN lock (`AppLockScreen.tsx`) stores a session unlock state and verifies the PIN against `/api/auth/app-lock/verify`.
 * **Limitation:** The PIN lock is a **device-level UI privacy gate**, protecting against casual "shoulder surfing" or an unlocked device left on a desk. It is **not** a secondary cryptographic encryption layer. Entering the PIN does not decrypt database fields; the JWT token still handles API authorization.
-* **Why this is acceptable:** For mobile and laptop use cases, preventing casual physical snooping by peers or roommates solves 95% of real-world privacy threats without risking total data loss if a 4-digit PIN is forgotten.
+* **Why this is acceptable:** For mobile and laptop use cases, preventing casual physical snooping by peers or roommates solves 95% of real-world privacy threats without risking total data loss if a 4–6 digit PIN is forgotten.
 
 ---
 
 ## 3. Heuristic Crisis Risk Engine Boundaries
 
-* **Current Architecture:** The `checkRisk.js` engine uses pre-compiled regular expressions and keyword taxonomies (covering English, Hindi, and Hinglish variants) to classify distress into `none`, `concern`, and `high`.
+* **Current Architecture:** The `server/utils/riskCheck.js` engine uses pre-compiled Unicode-aware regular expressions and keyword taxonomies (covering English, Hindi, and Hinglish variants, plus idiom guards) to classify distress into `none`, `concern`, and `high`.
+* **Measured Corpus Performance (153-case labelled test corpus):**
+  - **HIGH (Crisis, 66 cases):** 100.0% recall (0 false negatives)
+  - **NONE (Benign / Idioms, 49 cases):** 100.0% recall (0 false positives)
+  - **CONCERN (Distress, 38 cases):** 100.0% recall
 * **Known Gaps & Limitations:**
-  1. **Complex Metaphor / Indirect Suicidality:** Subtle or poetic despair (e.g., *"I am tired of existing in this world, I wish I could fade into the sky"*) may be classified as `concern` rather than `high`.
-  2. **False Positives:** Idiomatic colloquial expressions (e.g., *"that exam was brutal, I'm dying"*, *"killing it at the gym"*) require careful phrase exclusion. We added guardrails for common fitness and comedy slang, but novel slang may trigger false concern banners.
-  3. **Why we keep this approach:** A deterministic regex classifier has zero latency ($<2$ms), zero third-party dependency, zero cost, and 100% predictability for known critical phrases. When in doubt, safety banners fail safe (showing compassionate helplines) rather than failing silent.
+  1. **Complex Metaphor / Indirect Suicidality:** Subtle or poetic despair outside the curated lexicon may not be caught or may be classified as `concern` rather than `high`.
+  2. **False Positives:** Idiomatic colloquial expressions (e.g., *"want to die laughing"*, *"killing it at the gym"*, *"dying to see"*) require explicit phrase exclusion guards; novel slang not yet in `FALSE_POSITIVE_PATTERNS` may still trigger a false banner.
+  3. **Why we keep this approach:** A deterministic regex classifier has zero latency ($<2$ms), zero third-party dependency, zero cost, and transparent rule behavior for known critical phrases. When in doubt, safety banners fail safe (showing compassionate helplines) rather than failing silent.
 
 ---
 

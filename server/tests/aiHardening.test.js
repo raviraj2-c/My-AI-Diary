@@ -31,7 +31,7 @@ describe('AI Hardening & Privacy airtightness', () => {
   });
 
   describe('1. "Hide from AI" airtight enforcement across multiple excluded entries', () => {
-    let entry1, entry2, entry3, normalEntry;
+    let entry1, entry2, normalEntry;
 
     beforeEach(async () => {
       entry1 = await DiaryEntry.create({
@@ -52,7 +52,7 @@ describe('AI Hardening & Privacy airtightness', () => {
         aiExcluded: true
       });
 
-      entry3 = await DiaryEntry.create({
+      await DiaryEntry.create({
         user: user._id,
         title: 'Hidden Entry 3',
         content: '<p>Third private note with   HTML formatting and spaces.</p>',

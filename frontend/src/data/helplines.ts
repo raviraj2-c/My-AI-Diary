@@ -16,7 +16,7 @@ export interface HelplineItem {
   is24x7: boolean;
   website?: string;
   source: string; // official verification URL
-  lastVerified: string; // YYYY-MM-DD
+  lastVerified: string | null; // YYYY-MM-DD or null if unverified
 }
 
 export interface CountryHelplines {
@@ -27,9 +27,9 @@ export interface CountryHelplines {
 }
 
 /**
- * Checks if a helpline's verification date is older than 6 months (180 days).
+ * Checks if a helpline's verification date is missing or older than 6 months (180 days).
  */
-export function isHelplineVerificationStale(lastVerified?: string): boolean {
+export function isHelplineVerificationStale(lastVerified?: string | null): boolean {
   if (!lastVerified) return true;
   const verifiedDate = new Date(lastVerified).getTime();
   if (isNaN(verifiedDate)) return true;
@@ -51,7 +51,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://telemanas.mohfw.gov.in',
         source: 'https://telemanas.mohfw.gov.in',
-        lastVerified: '2026-11-20'
+        lastVerified: '2026-11-26'
       },
       {
         name: 'Tele-MANAS Toll Free Alternative',
@@ -60,7 +60,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         description: 'Alternative national toll-free support line',
         is24x7: true,
         source: 'https://telemanas.mohfw.gov.in',
-        lastVerified: '2026-11-20'
+        lastVerified: '2026-11-26'
       },
       {
         name: 'KIRAN (Dept of Empowerment of PwDs)',
@@ -68,8 +68,8 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         callUrl: 'tel:18005990019',
         description: 'Government toll-free helpline providing psychological support & first aid',
         is24x7: true,
-        source: 'https://disabilityaffairs.gov.in',
-        lastVerified: '2026-11-20'
+        source: 'https://depwd.gov.in',
+        lastVerified: null
       },
       {
         name: 'Vandrevala Foundation',
@@ -80,7 +80,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.vandrevalafoundation.com',
         source: 'https://www.vandrevalafoundation.com',
-        lastVerified: '2026-11-20'
+        lastVerified: '2026-11-26'
       }
     ]
   },
@@ -98,7 +98,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://988lifeline.org',
         source: 'https://988lifeline.org',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'Crisis Text Line',
@@ -109,7 +109,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.crisistextline.org',
         source: 'https://www.crisistextline.org',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'The Trevor Project (LGBTQ Youth)',
@@ -120,7 +120,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.thetrevorproject.org',
         source: 'https://www.thetrevorproject.org',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       }
     ]
   },
@@ -137,7 +137,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://111.nhs.uk',
         source: 'https://111.nhs.uk',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'Samaritans',
@@ -147,7 +147,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.samaritans.org',
         source: 'https://www.samaritans.org',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'Shout Crisis Text Line',
@@ -158,7 +158,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://giveusashout.org',
         source: 'https://giveusashout.org',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       }
     ]
   },
@@ -176,7 +176,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://988.ca',
         source: 'https://988.ca',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'Kids Help Phone',
@@ -187,7 +187,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://kidshelpphone.ca',
         source: 'https://kidshelpphone.ca',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       }
     ]
   },
@@ -205,7 +205,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.lifeline.org.au',
         source: 'https://www.lifeline.org.au',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       },
       {
         name: 'Beyond Blue',
@@ -215,7 +215,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.beyondblue.org.au',
         source: 'https://www.beyondblue.org.au',
-        lastVerified: '2026-11-20'
+        lastVerified: null
       }
     ]
   }

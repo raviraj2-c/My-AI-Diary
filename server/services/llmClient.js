@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const { User } = require('../config/models');
 const { dayRange, todayKey } = require('../utils/dates');
 
-const DEFAULT_MODEL = process.env.AI_MODEL || 'claude-3-haiku-20240307';
+const DEFAULT_MODEL = process.env.AI_MODEL || 'claude-haiku-4-5';
 const DAILY_LIMIT = 30;
 const TIMEOUT_MS = 25000;
 
@@ -204,7 +204,7 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     if (usageIncremented) {
       await refundDailyUsage(userId, 1);
     }
-    console.error('Claude API Error:', err.message);
+    console.error(`Claude API Error (status: ${err.status ?? 'unknown'}):`, err.message);
 
     // Map errors to compassionate, friendly messages
     if (err.status === 404 || err.message?.includes('not_found') || err.message?.includes('model')) {

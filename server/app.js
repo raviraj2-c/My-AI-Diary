@@ -135,7 +135,7 @@ app.use('/api/', limiter);
 // Logging
 morgan.token('url', (req) => {
   const url = req.originalUrl || req.url || '';
-  return url.replace(/(\/counselor-share\/|\/shared\/)([a-zA-Z0-9_\-]+)/gi, '$1[REDACTED]');
+  return url.replace(/(\/counselor-share\/|\/shared\/)([a-zA-Z0-9_-]+)/gi, '$1[REDACTED]');
 });
 
 if (process.env.NODE_ENV === 'production') {

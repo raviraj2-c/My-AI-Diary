@@ -278,6 +278,47 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
       expect(res.body.message).toContain('One or more selected entries were not found or belong to another user');
     });
 
+    it('caps entries sent to AI at 40, always includes favorites, and returns entriesUsed', async () => {
+      const favoriteTitles = ['Favorite Alpha', 'Favorite Beta', 'Favorite Gamma'];
+      const entriesToCreate = [];
+      for (let i = 0; i < 50; i++) {
+        const isFav = i === 2 || i === 25 || i === 48;
+        const favTitle = i === 2 ? favoriteTitles[0] : i === 25 ? favoriteTitles[1] : favoriteTitles[2];
+        entriesToCreate.push({
+          user: user.id,
+          title: isFav ? favTitle : `Normal Day ${i + 1}`,
+          content: `<p>Daily reflection content number ${i + 1} with calm thoughts.</p>`,
+          mood: 'peaceful',
+          isFavorite: isFav,
+          entryDate: new Date(Date.UTC(2026, 0, 1) + i * 86400000)
+        });
+      }
+      await DiaryEntry.insertMany(entriesToCreate);
+
+      const spy = jest.spyOn(llmClient, 'callLLM');
+      const res = await request(app)
+        .post('/api/ai/generate-storybook')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          theme: 'adventure',
+          startDate: '2026-01-01',
+          endDate: '2026-03-01'
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.entriesUsed).toBe(40);
+      expect(res.body.data.entriesUsed).toBe(40);
+      expect(spy).toHaveBeenCalled();
+
+      const promptArg = spy.mock.calls[0][0].messages[0].content;
+      for (const favTitle of favoriteTitles) {
+        expect(promptArg).toContain(favTitle);
+      }
+      const entryBlocks = promptArg.match(/"index":\s*\d+/g) || [];
+      expect(entryBlocks.length).toBe(40);
+      spy.mockRestore();
+    });
+
     it('GET /api/ai/storybooks returns metadata only without full generatedContent', async () => {
       await Storybook.create({
         user: user.id,

@@ -93,7 +93,7 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
                       </a>
                     </div>
                   ))}
-                  {primaryHelpline?.lastVerified && (
+                  {primaryHelpline?.lastVerified && !isHelplineVerificationStale(primaryHelpline.lastVerified) && (
                     <div className="text-[10px] text-calm-500 dark:text-calm-400 pt-1">
                       {t('sos.lastVerifiedDate', { date: primaryHelpline.lastVerified })}
                     </div>
@@ -177,7 +177,7 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
               {t('sos.freeConfidentialIn', { country: countryData.countryName })}
             </p>
-            {primaryHelpline?.lastVerified && (
+            {primaryHelpline?.lastVerified && !isHelplineVerificationStale(primaryHelpline.lastVerified) && (
               <span className="text-[10px] text-gray-400">
                 {t('sos.lastVerifiedDate', { date: primaryHelpline.lastVerified })}
               </span>

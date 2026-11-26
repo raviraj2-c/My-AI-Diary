@@ -84,7 +84,8 @@ const getStudyStats = async (req, res, next) => {
     const user = await User.findById(req.user.id).select('timezone');
     const tz = user?.timezone || 'UTC';
     const { start: todayStart } = dayRange(todayKey(tz), tz);
-    const sevenDaysAgo = new Date(todayStart.getTime() - 7 * 86400000);
+    // True 7-day window: today plus the preceding 6 days
+    const sevenDaysAgo = new Date(todayStart.getTime() - 6 * 86400000);
 
     const sessions = await StudySession.find({
       user: req.user.id,
@@ -125,7 +126,8 @@ const getBurnoutStatus = async (req, res, next) => {
     const user = await User.findById(req.user.id).select('timezone');
     const tz = user?.timezone || 'UTC';
     const { start: todayStart } = dayRange(todayKey(tz), tz);
-    const sevenDaysAgo = new Date(todayStart.getTime() - 7 * 86400000);
+    // True 7-day window: today plus the preceding 6 days
+    const sevenDaysAgo = new Date(todayStart.getTime() - 6 * 86400000);
 
     const [checkIns, habits] = await Promise.all([
       CheckIn.find({
