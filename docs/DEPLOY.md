@@ -5,7 +5,7 @@ This guide covers deploying the **MindDiary** full-stack system:
 - **Frontend SPA:** Hosted on [Vercel](https://vercel.com) (or Netlify / Cloudflare Pages).
 - **Database:** [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) M0 Free or Serverless.
 - **Media Storage:** [Cloudinary](https://cloudinary.com).
-- **AI Intelligence:** [Anthropic Claude](https://console.anthropic.com).
+- **AI Intelligence:** [Google Gemini](https://aistudio.google.com).
 
 ---
 
@@ -30,8 +30,8 @@ This guide covers deploying the **MindDiary** full-stack system:
 | `CLOUDINARY_CLOUD_NAME` | Yes | Cloudinary Cloud Name |
 | `CLOUDINARY_API_KEY` | Yes | Cloudinary API Key |
 | `CLOUDINARY_API_SECRET` | Yes | Cloudinary API Secret |
-| `ANTHROPIC_API_KEY` | Optional | `sk-ant-api03-...` (required for Claude AI reflections and chat) |
-| `AI_MODEL` | Optional | `claude-haiku-4-5` |
+| `GEMINI_API_KEY` | Optional | `AIza...` (required for Gemini AI reflections and chat) |
+| `AI_MODEL` | Optional | `gemini-2.5-flash` |
 | `SMTP_HOST` | Optional | E.g. `smtp.sendgrid.net` or `smtp.gmail.com` |
 | `SMTP_PORT` | Optional | `587` |
 | `SMTP_USER` | Optional | SMTP username |
@@ -83,7 +83,7 @@ Run through this test sequence immediately after deploying to production:
 - [ ] **Step 4: Media Upload**  
   In the Write page, attach an image and voice recording. Confirm client canvas downscaling, magic-byte validation, user-segregated Cloudinary storage, and proper preview rendering.
 - [ ] **Step 5: AI Reply**  
-  Enable AI features in Settings, then send a message in the AI Sanctuary (`/chat`) or request an entry reflection. Confirm Claude replies within 2–4 seconds (or returns clean 503 if API key is unconfigured) and the daily 30-call quota tracks accurately.
+  Enable AI features in Settings, then send a message in the AI Sanctuary (`/chat`) or request an entry reflection. Confirm Gemini replies within 2–4 seconds (or returns clean 503 if API key is unconfigured) and the daily 30-call quota tracks accurately.
 - [ ] **Step 6: Safety Screen**  
   Type a severe distress phrase (e.g., *"I want to end my life"*) into check-in or chat. Confirm immediate intercept by the high-risk guardrail, blocking external AI calls and surfacing the full-screen crisis safety dialog with national helplines and trusted contact actions.
 - [ ] **Step 7: SOS Button**  

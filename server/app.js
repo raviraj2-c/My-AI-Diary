@@ -168,7 +168,7 @@ app.use('/api/letters', letterRoutes);
 // Health Check
 app.get('/api/health', (req, res) => {
   const dbConnected = mongoose.connection.readyState === 1;
-  const aiKeyConfigured = Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'your_anthropic_api_key');
+  const aiKeyConfigured = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key');
   res.status(dbConnected ? 200 : 503).json({
     status: dbConnected ? 'ok' : 'error',
     success: dbConnected,
@@ -177,7 +177,7 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
     database: dbConnected ? 'connected' : 'disconnected',
-    aiModel: process.env.AI_MODEL || 'claude-3-haiku-20240307',
+    aiModel: process.env.AI_MODEL || 'gemini-2.5-flash',
     aiConfigured: aiKeyConfigured,
     uptime: process.uptime(),
   });

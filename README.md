@@ -195,12 +195,12 @@ MindDiary provides an **SOS button** on every view and automated compassionate s
 Unlike legacy mocks, all tests run against **real Express routes, real MongoDB schemas (via in-memory replica), and real React components**:
 
 * **Backend Test Suite (`Jest` + `Supertest` + `mongodb-memory-server`):**
-  - **19 Test Suites**, **217 Tests Passed** (100% pass rate)
-  - Suites: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (22), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (8), `modules` (36), `boot` (3), `insights` (4).
+  - **19 Test Suites**, **238 Tests Passed** (100% pass rate)
+  - Suites: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (24), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (27), `modules` (36), `boot` (3), `insights` (4).
 * **Frontend Test Suite (`Vitest` + `@testing-library/react` + `jsdom`):**
   - **14 Test Files**, **45 Tests Passed** (100% pass rate)
   - Suites: `sanitize` (5), `EmotionWheel` (3), `CheckIn` (1), `SafetyBanner` (4), `SOSButton` (6), `AppLockScreen` (2), `useSettings` (3), `AuthContext` (2), `authSafeguards` (4), `i18n` (1), `i18nComplete` (6), `storage` (2), `newFeatures` (3), `DiaryEntryReflect` (3).
-* **Total Automated Tests:** **262 tests passed, 0 failures, 0 skipped**.
+* **Total Automated Tests:** **283 tests passed, 0 failures, 0 skipped**.
 
 ### Real Lighthouse Production Audit
 Generated via headless Chrome audit against production preview build ([view HTML report](docs/lighthouse/report.report.html)):
@@ -233,10 +233,10 @@ Generated via headless Chrome audit against production preview build ([view HTML
 | **Multi-Language UI (EN / HI)** | ✅ **Done** | Complete translation key parity (200+ keys) between English and Hindi via `react-i18next`. |
 | **Counselor Summary Sharing** | ✅ **Done** | 7-day expiring token link showing **only** statistical averages and scores; **zero raw diary text is exposed**. |
 | **Data Export & Right to Erasure** | ✅ **Done** | One-click JSON backup export; password-verified account deletion cascading across all 16 MongoDB collections and Cloudinary. |
-| **Automated Test Coverage & CI** | ✅ **Done** | 262 tests across Jest (217) and Vitest (45); GitHub Actions workflow for Node 20/22 with lint, type-check, test, and build. |
+| **Automated Test Coverage & CI** | ✅ **Done** | 283 tests across Jest (238) and Vitest (45); GitHub Actions workflow for Node 20/22 with lint, type-check, test, and build. |
 | **Demo Seeder & Script** | ✅ **Done** | `npm run seed:demo` generates 30 days of realistic reflections and trends for viva evaluation. |
 | **Media Delivery** | 🟡 **Partly Done** | Files upload to user-scoped folders (`mydiary/user_<id>/`) with random unguessable IDs, but deliver over public CDN URLs rather than signed tokens. |
-| **App Lock Scope** | 🟡 **Partly Done** | 4-digit PIN lock provides a device-level UI privacy gate against physical snooping, but is not a second cryptographic key derivation layer. |
+| **App Lock Scope** | 🟡 **Partly Done** | 4–6 digit PIN lock provides a device-level UI privacy gate against physical snooping, but is not a second cryptographic key derivation layer. |
 | **Key Custody Architecture** | 🟡 **Partly Done** | Encryption key is managed by backend server in environment variables (database-at-rest protection), not zero-knowledge client derivation. |
 | **Client-Side Zero-Knowledge Encryption**| 🔮 **Future** | Derive encryption keys from user master password via WebCrypto PBKDF2/Argon2 directly in the browser. |
 | **Offline Journaling Support** | 🔮 **Future** | Service Worker draft queue with IndexedDB local encryption syncing upon reconnection. |
@@ -273,7 +273,7 @@ For project evaluation and viva examinations, present the application following 
 5. **Minute 5: Privacy Sovereignty & Counselor Summary Sharing:**
    - Go to Insights and click **Share Summary with Counselor**: generate a 7-day expiring link.
    - Open the link in an Incognito window (`/shared/:token`): show that the therapist sees **only** numerical averages, screening scores, and sleep-mood correlations; **zero personal diary text is exposed**.
-   - Show `docs/PROJECT_REPORT_OUTLINE.md`, `docs/API.md`, `docs/VIVA_QA.md`, and run `npm test` and `npm run test:frontend` in the terminal to demonstrate all 262 automated tests passing across Jest (217) and Vitest (45).
+   - Show `docs/PROJECT_REPORT_OUTLINE.md`, `docs/API.md`, `docs/VIVA_QA.md`, and run `npm test` and `npm run test:frontend` in the terminal to demonstrate all 283 automated tests passing across Jest (238) and Vitest (45).
 
 ---
 

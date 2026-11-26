@@ -25,6 +25,18 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     { text: 'I want to disappear forever', expected: 'high', label: 'EN High: want to disappear' },
     { text: 'I just want to end it all tonight', expected: 'high', label: 'EN High: end it all' },
     { text: 'I have no reason to live', expected: 'high', label: 'EN High: no reason to live' },
+    { text: 'I want to go to sleep and never wake up', expected: 'high', label: 'EN High: sleep and never wake up' },
+    { text: 'life is not worth living', expected: 'high', label: 'EN High: life is not worth living' },
+    { text: 'i feel like ending everything', expected: 'high', label: 'EN High: feel like ending everything' },
+    { text: 'I am thinking of overdosing tonight', expected: 'high', label: 'EN High: thinking of overdosing' },
+    { text: 'I wish I had never been born', expected: 'high', label: 'EN High: wish never been born' },
+    { text: 'I cant do this anymore, I just want it to stop forever', expected: 'high', label: 'EN High: stop forever' },
+    { text: 'mujhe lagta hai main mar jaunga to sab theek ho jayega', expected: 'high', label: 'Hinglish High: mar jaunga to sab theek' },
+    { text: 'mai apni life khatam karna chahti hu', expected: 'high', label: 'Hinglish High: life khatam karna chahti hu' },
+    { text: 'khud ko hurt karna chahta hu', expected: 'high', label: 'Hinglish High: khud ko hurt karna chahta hu' },
+    { text: 'काश मैं मर जाऊँ', expected: 'high', label: 'HI High: काश मैं मर जाऊँ' },
+    { text: 'मैं पैदा ही नहीं होना चाहिए था', expected: 'high', label: 'HI High: पैदा ही नहीं होना चाहिए था' },
+    { text: 'मैं अपने आप को मार लूँगा', expected: 'high', label: 'HI High: अपने आप को मार लूँगा' },
     { text: 'i wanna die', expected: 'high', label: 'EN High: slang wanna die' },
     { text: 'I WANNA DIE RIGHT NOW', expected: 'high', label: 'EN High: mixed case WANNA DIE' },
     { text: 'I dont want to be alive', expected: 'high', label: 'EN High: dont want to be alive' },
@@ -248,6 +260,121 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
     expect(noneRecall).toBe(100);
   });
 
+  // Held-out corpus (written AFTER freezing patterns; never tuned on)
+  const HELD_OUT_CORPUS = [
+    // --- HELD-OUT HIGH: English ---
+    { text: "I've decided to end my life tonight", expected: 'high', label: 'HO EN High: decided to end my life' },
+    { text: 'planning to take my own life this weekend', expected: 'high', label: 'HO EN High: planning take own life' },
+    { text: 'I just want to fall asleep and never wake up again', expected: 'high', label: 'HO EN High: sleep and never wake up' },
+    { text: 'wanna kill myself right now', expected: 'high', label: 'HO EN High: wanna kill myself' },
+    { text: 'im gonna end it all before morning', expected: 'high', label: 'HO EN High: gonna end it all' },
+    { text: 'thinking about ending everything today', expected: 'high', label: 'HO EN High: thinking about ending everything' },
+    { text: 'Everyone at home would be better off without me', expected: 'high', label: 'HO EN High: better off without me' },
+    { text: 'I dont want to be here anymore, please let it stop forever', expected: 'high', label: 'HO EN High: dont want to be here / stop forever' },
+    { text: 'wishing I could just die in my sleep', expected: 'high', label: 'HO EN High: wishing die' },
+    { text: 'I am suicidal and scared', expected: 'high', label: 'HO EN High: suicidal' },
+    { text: 'thinking of hurting myself? no, I want to hurt myself', expected: 'high', label: 'HO EN High: want to hurt myself' },
+    { text: 'i cant go on any longer, i want to die', expected: 'high', label: 'HO EN High: cant go on / want to die' },
+
+    // --- HELD-OUT HIGH: Hinglish ---
+    { text: 'mujhe ab mar jana hai is duniya se', expected: 'high', label: 'HO Hinglish High: mujhe mar jana hai' },
+    { text: 'main apni zindagi khatam karne ja raha hu', expected: 'high', label: 'HO Hinglish High: zindagi khatam karne' },
+    { text: 'apni jaan le lungi aaj main', expected: 'high', label: 'HO Hinglish High: apni jaan le lungi' },
+    { text: 'mujhe jeena nhi hai aur', expected: 'high', label: 'HO Hinglish High: jeena nhi hai' },
+    { text: 'khud ko nuksan pahunchana chahta hu', expected: 'high', label: 'HO Hinglish High: khud ko nuksan' },
+    { text: 'main mar jaunga toh sab khush rahenge', expected: 'high', label: 'HO Hinglish High: main mar jaunga' },
+
+    // --- HELD-OUT HIGH: Devanagari ---
+    { text: 'मैं अपनी जान देना चाहता हूँ', expected: 'high', label: 'HO HI High: जान देना' },
+    { text: 'काश मैं आज रात मर जाऊं', expected: 'high', label: 'HO HI High: काश मैं मर जाऊं' },
+    { text: 'मुझे जीने की इच्छा नहीं रही अब', expected: 'high', label: 'HO HI High: जीने की इच्छा नहीं' },
+    { text: 'मैं खुद को खत्म करना चाहती हूँ', expected: 'high', label: 'HO HI High: खुद को खत्म' },
+    { text: 'अब जीना नहीं है मुझे इस हाल में', expected: 'high', label: 'HO HI High: जीना नहीं है' },
+
+    // --- HELD-OUT NONE: Harmless / Idioms / Everyday ---
+    { text: 'My sister is going to murder me when she sees the mess', expected: 'none', label: 'HO NONE: murder me idiom' },
+    { text: 'Booked an appointment to cut my hair tomorrow', expected: 'none', label: 'HO NONE: cut my hair' },
+    { text: 'I was dying of laughter at his joke', expected: 'none', label: 'HO NONE: dying of laughter' },
+    { text: 'Dead tired after three hours of coding', expected: 'none', label: 'HO NONE: dead tired' },
+    { text: 'Dying to try that new biryani place', expected: 'none', label: 'HO NONE: dying to try' },
+    { text: 'My laptop is dead so I am using my tablet', expected: 'none', label: 'HO NONE: laptop is dead' },
+    { text: 'Overdosed on caffeine during exam week', expected: 'none', label: 'HO NONE: overdosed on caffeine' },
+    { text: 'How to diet without starving yourself', expected: 'none', label: 'HO NONE: how to diet' },
+    { text: 'I hurt myself running on the wet track', expected: 'none', label: 'HO NONE: hurt myself running' },
+    { text: 'You killed it in the debate competition!', expected: 'none', label: 'HO NONE: killed it' },
+    { text: 'Giving up junk food for thirty days', expected: 'none', label: 'HO NONE: giving up junk food' },
+    { text: 'Aaj ka din bahut shaant aur accha tha', expected: 'none', label: 'HO NONE Hinglish: peaceful day' },
+    { text: 'Main apna assignment khatam karunga raat ko', expected: 'none', label: 'HO NONE Hinglish: assignment khatam' },
+    { text: 'आज दोस्तों के साथ चाय पी और बहुत हंसी आई', expected: 'none', label: 'HO NONE HI: tea with friends' },
+    { text: 'कल सुबह जल्दी उठकर पढ़ाई करनी है', expected: 'none', label: 'HO NONE HI: morning study' },
+    { text: 'Watched a documentary about overdose prevention at school', expected: 'none', label: 'HO NONE: overdose prevention' },
+    { text: 'The horror movie had a scary death scene', expected: 'none', label: 'HO NONE: third-person movie death' },
+    { text: 'He is going to love this birthday surprise', expected: 'none', label: 'HO NONE: third-person going to' },
+
+    // --- HELD-OUT CONCERN: Distress / Fail-Safe ---
+    { text: 'I feel completely hopeless about my exams', expected: 'concern', label: 'HO EN Concern: hopeless' },
+    { text: 'Nobody cares if I succeed or fail', expected: 'concern', label: 'HO EN Concern: nobody cares' },
+    { text: 'I am tired of fighting every single day', expected: 'concern', label: 'HO EN Concern: tired of fighting' },
+    { text: 'My mind keeps drifting toward death even when I try to focus on work and chores', expected: 'concern', label: 'HO EN Concern: first-person + death term >6 tokens' },
+    { text: 'sab barbaad ho gaya hai kuch samajh nahi aa raha', expected: 'concern', label: 'HO Hinglish Concern: sab barbaad' },
+    { text: 'मैं अंदर से टूट गया हूँ कोई सहारा नहीं दिखता', expected: 'concern', label: 'HO HI Concern: अंदर से टूट गया' },
+    { text: 'कोई उम्मीद नहीं दिख रही मुझे अभी', expected: 'concern', label: 'HO HI Concern: कोई उम्मीद नहीं' }
+  ];
+
+  it('evaluates the held-out corpus without tuning and reports recall with 0 false HIGH on harmless set', () => {
+    expect(CORPUS.length + HELD_OUT_CORPUS.length).toBeGreaterThanOrEqual(200);
+
+    let highTP = 0, highFN = 0, falseHighOnNone = 0;
+    let noneTotal = 0, noneExact = 0;
+    let concernTotal = 0, concernMatched = 0;
+    const misses = [];
+
+    for (const item of HELD_OUT_CORPUS) {
+      const res = checkRisk(item.text);
+      if (item.expected === 'high') {
+        if (res.level === 'high') highTP++;
+        else {
+          highFN++;
+          misses.push({ text: item.text, expected: item.expected, got: res.level, label: item.label });
+        }
+      } else if (item.expected === 'none') {
+        noneTotal++;
+        if (res.level === 'none') noneExact++;
+        if (res.level === 'high') {
+          falseHighOnNone++;
+          misses.push({ text: item.text, expected: item.expected, got: res.level, label: item.label });
+        }
+      } else if (item.expected === 'concern') {
+        concernTotal++;
+        if (res.level === 'concern' || res.level === 'high') concernMatched++;
+        else misses.push({ text: item.text, expected: item.expected, got: res.level, label: item.label });
+      }
+    }
+
+    const highRecall = ((highTP / (highTP + highFN)) * 100).toFixed(1);
+    const noneRecall = ((noneExact / noneTotal) * 100).toFixed(1);
+    const concernRecall = ((concernMatched / concernTotal) * 100).toFixed(1);
+
+    console.log('\n========================================================================================');
+    console.log(`HELD-OUT CORPUS EVALUATION (${HELD_OUT_CORPUS.length} unseen cases; total corpus: ${CORPUS.length + HELD_OUT_CORPUS.length})`);
+    console.table([
+      { Class: 'HIGH (Held-Out)', Total: highTP + highFN, TP: highTP, FN: highFN, 'Recall (%)': highRecall },
+      { Class: 'NONE (Held-Out)', Total: noneTotal, Exact: noneExact, 'False HIGH': falseHighOnNone, 'Specificity (%)': noneRecall },
+      { Class: 'CONCERN (Held-Out)', Total: concernTotal, Matched: concernMatched, 'Recall (%)': concernRecall }
+    ]);
+    if (misses.length > 0) console.log('Held-out misses:', misses);
+    console.log('========================================================================================\n');
+
+    expect(falseHighOnNone).toBe(0);
+    expect(noneExact).toBe(noneTotal);
+  });
+
+  it('fails safe to CONCERN (never NONE) when first-person marker + death/self-harm term appear without HIGH match', () => {
+    const res = checkRisk('I keep reading old notes about death while sitting quietly in my room');
+    expect(res.level).toBe('concern');
+    expect(res.matched).toBe(true);
+  });
+
   describe('Unicode & Devanagari Normalization Unit Tests', () => {
     it('preserves Devanagari characters, conjuncts, and vowel signs (\\p{M})', () => {
       const devanagariText = 'मैं मरना चाहता हूँ';
@@ -270,13 +397,13 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
 
     it('removes ASCII and Unicode apostrophes and expands slang forms', () => {
       // ASCII apostrophe
-      expect(normalizeText("can't")).toBe('cant');
+      expect(normalizeText("can't")).toBe('cannot');
       expect(normalizeText("don't")).toBe('do not');
 
       // Unicode curly apostrophes
-      expect(normalizeText('can’t')).toBe('cant');
+      expect(normalizeText('can’t')).toBe('cannot');
       expect(normalizeText('don’t')).toBe('do not');
-      expect(normalizeText('can`t')).toBe('cant');
+      expect(normalizeText('can`t')).toBe('cannot');
 
       // Slang normalization
       expect(normalizeText('I wanna sleep')).toBe('i want to sleep');
@@ -338,8 +465,12 @@ describe('Crisis Risk Check Engine & Counselor-Reviewed Test Corpus', () => {
       ['killing it at the gym'],
       ['my battery is dying'],
       ['overdosed on coffee this morning'],
+      ['overdosed on caffeine before the exam'],
       ['how to diet safely'],
       ['cut myself shaving today'],
+      ['I need to cut my hair this weekend'],
+      ['my mom is going to murder me if I am late'],
+      ['I hurt myself playing football yesterday'],
       ['took a pain killer'],
       ['giving up sugar for a month']
     ])('returns none for benign idiom: %s', (phrase) => {

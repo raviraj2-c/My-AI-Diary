@@ -15,9 +15,9 @@ All private user journal entries, check-in reflections, gratitude lists, and CBT
 *Answer:*  
 The 256-bit key is managed on the backend server via the `ENCRYPTION_KEY` environment variable. Yes, the server holds the key and decrypts fields on read. This is a deliberate, documented trade-off: it allows server-side search across encrypted entries, generation of wellness insight correlations, automated PDF storybook compilation, and reliable account recovery if a password is forgotten. It protects against database leaks, stolen backups, and multi-tenant unauthorized access, but is not zero-knowledge client-side encryption. We document this honestly in `docs/PRIVACY_AND_ETHICS.md`.
 
-**Q3: How does the 4-digit App Lock PIN work, and what are its cryptographic limits?**  
+**Q3: How does the 4–6 digit App Lock PIN work, and what are its cryptographic limits?**  
 *Answer:*  
-When enabled, the user's 4-digit PIN is hashed using `bcrypt` and verified via `/api/auth/app-lock/verify`. On the frontend, `AppLockScreen.tsx` gates UI access if the app is backgrounded or inactive. Its limitation is that it is a **device-level UI privacy gate**, not a second cryptographic key derivation layer. It protects against casual physical snooping (e.g. roommates or colleagues looking at an open screen), but does not encrypt the underlying database documents.
+When enabled, the user's 4–6 digit PIN is hashed using `bcrypt` and verified via `/api/auth/app-lock/verify`. On the frontend, `AppLockScreen.tsx` gates UI access if the app is backgrounded or inactive. Its limitation is that it is a **device-level UI privacy gate**, not a second cryptographic key derivation layer. It protects against casual physical snooping (e.g. roommates or colleagues looking at an open screen), but does not encrypt the underlying database documents.
 
 **Q4: How does MindDiary prevent Cross-Site Scripting (XSS)?**  
 *Answer:*  

@@ -11,7 +11,7 @@ let server = null;
 if (require.main === module && process.env.NODE_ENV !== 'test') {
   connectDB().then(async () => {
     // Verify AI Model health if key is configured
-    if (process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'your_anthropic_api_key') {
+    if (process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key') {
       try {
         const { verifyModelHealth } = require('./services/llmClient');
         await verifyModelHealth();

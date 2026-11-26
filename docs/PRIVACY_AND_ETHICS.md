@@ -53,7 +53,7 @@ All private, descriptive user thoughts and emotional notes are encrypted using *
 
 ## 3. Limits of App Lock (PIN Protection)
 
-- **Device-Level UI Guard Only:** The 4-digit App Lock is a client-side gate stored hashed in local state and validated against the backend `/api/auth/app-lock/verify` endpoint.
+- **Device-Level UI Guard Only:** The 4–6 digit App Lock is a client-side gate stored hashed in local state and validated against the backend `/api/auth/app-lock/verify` endpoint.
 - **Not a Separate Key Derivation Layer:** The PIN does **not** derive the database encryption key (unlike Signal or 1Password).
 - **Intended Purpose:** It protects the user from casual snooping (e.g., a friend, partner, or colleague picking up an unlocked phone or laptop while the browser tab is open). If someone intercepts the raw database or server memory, the PIN does not provide additional cryptographic resistance.
 

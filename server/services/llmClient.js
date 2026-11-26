@@ -1,32 +1,68 @@
 /**
- * LLM Client wrapper for Anthropic Claude.
- * Handles authentication, timeout, retries, daily usage quotas, and friendly error mapping.
+ * LLM Client wrapper for Google Gemini API.
+ * Handles authentication, timeout, daily usage quotas, and friendly error mapping.
  */
 
-const Anthropic = require('@anthropic-ai/sdk');
 const mongoose = require('mongoose');
 const { User } = require('../config/models');
 const { dayRange, todayKey } = require('../utils/dates');
 
-const DEFAULT_MODEL = process.env.AI_MODEL || 'claude-haiku-4-5';
+const DEFAULT_MODEL = process.env.AI_MODEL || 'gemini-2.5-flash';
+const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const DAILY_LIMIT = 30;
 const TIMEOUT_MS = 25000;
 
-let anthropicClient = null;
-
-function getClient() {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || apiKey === 'your_anthropic_api_key') {
+function getApiKey() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === 'your_gemini_api_key') {
     return null;
   }
-  if (!anthropicClient) {
-    anthropicClient = new Anthropic({
-      apiKey,
-      timeout: TIMEOUT_MS,
-      maxRetries: 1
-    });
+  return apiKey.trim();
+}
+
+async function requestGemini({ apiKey, model, systemPrompt, messages, maxTokens, temperature }) {
+  const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent`;
+  const body = {
+    contents: messages.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    })),
+    generationConfig: {
+      maxOutputTokens: maxTokens,
+      temperature
+    }
+  };
+
+  if (systemPrompt) {
+    body.systemInstruction = { parts: [{ text: systemPrompt }] };
   }
-  return anthropicClient;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': apiKey
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(TIMEOUT_MS)
+  });
+
+  if (!res.ok) {
+    let errMessage = `HTTP ${res.status}`;
+    try {
+      const errData = await res.json();
+      errMessage = errData?.error?.message || errMessage;
+    } catch {
+      // keep default HTTP status message
+    }
+    const err = new Error(errMessage);
+    err.status = res.status;
+    throw err;
+  }
+
+  const data = await res.json();
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  return parts.map((p) => p.text || '').join('');
 }
 
 /**
@@ -46,7 +82,7 @@ async function checkAndIncrementUsage(userId) {
   const now = new Date();
   const todayStart = dayRange(todayKey(tz), tz).start;
 
-  // 1. Try atomic increment within the current UTC day where count < DAILY_LIMIT
+  // 1. Try atomic increment within the current local day where count < DAILY_LIMIT
   let updatedUser = await User.findOneAndUpdate(
     {
       _id: userId,
@@ -136,7 +172,7 @@ async function refundDailyUsage(userId, count = 1) {
 }
 
 /**
- * Executes a call to the Claude LLM with system prompt, messages, and safety limits.
+ * Executes a call to the Gemini LLM with system prompt, messages, and safety limits.
  *
  * @param {object} params
  * @param {string} params.userId - Authenticated user ID (for quota check)
@@ -145,7 +181,7 @@ async function refundDailyUsage(userId, count = 1) {
  * @param {number} [params.maxTokens=1024]
  * @param {number} [params.temperature=0.7]
  * @param {boolean} [params.countUsage=true] - Whether this call counts toward daily limit
- * @returns {Promise<{ text: string, quotaRemaining: number }>}
+ * @returns {Promise<{ text: string, quotaRemaining: number, mock?: boolean }>}
  */
 async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, temperature = 0.7, countUsage = true }) {
   let quota = { allowed: true, remaining: DAILY_LIMIT, count: 0 };
@@ -165,10 +201,10 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     }
   }
 
-  const client = getClient();
+  const apiKey = getApiKey();
 
-  // If Anthropic API key is not yet set in environment, provide a safe dev fallback
-  if (!client) {
+  // If Gemini API key is not yet set in environment, provide a safe dev fallback
+  if (!apiKey) {
     if (process.env.NODE_ENV === 'production') {
       const error = new Error('AI service is temporarily unavailable.');
       error.statusCode = 503;
@@ -183,18 +219,15 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
   }
 
   try {
-    const response = await client.messages.create({
+    const text = await requestGemini({
+      apiKey,
       model: DEFAULT_MODEL,
-      max_tokens: maxTokens,
-      temperature,
-      system: systemPrompt,
-      messages: messages.map(m => ({
-        role: m.role,
-        content: m.content
-      }))
+      systemPrompt,
+      messages,
+      maxTokens,
+      temperature
     });
 
-    const text = response.content?.[0]?.text || '';
     return {
       text,
       quotaRemaining: quota.remaining,
@@ -204,26 +237,25 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     if (usageIncremented) {
       await refundDailyUsage(userId, 1);
     }
-    console.error(`Claude API Error (status: ${err.status ?? 'unknown'}):`, err.message);
+    console.error(`Gemini API Error (status: ${err.status ?? 'unknown'}):`, err.message);
 
-    // Map errors to compassionate, friendly messages
-    if (err.status === 404 || err.message?.includes('not_found') || err.message?.includes('model')) {
-      console.error(`❌ FATAL / CONFIG ERROR: Configured AI_MODEL '${DEFAULT_MODEL}' was not found or is deprecated by Anthropic. Update AI_MODEL in .env.`);
+    if (err.status === 404 || err.message?.includes('not found') || err.message?.includes('NOT_FOUND')) {
+      console.error(`❌ FATAL / CONFIG ERROR: Configured AI_MODEL '${DEFAULT_MODEL}' was not found or is deprecated on Gemini. Update AI_MODEL in .env.`);
       const error = new Error('AI service configuration issue (model not found). Please contact support.');
       error.statusCode = 502;
       throw error;
     }
-    if (err.status === 401 || err.message?.includes('401')) {
+    if (err.status === 401 || err.status === 403) {
       const error = new Error('AI service configuration issue. Please contact support.');
       error.statusCode = 502;
       throw error;
     }
-    if (err.status === 429 || err.message?.includes('429')) {
+    if (err.status === 429) {
       const error = new Error('AI companion is temporarily receiving too many thoughts. Please take a breath and try again shortly.');
       error.statusCode = 429;
       throw error;
     }
-    if (err.code === 'ETIMEDOUT' || err.message?.includes('timeout')) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError' || err.code === 'ETIMEDOUT' || err.message?.includes('timeout')) {
       const error = new Error('The AI took a little too long to reflect. Please try sending your thought again.');
       error.statusCode = 504;
       throw error;
@@ -236,7 +268,7 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
 }
 
 /**
- * Fallback generator for development environments when ANTHROPIC_API_KEY is not yet supplied.
+ * Fallback generator for development environments when GEMINI_API_KEY is not yet supplied.
  */
 function generateDevMockResponse(systemPrompt, userText) {
   if (systemPrompt.includes('story author')) {
@@ -278,7 +310,7 @@ function generateDevMockResponse(systemPrompt, userText) {
     return "Thank you for sharing that thought. Another gentle way to look at this might be: While things feel overwhelming right now, one difficult moment does not define your entire journey. Could it be that you are doing the best you can with the energy you have today?";
   }
 
-  if (systemPrompt.includes('Ask My Diary') || systemPrompt.includes('Ask My Diary')) {
+  if (systemPrompt.includes('Ask My Diary')) {
     let usedIds = [];
     const xmlMatches = [...userText.matchAll(/<diary_entry\s+id="([^"]+)"/g)];
     if (xmlMatches && xmlMatches.length > 0) {
@@ -299,33 +331,33 @@ function generateDevMockResponse(systemPrompt, userText) {
 }
 
 /**
- * Health check verification for the configured Anthropic AI model at startup or diagnostic.
+ * Health check verification for the configured Gemini AI model at startup or diagnostic.
  *
  * @returns {Promise<{ ok: boolean, model?: string, status?: number|string, error?: string }>}
  */
 async function verifyModelHealth() {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || apiKey === 'your_anthropic_api_key') {
+  const apiKey = getApiKey();
+  if (!apiKey) {
     if (process.env.NODE_ENV === 'production') {
-      console.warn('⚠️ WARNING: ANTHROPIC_API_KEY is missing or unconfigured in production.');
+      console.warn('⚠️ WARNING: GEMINI_API_KEY is missing or unconfigured in production.');
     }
     return { ok: false, status: 'missing_key' };
   }
-  const client = getClient();
-  if (!client) return { ok: false, status: 'no_client' };
 
   try {
-    await client.messages.create({
+    await requestGemini({
+      apiKey,
       model: DEFAULT_MODEL,
-      max_tokens: 1,
-      messages: [{ role: 'user', content: 'health_check' }]
+      messages: [{ role: 'user', content: 'ping' }],
+      maxTokens: 1,
+      temperature: 0
     });
-    console.log(`✅ Anthropic AI model '${DEFAULT_MODEL}' verified successfully.`);
+    console.log(`✅ Gemini AI model '${DEFAULT_MODEL}' verified successfully.`);
     return { ok: true, model: DEFAULT_MODEL };
   } catch (err) {
-    console.error(`❌ Anthropic AI startup verification failed for model '${DEFAULT_MODEL}' (status: ${err.status}):`, err.message);
+    console.error(`❌ Gemini AI startup verification failed for model '${DEFAULT_MODEL}' (status: ${err.status ?? 'unknown'}):`, err.message);
     if (err.status === 404) {
-      console.error(`❌ FATAL: Configured AI_MODEL '${DEFAULT_MODEL}' does not exist on Anthropic. Update AI_MODEL in .env.`);
+      console.error(`❌ FATAL: Configured AI_MODEL '${DEFAULT_MODEL}' does not exist on Gemini. Update AI_MODEL in .env.`);
     }
     return { ok: false, status: err.status, error: err.message };
   }

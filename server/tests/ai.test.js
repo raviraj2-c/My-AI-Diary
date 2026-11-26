@@ -617,4 +617,50 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
       expect(res.body.data.usedEntries[0].id).toBe(hindiEntry._id.toString());
     });
   });
+
+  describe('Gemini API Client Integration', () => {
+    it('sends generateContent request with x-goog-api-key and maps 404 to 502', async () => {
+      await User.findByIdAndUpdate(user.id, { allowAIFeatures: true });
+      const origKey = process.env.GEMINI_API_KEY;
+      process.env.GEMINI_API_KEY = 'test-gemini-key-123';
+      const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: 'Gentle Gemini reply' }] } }]
+        })
+      });
+
+      try {
+        const res = await llmClient.callLLM({
+          userId: user.id,
+          systemPrompt: 'Be kind.',
+          messages: [{ role: 'user', content: 'Hello' }]
+        });
+        expect(res.text).toBe('Gentle Gemini reply');
+        expect(res.mock).toBe(false);
+        expect(fetchSpy).toHaveBeenCalledTimes(1);
+        const [url, init] = fetchSpy.mock.calls[0];
+        expect(url).toContain('generativelanguage.googleapis.com/v1beta/models/');
+        expect(url).toContain(':generateContent');
+        expect(init.headers['x-goog-api-key']).toBe('test-gemini-key-123');
+
+        fetchSpy.mockResolvedValueOnce({
+          ok: false,
+          status: 404,
+          json: async () => ({ error: { message: 'Model not found' } })
+        });
+        await expect(
+          llmClient.callLLM({
+            userId: user.id,
+            systemPrompt: 'Be kind.',
+            messages: [{ role: 'user', content: 'Hello' }]
+          })
+        ).rejects.toMatchObject({ statusCode: 502 });
+      } finally {
+        fetchSpy.mockRestore();
+        if (origKey === undefined) delete process.env.GEMINI_API_KEY;
+        else process.env.GEMINI_API_KEY = origKey;
+      }
+    });
+  });
 });

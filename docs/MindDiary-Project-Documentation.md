@@ -141,7 +141,7 @@ MindDiary includes a rich suite of 14 integrated wellness tools:
 - Password change and logout-all increment `tokenVersion`, instantly invalidating existing JWT tokens across all sessions.
 
 ### 4.2 App Lock PIN Screen
-- Optional 4-digit PIN stored as a bcrypt hash (`appLockPin`).
+- Optional 4–6 digit PIN stored as a bcrypt hash (`appLockPin`).
 - 5 consecutive failed attempts lock the device interface for 5 minutes.
 - Verified on the server; PIN recovery requires validating the master account password.
 
@@ -263,7 +263,7 @@ All previously identified storybook gaps have been resolved:
 - `POST /api/auth/reset-password` - Reset password with token
 - `POST /api/auth/change-password` - Change password
 - `POST /api/auth/logout-all` - Invalidate all active user sessions
-- `POST /api/auth/app-lock/setup` - Set 4-digit PIN lock
+- `POST /api/auth/app-lock/setup` - Set 4–6 digit PIN lock
 - `POST /api/auth/app-lock/verify` - Verify PIN lock
 - `POST /api/auth/app-lock/disable` - Disable PIN lock
 - `GET /api/auth/export-data` - Export complete decrypted data archive

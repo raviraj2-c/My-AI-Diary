@@ -12,7 +12,7 @@
 | # | Feature / Screen | Test Steps Performed | Viewport & Theme | Observed Result | Status |
 | :-: | :--- | :--- | :--- | :--- | :-: |
 | **1** | **Authentication & Cold Start Notice** (`/`) | 1. Open app while unauthenticated.<br>2. Submit login with invalid email.<br>3. Submit valid credentials.<br>4. Test Render slow response simulator ($>3.5$s). | Desktop & Mobile<br>(Light & Dark) | Form validates inputs; slow server notice displays gracefully after 3.5s; redirects to dashboard on login. | **PASS** |
-| **2** | **App Lock Screen** (`AppLockScreen.tsx`) | 1. Enable 4-digit PIN in settings.<br>2. Trigger lock screen.<br>3. Enter incorrect PIN 5 times.<br>4. Enter correct PIN. | Desktop & Mobile<br>(Light & Dark) | Keypad provides visual feedback. 5 failed attempts locks keypad with 5-minute countdown. Correct PIN unmasks screen instantly. | **PASS** |
+| **2** | **App Lock Screen** (`AppLockScreen.tsx`) | 1. Enable 4–6 digit PIN in settings.<br>2. Trigger lock screen.<br>3. Enter incorrect PIN 5 times.<br>4. Enter correct PIN. | Desktop & Mobile<br>(Light & Dark) | Keypad provides visual feedback. 5 failed attempts locks keypad with 5-minute countdown. Correct PIN unmasks screen instantly. | **PASS** |
 | **3** | **Dashboard** (`/`) | 1. View daily streak counter.<br>2. Check daily affirmation card.<br>3. Test mood-based music suggestion link (Spotify/YouTube search URL). | Desktop & Mobile<br>(Light & Dark) | Header displays greeting, streak count renders accurately, affirmation displays based on today's mood without copyrighted media. | **PASS** |
 | **4** | **Diary Editor & Emotion Wheel** (`/write`) | 1. Write rich text entry.<br>2. Select core emotion & sub-emotion from EmotionWheel.<br>3. Add tags & attach test image.<br>4. Submit entry. | Desktop & Mobile<br>(Light & Dark) | Emotion wheel renders accessible keyboard controls; image renders preview; entry saves encrypted at rest with AES-256-GCM. | **PASS** |
 | **5** | **XSS Stripping & Sanitization** | 1. Paste malicious script `<img src=x onerror=alert(1)>` and `<script>` into entry content.<br>2. Save entry.<br>3. Reload and view entry. | Desktop & Mobile | `sanitize-html` and `DOMPurify` strip script tags and onerror handlers completely. Plain safe text preserved without script execution. | **PASS** |
@@ -47,13 +47,13 @@
   - **14 Test Files Passed** (14 total, 0 failed)
   - **45 Tests Passed** (45 total, 0 failures, 0 flaky)
   - Includes: `sanitize` (5), `EmotionWheel` (3), `CheckIn` (1), `SafetyBanner` (4), `SOSButton` (6), `AppLockScreen` (2), `useSettings` (3), `AuthContext` (2), `authSafeguards` (4), `i18n` (1), `i18nComplete` (6), `storage` (2), `newFeatures` (3), `DiaryEntryReflect` (3).
-  - Execution time: ~3.1s
+  - Execution time: ~3.2s
 * **Backend Test Suite (Jest + Supertest + In-Memory MongoDB):**
   - **19 Test Suites Passed** (19 total, 0 failed)
-  - **217 Tests Passed** (217 total, 0 failures, 0 flaky)
-  - Includes: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (22), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (8), `modules` (36), `boot` (3), `insights` (4).
-  - Execution time: ~124.4s (verified without `server/.env`)
-* **Total Automated Tests:** **262 tests passed with 100% success rate**.
+  - **238 Tests Passed** (238 total, 0 failures, 0 flaky)
+  - Includes: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (24), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (27), `modules` (36), `boot` (3), `insights` (4).
+  - Execution time: ~82.7s
+* **Total Automated Tests:** **283 tests passed with 100% success rate**.
 * **Linting & Compilation Quality:**
   - `server`: ESLint reported **0 errors**, **9 warnings** (0 warnings in test files).
   - `frontend`: ESLint reported **0 errors**, **0 warnings**.
