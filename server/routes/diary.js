@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getEntries,
+  getCalendarMonth,
   getEntry,
   createEntry,
   updateEntry,
@@ -11,6 +12,8 @@ const {
 const auth = require('../middleware/auth');
 
 const router = express.Router();
+
+router.get('/calendar', auth, getCalendarMonth);
 
 router.route('/entries')
   .get(auth, getEntries)

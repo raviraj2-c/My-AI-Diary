@@ -25,7 +25,7 @@ const getMessages = async (req, res, next) => {
 };
 
 /**
- * Normalizes conversation history for Claude API:
+ * Normalizes conversation history for Gemini API:
  * - Drops leading assistant messages (must start with 'user')
  * - Merges consecutive same-role messages so roles strictly alternate
  */
@@ -133,26 +133,55 @@ const sendMessage = async (req, res, next) => {
       }
     }
 
-    // 5. Invoke Claude with normalized role sequence
+    // 5. Invoke Gemini with normalized role sequence
     const rawMessages = sortedHistory.map(m => ({
       role: m.role,
       content: m.content
     }));
     const chatMessages = normalizeChatHistory(rawMessages);
 
-    const response = await llmClient.callLLM({
-      userId: req.user.id,
-      systemPrompt,
-      messages: chatMessages,
-      maxTokens: 500,
-      temperature: 0.7
-    });
+    let response;
+    try {
+      response = await llmClient.callLLM({
+        userId: req.user.id,
+        systemPrompt,
+        messages: chatMessages,
+        maxTokens: 500,
+        temperature: 0.7
+      });
+    } catch (llmErr) {
+      if (llmErr.code === 'AI_BLOCKED') {
+        const blockedReply = "I'm here with you. I couldn't generate a reflection for that message, but you don't have to carry heavy feelings alone. If you need support, please reach out to someone you trust or use the helpline resources below.";
+        return res.json({
+          success: true,
+          blocked: true,
+          safety: { level: 'concern' },
+          data: {
+            userMessage: userMsg,
+            assistantMessage: {
+              _id: `blocked-${Date.now()}`,
+              role: 'assistant',
+              content: blockedReply,
+              safetyLevel: 'concern',
+              createdAt: new Date().toISOString()
+            }
+          }
+        });
+      }
+      throw llmErr;
+    }
 
     const hasCrisisSignal = response.text.includes('[CRISIS_SIGNAL_DETECTED]');
     const cleanReply = response.text.replace('[CRISIS_SIGNAL_DETECTED]', '').trim();
     const replySafetyLevel = hasCrisisSignal ? 'high' : risk.level;
 
-    // 6. Save assistant reply to database
+    // 6. Save assistant reply to database (never save an empty assistant message)
+    if (!cleanReply) {
+      const emptyErr = new Error('The AI did not return a response. Please try again.');
+      emptyErr.statusCode = 502;
+      emptyErr.code = 'AI_EMPTY';
+      throw emptyErr;
+    }
     const assistantMsg = await ChatMessage.create({
       user: req.user.id,
       role: 'assistant',

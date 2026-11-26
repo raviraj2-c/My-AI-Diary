@@ -11,7 +11,7 @@ describe('Part M: Ask My Diary Safeguards, Consent, Retrieval & Memory', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'AskDiaryTester', email: `tester-${Date.now()}-${Math.random()}@test.com`, password: 'Password123' });
+      .send({ name: 'AskDiaryTester', email: `tester-${Date.now()}-${Math.random()}@test.com`, password: 'Password123' , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
   });
@@ -214,7 +214,7 @@ describe('Part M: Ask My Diary Safeguards, Consent, Retrieval & Memory', () => {
       // Create User B
       const resB = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'UserB', email: `userb-${Date.now()}@test.com`, password: 'Password123' });
+        .send({ name: 'UserB', email: `userb-${Date.now()}@test.com`, password: 'Password123' , ageConfirmed: true});
       const userB = resB.body.user;
       const tokenB = resB.body.token;
       await User.findByIdAndUpdate(userB.id, { allowAIFeatures: true, allowDiaryAI: true });

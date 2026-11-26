@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Home, PenTool, Calendar, TrendingUp, Wind, Settings } from 'lucide-react';
+import { Home, BookOpen, Smile, Wind, MessageCircle, Plus } from 'lucide-react';
 
 export const MobileBottomBar: React.FC = () => {
   const location = useLocation();
@@ -9,20 +9,30 @@ export const MobileBottomBar: React.FC = () => {
 
   const tabs = [
     { key: 'home', defaultName: 'Home', href: '/', icon: Home },
-    { key: 'write', defaultName: 'Write', href: '/write', icon: PenTool },
-    { key: 'calendar', defaultName: 'Calendar', href: '/calendar', icon: Calendar },
-    { key: 'insights', defaultName: 'Insights', href: '/insights', icon: TrendingUp },
+    { key: 'journal', defaultName: 'Journal', href: '/journal', icon: BookOpen },
+    { key: 'mood', defaultName: 'Mood', href: '/mood', icon: Smile },
     { key: 'calm', defaultName: 'Calm', href: '/calm', icon: Wind },
-    { key: 'more', defaultName: 'More', href: '/settings', icon: Settings },
+    { key: 'talk', defaultName: 'Talk', href: '/talk', icon: MessageCircle },
   ];
 
   return (
     <nav
       aria-label="Mobile bottom navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 h-16 z-40 bg-white/95 dark:bg-[#131d31]/95 backdrop-blur-md border-t border-gray-200/80 dark:border-gray-800/80 px-2 flex items-center justify-around shadow-soft-lg"
+      className="md:hidden fixed bottom-0 left-0 right-0 h-16 z-40 bg-surface border-t border-border px-1 grid grid-cols-5 items-center"
     >
+      <Link
+        to="/write"
+        aria-label={t('nav.write', 'Write')}
+        className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-sky-700 text-white border border-surface flex items-center justify-center hover:bg-sky-700/90 transition-colors"
+      >
+        <Plus size={24} strokeWidth={1.75} />
+      </Link>
+
       {tabs.map((tab) => {
-        const isActive = location.pathname === tab.href;
+        const isActive =
+          tab.href === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(tab.href);
         const Icon = tab.icon;
         const label = t(`nav.${tab.key}`, tab.defaultName);
         return (
@@ -30,14 +40,15 @@ export const MobileBottomBar: React.FC = () => {
             key={tab.key}
             to={tab.href}
             aria-label={label}
-            className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all duration-150 min-w-[50px] ${
+            aria-current={isActive ? 'page' : undefined}
+            className={`flex flex-col items-center justify-center py-1 px-1 rounded-card transition-colors min-w-0 ${
               isActive
-                ? 'text-calm-700 dark:text-calm-400 font-semibold scale-105'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                ? 'text-sky-700 dark:text-sky-400 font-semibold'
+                : 'text-muted hover:text-text'
             }`}
           >
-            <Icon className={`h-5 w-5 ${isActive ? 'stroke-[2.3]' : 'stroke-[1.8]'}`} />
-            <span className="text-[10px] mt-0.5">{label}</span>
+            <Icon size={20} strokeWidth={1.75} />
+            <span className="text-[11px] mt-0.5 truncate max-w-full">{label}</span>
           </Link>
         );
       })}

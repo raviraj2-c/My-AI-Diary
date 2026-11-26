@@ -20,7 +20,7 @@ export const Spinner: React.FC<SpinnerProps> = ({
 
   return (
     <div role="status" className="inline-flex items-center justify-center gap-2">
-      <Loader2 className={`animate-spin text-calm-600 dark:text-calm-400 ${sizeClasses[size]} ${className}`} />
+      <Loader2 className={`animate-spin text-muted dark:text-muted ${sizeClasses[size]} ${className}`} />
       <span className="sr-only">{label}</span>
     </div>
   );

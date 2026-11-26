@@ -103,7 +103,7 @@ export const StudyTimer: React.FC<StudyTimerProps> = ({ onSessionLogged }) => {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Coffee className="w-4 h-4 text-calm-600 dark:text-calm-400" />
+          <Coffee className="w-4 h-4 text-muted dark:text-muted" />
           {t('student.breakTime', 'Break (5m)')}
         </button>
       </div>
@@ -124,7 +124,7 @@ export const StudyTimer: React.FC<StudyTimerProps> = ({ onSessionLogged }) => {
             cy="50"
             r="42"
             className={`${
-              mode === 'study' ? 'stroke-primary' : 'stroke-calm-500'
+              mode === 'study' ? 'stroke-primary' : 'stroke-muted'
             } transition-all duration-500`}
             strokeWidth="8"
             strokeDasharray={264}
@@ -146,14 +146,14 @@ export const StudyTimer: React.FC<StudyTimerProps> = ({ onSessionLogged }) => {
 
       {/* Break suggestion alert */}
       {mode === 'break' && (
-        <div className="mb-4 text-center max-w-xs text-xs bg-calm-50 dark:bg-calm-950/40 border border-calm-200 dark:border-calm-800 text-calm-800 dark:text-calm-200 p-3 rounded-xl animate-fade-in">
+        <div className="mb-4 text-center max-w-xs text-xs bg-sky-50 dark:bg-ink-950 border border-border dark:border-ink-800 text-ink-800 dark:text-border p-3 rounded-xl animate-fade-in">
           <p className="font-medium mb-1">{t('studyTimer.timeToUnwind')}</p>
           <p>{t('studyTimer.unwindInstructions')}</p>
         </div>
       )}
 
       {justFinished && mode === 'break' && (
-        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 mb-4 font-medium animate-fade-in">
+        <div className="flex items-center gap-2 text-xs text-sky-700 dark:text-sky-400 mb-4 font-medium animate-fade-in">
           <CheckCircle2 className="w-4 h-4" />
           {t('studyTimer.sessionSaved')}
         </div>

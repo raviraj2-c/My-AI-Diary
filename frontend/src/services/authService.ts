@@ -46,11 +46,11 @@ export class AuthService {
     }
   }
 
-  static async register(name: string, email: string, password: string): Promise<User> {
+  static async register(name: string, email: string, password: string, ageConfirmed = true): Promise<User> {
     try {
       const data = await apiRequest(API_CONFIG.ENDPOINTS.AUTH.REGISTER, {
         method: 'POST',
-        body: JSON.stringify({ name, email, password, timezone: getUserTimezone() }),
+        body: JSON.stringify({ name, email, password, ageConfirmed, timezone: getUserTimezone() }),
       });
 
       if (!data.success || !data.user) {

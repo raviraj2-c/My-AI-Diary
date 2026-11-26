@@ -82,8 +82,8 @@ export const SearchPage: React.FC = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('search.title', 'Search & Filter')}</h1>
-          <p className="text-sm text-calm-500 dark:text-calm-400 mt-0.5">
+          <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('search.title', 'Search & Filter')}</h1>
+          <p className="text-sm text-muted dark:text-muted mt-0.5">
             {t('search.subtitle', 'Search your private encrypted entries by keywords, moods, or tags.')}
           </p>
         </div>

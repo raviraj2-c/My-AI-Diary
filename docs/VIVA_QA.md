@@ -1,7 +1,7 @@
 # MindDiary: 32 Viva Examination Questions & Answers
 
 *Updated: November 2026 for Final Project Evaluation*  
-*Matches Real Codebase: Express 4, Mongoose 7, Jest + Supertest, Vitest + React Testing Library, AES-256-GCM, Anthropic Claude*
+*Matches Real Codebase: Express 4, Mongoose 7, Jest + Supertest, Vitest + React Testing Library, AES-256-GCM, Google Gemini*
 
 ---
 
@@ -41,7 +41,7 @@ When any entry, check-in, or chat message is received, `server/utils/riskCheck.j
 **Q7: What happens when a user submits text with "high" suicide or self-harm risk?**  
 *Answer:*  
 Three critical safeguards execute:
-1. **The external AI (Claude) is NEVER called.** This eliminates latency, hallucination risk, and third-party transmission of acute distress.
+1. **The external AI (Gemini) is NEVER called.** This eliminates latency, hallucination risk, and third-party transmission of acute distress.
 2. An immediate, caring response is generated locally (*"I hear how painful things feel right now. You matter, and you do not have to carry this alone..."*).
 3. The response payload returns `safety: { level: 'high' }`, which triggers the persistent `SafetyBanner` and `SOSButton` with one-tap, direct-dial phone links to verified national helplines (e.g. Tele-MANAS 14416 or 988). The user's entry is never lost or discarded.
 
@@ -59,11 +59,11 @@ PHQ-9 (Patient Health Questionnaire-9) and GAD-7 (Generalized Anxiety Disorder-7
 
 **Q10: Which AI provider is used, and how is it integrated?**  
 *Answer:*  
-We integrate Anthropic's Claude using `@anthropic-ai/sdk` from the **server only** (`server/services/llmClient.js`). The model name (`AI_MODEL`, defaulting to `claude-3-haiku-20240307`) and `ANTHROPIC_API_KEY` are read strictly from environment variables. The frontend has zero access to AI credentials.
+We integrate Google Gemini via REST API from the **server only** (`server/services/llmClient.js`, configured via `server/config/ai.js`). The model name (`GEMINI_MODEL`, chosen from `npm run ai:check`, default `gemini-2.5-flash`) and `GEMINI_API_KEY` are read strictly from environment variables. On `GEMINI_TIER=free`, Google may use submitted content, so diary AI is disabled in production unless `ALLOW_FREE_TIER_DIARY_AI=true` is set for non-personal demos; on `GEMINI_TIER=paid` (billing enabled), Google does not use submitted content for training. Users must also confirm they are 18+ at sign-up. The frontend has zero access to AI credentials.
 
 **Q11: What guardrails exist in the AI system prompt (`safetyPrompt.js`)?**  
 *Answer:*  
-All AI features share a strict system prompt instructing Claude to:
+All AI features share a strict system prompt instructing Gemini to:
 1. Be warm, concise, and reflective in plain language.
 2. Ask at most one gentle question and suggest small actions.
 3. **NEVER diagnose**, suggest medications or dosages, or claim to be a doctor or therapist.
@@ -77,7 +77,7 @@ All AI features share a strict system prompt instructing Claude to:
 
 **Q13: How does the AI Storybook feature work?**  
 *Answer:*  
-Users select a date range and narrative theme (e.g., Adventure, Reflective, Comedy). The backend aggregates the user's diary entries for that window and prompts Claude with a structured JSON schema constraint. If the AI returns invalid or unparseable JSON, the server catches it and returns a clean `502 Bad Gateway` rather than crashing.
+Users select a date range and narrative theme (e.g., Adventure, Reflective, Comedy). The backend aggregates the user's diary entries for that window and prompts Gemini with a structured JSON schema constraint. If the AI returns invalid or unparseable JSON, the server catches it and returns a clean `502 Bad Gateway` rather than crashing.
 
 ---
 

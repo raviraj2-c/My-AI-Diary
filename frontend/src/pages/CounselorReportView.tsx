@@ -72,7 +72,7 @@ export const CounselorReportView: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center">
-          <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <AlertCircle className="w-12 h-12 text-sky-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{t('counselor.unavailable')}</h2>
           <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
             {error || 'This link may have expired (valid for 7 days) or was revoked by the user.'}
@@ -100,7 +100,7 @@ export const CounselorReportView: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight">{t('counselor.title')}</h1>
-                <span className="text-xs bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span className="text-xs bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-200 font-medium px-2 py-0.5 rounded-full flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" /> {t('counselor.verified')}
                 </span>
               </div>
@@ -221,7 +221,7 @@ export const CounselorReportView: React.FC = () => {
             <ul className="space-y-2">
               {report.correlations.map((c, idx) => (
                 <li key={idx} className="text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-sky-500 mt-0.5 shrink-0" />
                   <span>{c.text}</span>
                 </li>
               ))}

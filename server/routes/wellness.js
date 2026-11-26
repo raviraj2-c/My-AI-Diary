@@ -25,7 +25,9 @@ const {
   revokeCounselorReportShare,
   getYearPixels,
   getCopingPlan,
-  saveCopingPlan
+  saveCopingPlan,
+  getMoodDaysEndpoint,
+  getHomeSummary
 } = require('../controllers/wellnessController');
 
 // Public route: Counselor Report View (authenticated via expiring token)
@@ -77,6 +79,10 @@ router.delete('/counselor-share/:token', revokeCounselorReportShare);
 router.post('/calm-sessions', logCalmSession);
 router.post('/self-checks', saveSelfCheck);
 router.get('/self-checks', getSelfChecks);
+
+// Unified daily mood & Home summary
+router.get('/mood-days', getMoodDaysEndpoint);
+router.get('/home-summary', getHomeSummary);
 
 // Year in Pixels & Coping Plan
 router.get('/year-pixels', getYearPixels);

@@ -40,15 +40,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div className="flex flex-col items-center text-center">
         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${
           variant === 'danger'
-            ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400'
+            ? 'bg-sky-50 text-danger dark:bg-danger dark:text-danger'
             : 'bg-primary-50 text-primary-600 dark:bg-primary-950/60 dark:text-primary-400'
         }`}>
           <AlertCircle className="h-6 w-6" />
         </div>
-        <h3 className="text-lg font-semibold text-calm-900 dark:text-calm-100 mb-2">
+        <h3 className="text-lg font-semibold text-ink-900 dark:text-sky-100 mb-2">
           {title}
         </h3>
-        <p className="text-sm text-calm-500 dark:text-calm-400 mb-6 leading-relaxed">
+        <p className="text-sm text-muted dark:text-muted mb-6 leading-relaxed">
           {message}
         </p>
 

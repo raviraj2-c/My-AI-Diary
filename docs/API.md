@@ -29,7 +29,7 @@ Rate Limit on Auth: 10 requests per 15 minutes per IP (`429 Too Many Requests`).
 
 | Method | Endpoint | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register new user. Body: `{ name, email, password }` |
+| `POST` | `/api/auth/register` | Public | Register new user (18+). Body: `{ name, email, password, ageConfirmed: true }` |
 | `POST` | `/api/auth/login` | Public | Sign in user. Body: `{ email, password }` |
 | `GET` | `/api/auth/me` | User | Get current authenticated profile & settings |
 | `PUT` | `/api/auth/settings` | User | Sync user settings `{ theme, fontSize, fontFamily, language, country, trustedContact, allowAIFeatures }` |
@@ -56,6 +56,7 @@ All private entry fields (`title`, `content`, `location`) are encrypted at rest 
 | `GET` | `/api/diary/entries/:id` | User | Fetch single entry (User ownership enforced) |
 | `PUT` | `/api/diary/entries/:id` | User | Update entry (User ownership enforced) |
 | `DELETE`| `/api/diary/entries/:id` | User | Delete entry |
+| `GET` | `/api/diary/calendar` | User | Lightweight month grid metadata (`?month=YYYY-MM`) without decrypting entry content |
 | `GET` | `/api/diary/tags` | User | Get user's distinct tags |
 | `GET` | `/api/diary/stats` | User | Get total entries, streak counters, and mood breakdown |
 
@@ -111,7 +112,9 @@ Requires `allowAIFeatures: true`. Enforces quota of 30 requests/day. Pre-flight 
 | `POST` | `/api/wellness/favorites/:id`| User | Toggle favorite on diary entry |
 | `POST` | `/api/wellness/pins/:id` | User | Toggle pinned status on diary entry |
 | `GET` | `/api/wellness/happy-box` | User | Aggregated mood lifters (favorited entries, gratitude, positive memories) |
-| `GET` | `/api/wellness/insights` | User | Empirical metrics: sleep-mood lift, best/hardest day, check-in count rule |
+| `GET` | `/api/wellness/mood-days` | User | Unified daily mood scores 1–10 (`?from=YYYY-MM-DD&to=YYYY-MM-DD`, check-in wins, entry average fallback) |
+| `GET` | `/api/wellness/home-summary` | User | Aggregated Home payload: streak, today's mood, 7-day dots, due letter flag, last entry |
+| `GET` | `/api/wellness/insights` | User | Empirical metrics: sleep-mood lift, best/hardest day, 7+ mood-day rule |
 | `GET` | `/api/wellness/year-pixels` | User | 12x31 yearly mood visualization grid (`?year=YYYY`) |
 | `GET` | `/api/wellness/coping-plan` | User | Get personal safety coping plan (warning signs, strategies, contacts, anchors) |
 | `PUT` | `/api/wellness/coping-plan` | User | Save/update personal safety coping plan (encrypted at rest) |

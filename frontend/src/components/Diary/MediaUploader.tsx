@@ -187,7 +187,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="text-calm-400 hover:text-calm-600"
+            className="text-muted hover:text-muted"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -203,7 +203,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
           className={`relative border-2 border-dashed rounded-2xl p-6 transition-all text-center ${
             isDragging
               ? 'border-primary-500 bg-primary-50/50 dark:bg-primary-950/30'
-              : 'border-calm-200 dark:border-calm-700/80 bg-calm-50/40 dark:bg-[#0f172a]/50 hover:border-calm-300'
+              : 'border-border dark:border-text bg-sky-50 dark:bg-[#0f172a]/50 hover:border-sky-200'
           }`}
         >
           <input
@@ -219,14 +219,14 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
           />
 
           <div className="flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-2xl bg-calm-100 dark:bg-calm-800 text-primary-600 dark:text-primary-300 flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-ink-800 text-primary-600 dark:text-primary-300 flex items-center justify-center mb-3">
               <UploadCloud className="w-6 h-6" />
             </div>
 
-            <p className="text-sm font-medium text-calm-800 dark:text-calm-100">
+            <p className="text-sm font-medium text-ink-800 dark:text-sky-100">
               {t('media.dragDrop')}
             </p>
-            <p className="text-xs text-calm-400 dark:text-calm-400 mt-1 max-w-sm">
+            <p className="text-xs text-muted dark:text-muted mt-1 max-w-sm">
               {t('media.sizeLimits', { count: media.length, max: maxItems })}
             </p>
 
@@ -266,15 +266,15 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
 
           {/* Progress bar overlay during upload */}
           {uploadProgress !== null && (
-            <div className="mt-4 pt-4 border-t border-calm-200 dark:border-calm-800">
-              <div className="flex items-center justify-between text-xs text-calm-600 dark:text-calm-400 mb-1.5 font-medium">
+            <div className="mt-4 pt-4 border-t border-border dark:border-ink-800">
+              <div className="flex items-center justify-between text-xs text-muted dark:text-muted mb-1.5 font-medium">
                 <span className="flex items-center gap-1.5">
                   <Spinner size="sm" />
                   <span>{t('media.uploadingMedia')}</span>
                 </span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="w-full bg-calm-100 dark:bg-calm-800 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-sky-100 dark:bg-ink-800 rounded-full h-2 overflow-hidden">
                 <div
                   className="bg-primary-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
@@ -288,7 +288,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
       {/* Attached Media List */}
       {media.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-calm-500">
+          <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-muted">
             <span>{t('media.attachedMediaCount', { count: media.length, max: maxItems })}</span>
           </div>
 
@@ -296,10 +296,10 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
             {media.map((item, index) => (
               <div
                 key={item.publicId || item.url || index}
-                className="relative rounded-xl border border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b] p-2.5 flex flex-col justify-between group shadow-xs"
+                className="relative rounded-xl border border-border dark:border-ink-800 bg-white dark:bg-[#1e293b] p-2.5 flex flex-col justify-between group shadow-xs"
               >
                 {/* Media Preview Box */}
-                <div className="relative aspect-video rounded-lg overflow-hidden bg-calm-100 dark:bg-calm-900 flex items-center justify-center">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-sky-100 dark:bg-ink-900 flex items-center justify-center">
                   {item.type === 'image' && (
                     <img
                       src={item.thumbnailUrl || item.url}
@@ -348,7 +348,7 @@ export const MediaUploader: React.FC<MediaUploaderProps> = ({
                     onChange={(e) => handleCaptionChange(index, e.target.value)}
                     placeholder="Add caption..."
                     maxLength={200}
-                    className="w-full px-2 py-1 text-xs bg-calm-50 dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700/80 rounded-lg text-calm-800 dark:text-calm-200 placeholder-calm-400 focus:outline-none focus:ring-1 focus:ring-primary-400"
+                    className="w-full px-2 py-1 text-xs bg-sky-50 dark:bg-[#0f172a] border border-border dark:border-text rounded-lg text-ink-800 dark:text-border placeholder-muted focus:outline-none focus:ring-1 focus:ring-primary-400"
                   />
                 </div>
               </div>

@@ -6,46 +6,86 @@
 const mongoose = require('mongoose');
 const { User } = require('../config/models');
 const { dayRange, todayKey } = require('../utils/dates');
+const { MODEL, GEMINI_API_BASE, getApiKey, getModel, isAIConfigured } = require('../config/ai');
 
-const DEFAULT_MODEL = process.env.AI_MODEL || 'gemini-2.5-flash';
-const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const DAILY_LIMIT = 30;
-const TIMEOUT_MS = 25000;
+const DEFAULT_TIMEOUT_MS = 25000;
+const RATE_LIMIT_RETRY_DELAY_MS = 1500;
+const SHORT_TASK_HEADROOM_TOKENS = 512;
+const BLOCKED_FINISH_REASONS = new Set([
+  'SAFETY',
+  'RECITATION',
+  'BLOCKLIST',
+  'PROHIBITED_CONTENT',
+  'SPII',
+  'IMAGE_SAFETY'
+]);
 
-function getApiKey() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || apiKey === 'your_gemini_api_key') {
-    return null;
-  }
-  return apiKey.trim();
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function requestGemini({ apiKey, model, systemPrompt, messages, maxTokens, temperature }) {
+async function fetchGeminiWithRetry({ url, apiKey, body, timeoutMs }) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': apiKey
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+
+    if ((res.status === 429 || res.status === 503) && attempt === 0) {
+      await sleep(RATE_LIMIT_RETRY_DELAY_MS);
+      continue;
+    }
+
+    return res;
+  }
+}
+
+async function requestGemini({
+  apiKey,
+  model,
+  systemPrompt,
+  messages,
+  maxTokens,
+  temperature,
+  responseMimeType,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  _retriedMaxTokens = false
+}) {
   const url = `${GEMINI_API_BASE}/${encodeURIComponent(model)}:generateContent`;
+  // Short tasks get +512 token headroom and thinkingBudget: 0 (per Google Gemini 2.5/Flash-Lite docs)
+  // so internal reasoning tokens do not consume the output budget or add latency.
+  const isShortTask = maxTokens < 2000;
+  const effectiveMaxTokens = !_retriedMaxTokens && isShortTask
+    ? maxTokens + SHORT_TASK_HEADROOM_TOKENS
+    : maxTokens;
+
+  const generationConfig = {
+    maxOutputTokens: effectiveMaxTokens,
+    temperature
+  };
+  if (responseMimeType) {
+    generationConfig.responseMimeType = responseMimeType;
+  }
+
   const body = {
     contents: messages.map((m) => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: m.content }]
     })),
-    generationConfig: {
-      maxOutputTokens: maxTokens,
-      temperature
-    }
+    generationConfig
   };
 
   if (systemPrompt) {
     body.systemInstruction = { parts: [{ text: systemPrompt }] };
   }
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
-    },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(TIMEOUT_MS)
-  });
+  const res = await fetchGeminiWithRetry({ url, apiKey, body, timeoutMs });
 
   if (!res.ok) {
     let errMessage = `HTTP ${res.status}`;
@@ -61,8 +101,49 @@ async function requestGemini({ apiKey, model, systemPrompt, messages, maxTokens,
   }
 
   const data = await res.json();
-  const parts = data?.candidates?.[0]?.content?.parts || [];
-  return parts.map((p) => p.text || '').join('');
+
+  if (data.promptFeedback?.blockReason) {
+    const err = new Error(`Prompt blocked: ${data.promptFeedback.blockReason}`);
+    err.code = 'AI_BLOCKED';
+    throw err;
+  }
+
+  const candidate = data?.candidates?.[0];
+  const parts = candidate?.content?.parts || [];
+  const text = parts.map((p) => p.text || '').join('');
+
+  if (!text.trim()) {
+    const finishReason = candidate?.finishReason;
+    if (BLOCKED_FINISH_REASONS.has(finishReason)) {
+      const err = new Error(`Response blocked (${finishReason})`);
+      err.code = 'AI_BLOCKED';
+      throw err;
+    }
+    if (finishReason === 'MAX_TOKENS') {
+      if (!_retriedMaxTokens) {
+        const largerMaxTokens = Math.min(Math.max(effectiveMaxTokens * 2, 1024), 8192);
+        return requestGemini({
+          apiKey,
+          model,
+          systemPrompt,
+          messages,
+          maxTokens: largerMaxTokens,
+          temperature,
+          responseMimeType,
+          timeoutMs,
+          _retriedMaxTokens: true
+        });
+      }
+      const err = new Error('Response truncated at MAX_TOKENS');
+      err.code = 'AI_TRUNCATED';
+      throw err;
+    }
+    const err = new Error(`Empty response (${finishReason || 'NO_CANDIDATES'})`);
+    err.code = 'AI_EMPTY';
+    throw err;
+  }
+
+  return text;
 }
 
 /**
@@ -183,9 +264,28 @@ async function refundDailyUsage(userId, count = 1) {
  * @param {boolean} [params.countUsage=true] - Whether this call counts toward daily limit
  * @returns {Promise<{ text: string, quotaRemaining: number, mock?: boolean }>}
  */
-async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, temperature = 0.7, countUsage = true }) {
+async function callLLM({
+  userId,
+  systemPrompt,
+  messages,
+  maxTokens = 1024,
+  temperature = 0.7,
+  countUsage = true,
+  responseMimeType,
+  timeoutMs = DEFAULT_TIMEOUT_MS
+}) {
   let quota = { allowed: true, remaining: DAILY_LIMIT, count: 0 };
   let usageIncremented = false;
+
+  const apiKey = getApiKey();
+  const model = getModel();
+
+  if (process.env.NODE_ENV === 'production' && !isAIConfigured()) {
+    const error = new Error('AI is not configured');
+    error.statusCode = 503;
+    error.code = 'AI_NOT_CONFIGURED';
+    throw error;
+  }
 
   // 1. Check and record daily quota if applicable
   if (countUsage) {
@@ -201,15 +301,8 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     }
   }
 
-  const apiKey = getApiKey();
-
   // If Gemini API key is not yet set in environment, provide a safe dev fallback
   if (!apiKey) {
-    if (process.env.NODE_ENV === 'production') {
-      const error = new Error('AI service is temporarily unavailable.');
-      error.statusCode = 503;
-      throw error;
-    }
     const lastUserMsg = messages[messages.length - 1]?.content || '';
     return {
       text: generateDevMockResponse(systemPrompt, lastUserMsg),
@@ -218,14 +311,26 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     };
   }
 
+  if (!model) {
+    if (usageIncremented) {
+      await refundDailyUsage(userId, 1);
+    }
+    const error = new Error('AI is not configured');
+    error.statusCode = 503;
+    error.code = 'AI_NOT_CONFIGURED';
+    throw error;
+  }
+
   try {
     const text = await requestGemini({
       apiKey,
-      model: DEFAULT_MODEL,
+      model,
       systemPrompt,
       messages,
       maxTokens,
-      temperature
+      temperature,
+      responseMimeType,
+      timeoutMs
     });
 
     return {
@@ -239,8 +344,26 @@ async function callLLM({ userId, systemPrompt, messages, maxTokens = 1024, tempe
     }
     console.error(`Gemini API Error (status: ${err.status ?? 'unknown'}):`, err.message);
 
+    if (err.code === 'AI_BLOCKED') {
+      const error = new Error('I could not generate a response for that right now. Please try rephrasing or reach out to support if you are going through a tough time.');
+      error.statusCode = 422;
+      error.code = 'AI_BLOCKED';
+      throw error;
+    }
+    if (err.code === 'AI_TRUNCATED') {
+      const error = new Error('The AI response was cut short. Please try again.');
+      error.statusCode = 502;
+      error.code = 'AI_TRUNCATED';
+      throw error;
+    }
+    if (err.code === 'AI_EMPTY') {
+      const error = new Error('The AI did not return a response. Please try again.');
+      error.statusCode = 502;
+      error.code = 'AI_EMPTY';
+      throw error;
+    }
     if (err.status === 404 || err.message?.includes('not found') || err.message?.includes('NOT_FOUND')) {
-      console.error(`❌ FATAL / CONFIG ERROR: Configured AI_MODEL '${DEFAULT_MODEL}' was not found or is deprecated on Gemini. Update AI_MODEL in .env.`);
+      console.error(`❌ FATAL / CONFIG ERROR: Configured GEMINI_MODEL '${model}' was not found or is deprecated on Gemini. Update GEMINI_MODEL in .env.`);
       const error = new Error('AI service configuration issue (model not found). Please contact support.');
       error.statusCode = 502;
       throw error;
@@ -337,9 +460,10 @@ function generateDevMockResponse(systemPrompt, userText) {
  */
 async function verifyModelHealth() {
   const apiKey = getApiKey();
-  if (!apiKey) {
+  const model = getModel();
+  if (!apiKey || !model) {
     if (process.env.NODE_ENV === 'production') {
-      console.warn('⚠️ WARNING: GEMINI_API_KEY is missing or unconfigured in production.');
+      console.warn('⚠️ WARNING: GEMINI_API_KEY or GEMINI_MODEL is missing or unconfigured in production.');
     }
     return { ok: false, status: 'missing_key' };
   }
@@ -347,17 +471,17 @@ async function verifyModelHealth() {
   try {
     await requestGemini({
       apiKey,
-      model: DEFAULT_MODEL,
+      model,
       messages: [{ role: 'user', content: 'ping' }],
       maxTokens: 1,
       temperature: 0
     });
-    console.log(`✅ Gemini AI model '${DEFAULT_MODEL}' verified successfully.`);
-    return { ok: true, model: DEFAULT_MODEL };
+    console.log(`✅ Gemini AI model '${model}' verified successfully.`);
+    return { ok: true, model };
   } catch (err) {
-    console.error(`❌ Gemini AI startup verification failed for model '${DEFAULT_MODEL}' (status: ${err.status ?? 'unknown'}):`, err.message);
+    console.error(`❌ Gemini AI startup verification failed for model '${model}' (status: ${err.status ?? 'unknown'}):`, err.message);
     if (err.status === 404) {
-      console.error(`❌ FATAL: Configured AI_MODEL '${DEFAULT_MODEL}' does not exist on Gemini. Update AI_MODEL in .env.`);
+      console.error(`❌ FATAL: Configured GEMINI_MODEL '${model}' does not exist on Gemini. Update GEMINI_MODEL in .env.`);
     }
     return { ok: false, status: err.status, error: err.message };
   }
@@ -369,5 +493,5 @@ module.exports = {
   refundDailyUsage,
   verifyModelHealth,
   DAILY_LIMIT,
-  DEFAULT_MODEL
+  MODEL
 };

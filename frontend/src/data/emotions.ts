@@ -21,7 +21,7 @@ export const EMOTION_WHEEL: CoreEmotion[] = [
     name: 'Joy',
     emoji: '☀️',
     color: '#eab308',
-    badgeClass: 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200',
+    badgeClass: 'bg-sky-100 text-ink-900 border-sky-200 dark:bg-ink-900 dark:text-sky-200',
     subEmotions: [
       {
         name: 'Happy',
@@ -50,7 +50,7 @@ export const EMOTION_WHEEL: CoreEmotion[] = [
     name: 'Love',
     emoji: '🌿',
     color: '#10b981',
-    badgeClass: 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-200',
+    badgeClass: 'bg-sky-100 text-ink-900 border-sky-200 dark:bg-ink-900 dark:text-sky-200',
     subEmotions: [
       {
         name: 'Affectionate',
@@ -96,7 +96,7 @@ export const EMOTION_WHEEL: CoreEmotion[] = [
     name: 'Fear',
     emoji: '🌪️',
     color: '#8b5cf6',
-    badgeClass: 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/40 dark:text-purple-200',
+    badgeClass: 'bg-sky-100 text-ink-900 border-sky-200 dark:bg-ink-900 dark:text-sky-200',
     subEmotions: [
       {
         name: 'Anxious',
@@ -117,7 +117,7 @@ export const EMOTION_WHEEL: CoreEmotion[] = [
     name: 'Anger',
     emoji: '🔥',
     color: '#ef4444',
-    badgeClass: 'bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/40 dark:text-rose-200',
+    badgeClass: 'bg-danger text-danger border-danger dark:bg-danger dark:text-danger',
     subEmotions: [
       {
         name: 'Frustrated',

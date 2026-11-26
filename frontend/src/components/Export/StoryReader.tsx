@@ -186,26 +186,26 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#faf8f5] dark:bg-[#0b1120] text-calm-900 dark:text-calm-100 flex flex-col justify-between overflow-hidden select-none motion-reduce:transition-none"
+      className="fixed inset-0 z-50 bg-[#faf8f5] dark:bg-[#0b1120] text-ink-900 dark:text-sky-100 flex flex-col justify-between overflow-hidden select-none motion-reduce:transition-none"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
       {/* Top Reading Navigation Bar */}
-      <header className="h-16 px-4 md:px-8 flex items-center justify-between border-b border-calm-200/80 dark:border-calm-800/80 bg-white/80 dark:bg-[#131d31]/80 backdrop-blur-md z-20">
+      <header className="h-16 px-4 md:px-8 flex items-center justify-between border-b border-border dark:border-ink-800 bg-white/80 dark:bg-[#131d31]/80 backdrop-blur-md z-20">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-calm-600 dark:text-calm-400 hover:bg-calm-100 dark:hover:bg-calm-800 transition-colors"
+            className="p-2 rounded-xl text-muted dark:text-muted hover:bg-sky-100 dark:hover:bg-ink-800 transition-colors"
             title={t('storybook.closeReader')}
           >
             <X className="w-5 h-5" />
           </button>
 
           <div className="hidden sm:block">
-            <h2 className="text-sm font-serif font-bold text-calm-900 dark:text-calm-100 truncate max-w-xs md:max-w-md">
+            <h2 className="text-sm font-serif font-bold text-ink-900 dark:text-sky-100 truncate max-w-xs md:max-w-md">
               {storybook.title}
             </h2>
-            <p className="text-[11px] text-calm-500 capitalize">
+            <p className="text-[11px] text-muted capitalize">
               {t('storybook.memoirWithChapters', { theme: storybook.theme, count: chapters.length })}
             </p>
           </div>
@@ -215,9 +215,9 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsChapterMenuOpen(!isChapterMenuOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-calm-200 dark:border-calm-700 bg-white dark:bg-[#1e293b] text-xs font-medium text-calm-800 dark:text-calm-200 hover:border-calm-300 shadow-soft-sm"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border dark:border-text bg-white dark:bg-[#1e293b] text-xs font-medium text-ink-800 dark:text-border hover:border-sky-200 shadow-soft-sm"
           >
-            <List className="w-3.5 h-3.5 text-calm-500" />
+            <List className="w-3.5 h-3.5 text-muted" />
             <span>
               {currentPage === 0
                 ? t('storybook.coverPage')
@@ -226,7 +226,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
           </button>
 
           {isChapterMenuOpen && (
-            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 max-h-72 overflow-y-auto rounded-2xl bg-white dark:bg-[#1e293b] border border-calm-200 dark:border-calm-700 shadow-soft-xl p-1.5 z-30 animate-fade-in">
+            <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-64 max-h-72 overflow-y-auto rounded-2xl bg-white dark:bg-[#1e293b] border border-border dark:border-text shadow-soft-xl p-1.5 z-30 animate-fade-in">
               <button
                 onClick={() => {
                   setCurrentPage(0);
@@ -235,7 +235,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
                 className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors ${
                   currentPage === 0
                     ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-300 font-semibold'
-                    : 'text-calm-700 dark:text-calm-300 hover:bg-calm-50 dark:hover:bg-calm-800'
+                    : 'text-text dark:text-sky-200 hover:bg-sky-50 dark:hover:bg-ink-800'
                 }`}
               >
                 {t('storybook.coverPage')}
@@ -250,7 +250,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-colors truncate ${
                     currentPage === idx + 1
                       ? 'bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-300 font-semibold'
-                      : 'text-calm-700 dark:text-calm-300 hover:bg-calm-50 dark:hover:bg-calm-800'
+                      : 'text-text dark:text-sky-200 hover:bg-sky-50 dark:hover:bg-ink-800'
                   }`}
                 >
                   {ch.chapterNumber || idx + 1}. {ch.title}
@@ -316,7 +316,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
                 timeframe={storybook.timeframe}
                 size="full"
               />
-              <p className="mt-6 text-xs text-calm-400 dark:text-calm-500 font-mono tracking-wide">
+              <p className="mt-6 text-xs text-muted dark:text-muted font-mono tracking-wide">
                 {t('storybook.pressRightArrow')}
               </p>
             </div>
@@ -324,21 +324,21 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
             /* Chapter Page */
             <article
               key={currentPage}
-              className="bg-white/90 dark:bg-[#131d31]/90 rounded-3xl p-6 sm:p-12 md:p-16 border border-calm-200/80 dark:border-calm-800/80 shadow-soft-lg animate-fade-in motion-reduce:transition-none"
+              className="bg-white/90 dark:bg-[#131d31]/90 rounded-3xl p-6 sm:p-12 md:p-16 border border-border dark:border-ink-800 shadow-soft-lg animate-fade-in motion-reduce:transition-none"
             >
-              <div className="mb-8 pb-4 border-b border-calm-100 dark:border-calm-800/80 flex items-center justify-between">
+              <div className="mb-8 pb-4 border-b border-sky-100 dark:border-ink-800 flex items-center justify-between">
                 <div>
                   <span className="text-xs uppercase tracking-widest font-mono text-primary-600 dark:text-primary-400 font-semibold">
                     {t('storybook.chapterOnly', { num: activeChapter?.chapterNumber || currentPage })}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-calm-900 dark:text-calm-50 mt-1">
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif font-bold text-ink-900 dark:text-sky-50 mt-1">
                     {activeChapter?.title}
                   </h3>
                 </div>
-                <BookOpen className="w-6 h-6 text-calm-300 dark:text-calm-700 shrink-0" />
+                <BookOpen className="w-6 h-6 text-sky-200 dark:text-text shrink-0" />
               </div>
 
-              <div className="font-serif text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-calm-800 dark:text-calm-200 whitespace-pre-line tracking-wide">
+              <div className="font-serif text-lg sm:text-xl md:text-2xl leading-relaxed sm:leading-loose text-ink-800 dark:text-border whitespace-pre-line tracking-wide">
                 {activeChapter?.content}
               </div>
             </article>
@@ -347,7 +347,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
       </main>
 
       {/* Bottom Footer Navigation Bar */}
-      <footer className="h-16 px-4 md:px-8 flex items-center justify-between border-t border-calm-200/80 dark:border-calm-800/80 bg-white/80 dark:bg-[#131d31]/80 backdrop-blur-md z-20">
+      <footer className="h-16 px-4 md:px-8 flex items-center justify-between border-t border-border dark:border-ink-800 bg-white/80 dark:bg-[#131d31]/80 backdrop-blur-md z-20">
         <Button
           variant="outline"
           size="sm"
@@ -369,7 +369,7 @@ export const StoryReader: React.FC<StoryReaderProps> = ({
               <span>{isPlayingSpeech ? t('storybook.stopReadAloud') : t('storybook.readAloud')}</span>
             </Button>
           )}
-          <span className="text-xs font-mono text-calm-500 dark:text-calm-400">
+          <span className="text-xs font-mono text-muted dark:text-muted">
             {t('storybook.pageOf', { current: currentPage + 1, total: totalPages })}
           </span>
         </div>

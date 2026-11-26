@@ -14,13 +14,13 @@ describe('Three Small Features: Year in Pixels, Letters to Future Self, Coping P
   beforeEach(async () => {
     const resA = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'User A', email: `userA-${Date.now()}@test.com`, password: userPassword });
+      .send({ name: 'User A', email: `userA-${Date.now()}@test.com`, password: userPassword , ageConfirmed: true});
     userA = resA.body.user;
     tokenA = resA.body.token;
 
     const resB = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'User B', email: `userB-${Date.now()}@test.com`, password: userPassword });
+      .send({ name: 'User B', email: `userB-${Date.now()}@test.com`, password: userPassword , ageConfirmed: true});
     tokenB = resB.body.token;
   });
 

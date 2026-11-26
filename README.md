@@ -92,7 +92,7 @@ My-AI-Diary/
 
 ## 🔒 Privacy & Encryption at Rest
 
-MindDiary encrypts sensitive text fields (`DiaryEntry.content`, `DiaryEntry.media[].caption`, `CheckIn.note`, `GratitudeEntry.items`, `ChatMessage.content`, `ThoughtRecord.situation/thought/balancedThought`, `Storybook.generatedContent/chapters`, `SelfCheck.answers`, `Exam.notes`, `SmallWin.tasks[].text`) using **AES-256-GCM**:
+MindDiary encrypts sensitive text fields (`DiaryEntry.content`, `DiaryEntry.media[].caption`, `CheckIn.note`, `GratitudeEntry.items`, `ChatMessage.content`, `ThoughtRecord.situation/thought/balancedThought`, `Storybook.generatedContent/chapters`, `SelfCheck.answers`, `Exam.notes`, `SmallWin.tasks[].text`, `CopingPlan.*`, `FutureLetter.content`) using **AES-256-GCM**:
 
 1. **Format:** Ciphertext is saved in MongoDB prefixed with `enc:v1:` containing the initialization vector (IV), encrypted data, and authentication tag.
 2. **Key Storage:** The master key is read from `server/.env` via `ENCRYPTION_KEY` (32 bytes hex or string).
@@ -244,6 +244,12 @@ Generated via headless Chrome audit against production preview build ([view HTML
 
 ---
 
+## 📸 Screenshots & UI Gallery
+
+Light and dark mode UI captures (desktop `1280×800` and mobile `360×800`) are stored in `docs/screens/` covering Home (`/`), Journal (`/journal`), Mood (`/mood`), Calm (`/calm`), Talk (`/talk`), Settings (`/settings`), and Auth/Privacy.
+
+---
+
 ## 🎓 5-Minute Examiner Demo Walkthrough Order
 
 For project evaluation and viva examinations, present the application following this structured 5-minute flow:
@@ -295,7 +301,9 @@ For project evaluation and viva examinations, present the application following 
   - `MONGODB_URI`
   - `ENCRYPTION_KEY` (32 bytes hex)
   - `FRONTEND_URL` (your deployed Vercel domain)
-  - `ANTHROPIC_API_KEY` (Claude API key)
+  - `GEMINI_API_KEY` (Google Gemini API key)
+  - `GEMINI_MODEL` (Gemini model name from `npm run ai:check`, default `gemini-2.5-flash`)
+  - `GEMINI_TIER` (`free` or `paid`; use `paid` only if billing is enabled)
   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
 
 ### 3. Frontend (Vercel / Netlify)

@@ -34,7 +34,7 @@ This survey instrument is designed to collect quantitative usability metrics (Sy
 | **Q2** | The 10-second daily check-in (mood, sleep, stress) was quick enough to complete without feeling like a chore. | Usability & Friction | `[ ]` |
 | **Q3** | The TipTap text editor and voice dictation made it easy and natural to write expressive thoughts. | Content Creation | `[ ]` |
 | **Q4** | The Student Mode (exam countdown, Pomodoro timer, burnout notice) helped me manage academic stress. | Academic Relevance | `[ ]` |
-| **Q5** | The AI reflections (Claude) felt gentle, supportive, and non-judgmental, without sounding robotic or clinical. | AI Interaction Quality | `[ ]` |
+| **Q5** | The AI reflections (Gemini) felt gentle, supportive, and non-judgmental, without sounding robotic or clinical. | AI Interaction Quality | `[ ]` |
 | **Q6** | The CBT Thought Challenger helped me step back and examine negative thoughts from a balanced angle. | Mental Health Value | `[ ]` |
 | **Q7** | The Calm Space exercises (Box Breathing, Grounding, Vent Box) were effective in lowering immediate anxiety. | De-escalation & Calm | `[ ]` |
 | **Q8** | I felt safe knowing that my personal journal text is private, never used for AI model training, and excluded from counselor shares. | Privacy & Trust | `[ ]` |

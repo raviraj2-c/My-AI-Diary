@@ -95,20 +95,10 @@ export const StoriesPage: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="p-1.5 rounded-lg bg-primary-100 dark:bg-primary-950/60 text-primary-600 dark:text-primary-300">
-              <BookOpen className="w-5 h-5" />
-            </span>
-            <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">
-              {t('stories.libraryTitle')}
-            </h1>
-          </div>
-          <p className="text-sm text-calm-500 dark:text-calm-400">
-            {t('stories.librarySubtitle')}
-          </p>
-        </div>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">
+          {t('stories.libraryTitle')}
+        </h1>
 
         <Link to="/export">
           <Button variant="primary" size="sm" icon={<Plus className="w-4 h-4" />}>
@@ -121,17 +111,17 @@ export const StoriesPage: React.FC = () => {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-3">
           <Spinner size="lg" />
-          <p className="text-sm text-calm-500">{t('stories.gathering')}</p>
+          <p className="text-sm text-muted">{t('stories.gathering')}</p>
         </div>
       ) : stories.length === 0 ? (
-        <Card className="p-12 text-center border-dashed border-2 border-calm-200 dark:border-calm-800">
-          <div className="w-14 h-14 rounded-2xl bg-calm-100 dark:bg-calm-800/60 text-calm-500 mx-auto flex items-center justify-center mb-4">
+        <Card className="p-12 text-center border-dashed border-2 border-border dark:border-ink-800">
+          <div className="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-ink-800 text-muted mx-auto flex items-center justify-center mb-4">
             <BookOpen className="w-7 h-7" />
           </div>
-          <h3 className="text-lg font-serif font-bold text-calm-900 dark:text-calm-100 mb-1">
+          <h3 className="text-lg font-serif font-bold text-ink-900 dark:text-sky-100 mb-1">
             {t('stories.emptyTitle')}
           </h3>
-          <p className="text-sm text-calm-500 dark:text-calm-400 max-w-md mx-auto mb-6">
+          <p className="text-sm text-muted dark:text-muted max-w-md mx-auto mb-6">
             {t('stories.emptyDesc')}
           </p>
           <Link to="/export">
@@ -145,7 +135,7 @@ export const StoriesPage: React.FC = () => {
           {stories.map((story) => (
             <Card
               key={story.id}
-              className="p-5 flex flex-col justify-between border-calm-200 dark:border-calm-800 hover:shadow-soft-lg transition-all group"
+              className="p-5 flex flex-col justify-between border-border dark:border-ink-800 hover:shadow-soft-lg transition-all group"
             >
               <div className="space-y-4">
                 {/* Visual Cover Preview */}
@@ -166,13 +156,13 @@ export const StoriesPage: React.FC = () => {
                 <div>
                   <h3
                     onClick={() => handleOpenStory(story.id)}
-                    className="text-base font-serif font-bold text-calm-900 dark:text-calm-50 hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer line-clamp-1 transition-colors"
+                    className="text-base font-serif font-bold text-ink-900 dark:text-sky-50 hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer line-clamp-1 transition-colors"
                   >
                     {story.title}
                   </h3>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-calm-500 dark:text-calm-400">
-                    <span className="capitalize font-medium text-calm-700 dark:text-calm-300">
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted dark:text-muted">
+                    <span className="capitalize font-medium text-text dark:text-sky-200">
                       {story.theme}
                     </span>
                     <span>•</span>
@@ -185,7 +175,7 @@ export const StoriesPage: React.FC = () => {
                     ) : null}
                   </div>
 
-                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-calm-400">
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] text-muted">
                     <Calendar className="w-3.5 h-3.5" />
                     <span>{t('stories.createdOn', { date: formatDate(story.createdAt) })}</span>
                   </div>
@@ -193,7 +183,7 @@ export const StoriesPage: React.FC = () => {
               </div>
 
               {/* Actions */}
-              <div className="mt-6 pt-4 border-t border-calm-100 dark:border-calm-800/80 flex items-center justify-between gap-2">
+              <div className="mt-6 pt-4 border-t border-sky-100 dark:border-ink-800 flex items-center justify-between gap-2">
                 <Button
                   variant="primary"
                   size="sm"
@@ -207,21 +197,21 @@ export const StoriesPage: React.FC = () => {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleDownloadPDF(story.id)}
-                    className="p-1.5 rounded-lg text-calm-500 hover:text-calm-800 dark:hover:text-calm-200 hover:bg-calm-100 dark:hover:bg-calm-800 transition-colors"
+                    className="p-1.5 rounded-lg text-muted hover:text-ink-800 dark:hover:text-border hover:bg-sky-100 dark:hover:bg-ink-800 transition-colors"
                     title={t('stories.downloadPDF')}
                   >
                     <Download className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDownloadText(story.id)}
-                    className="p-1.5 rounded-lg text-calm-500 hover:text-calm-800 dark:hover:text-calm-200 hover:bg-calm-100 dark:hover:bg-calm-800 transition-colors"
+                    className="p-1.5 rounded-lg text-muted hover:text-ink-800 dark:hover:text-border hover:bg-sky-100 dark:hover:bg-ink-800 transition-colors"
                     title={t('stories.downloadText')}
                   >
                     <FileText className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setStoryToDelete(story.id)}
-                    className="p-1.5 rounded-lg text-calm-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    className="p-1.5 rounded-lg text-muted hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     title={t('stories.deleteTitle')}
                   >
                     <Trash2 className="w-4 h-4" />

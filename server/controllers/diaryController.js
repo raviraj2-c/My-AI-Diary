@@ -217,6 +217,8 @@ const getEntries = async (req, res, next) => {
       return res.json({
         success: true,
         count: paginated.length,
+        searchedLimit: 500,
+        searchNote: 'searched the latest 500 entries',
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -253,6 +255,69 @@ const getEntries = async (req, res, next) => {
         pages: Math.ceil(total / options.limit)
       },
       data: entries
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Returns non-encrypted calendar metadata for a given month (YYYY-MM).
+ * Never selects or decrypts entry content.
+ */
+const getCalendarMonth = async (req, res, next) => {
+  try {
+    const { month } = req.query;
+    if (!month || typeof month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Query parameter month must be in YYYY-MM format'
+      });
+    }
+
+    const [yearStr, monthStr] = month.split('-');
+    const yearNum = parseInt(yearStr, 10);
+    const monthNum = parseInt(monthStr, 10);
+    const lastDay = new Date(Date.UTC(yearNum, monthNum, 0)).getUTCDate();
+    const fromKey = `${month}-01`;
+    const toKey = `${month}-${String(lastDay).padStart(2, '0')}`;
+
+    const user = await User.findById(req.user.id).select('timezone');
+    const tz = user?.timezone || 'UTC';
+    const start = startOfDay(fromKey, tz);
+    const end = endOfDay(toKey, tz);
+
+    const rows = await DiaryEntry.find({
+      user: req.user.id,
+      entryDate: { $gte: start, $lte: end }
+    })
+      .select('entryDate dateKey mood media')
+      .sort({ entryDate: 1 })
+      .lean();
+
+    const byDate = new Map();
+    for (const row of rows) {
+      const date = row.dateKey || keyOf(row.entryDate, tz);
+      const hasMedia = Array.isArray(row.media) && row.media.length > 0;
+      const existing = byDate.get(date);
+      if (!existing) {
+        byDate.set(date, {
+          date,
+          count: 1,
+          mood: row.mood || 'neutral',
+          hasMedia
+        });
+      } else {
+        existing.count += 1;
+        existing.hasMedia = existing.hasMedia || hasMedia;
+        if (row.mood) existing.mood = row.mood;
+      }
+    }
+
+    res.json({
+      success: true,
+      month,
+      data: Array.from(byDate.values())
     });
   } catch (error) {
     next(error);
@@ -660,6 +725,7 @@ const getStats = async (req, res, next) => {
 
 module.exports = {
   getEntries,
+  getCalendarMonth,
   getEntry,
   createEntry,
   updateEntry,

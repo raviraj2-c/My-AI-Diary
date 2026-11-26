@@ -8,7 +8,7 @@ describe('Diary Entries API & Data Integrity', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Journaler', email: 'journaler@test.com', password: 'Password123' });
+      .send({ name: 'Journaler', email: 'journaler@test.com', password: 'Password123' , ageConfirmed: true});
     token = res.body.token;
   });
 

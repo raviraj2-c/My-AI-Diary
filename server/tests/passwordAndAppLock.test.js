@@ -22,7 +22,7 @@ describe('User matchPassword, Delete-Account & App Lock Verification', () => {
         name: 'Password Tester',
         email: `pwd-tester-${Date.now()}@example.com`,
         password: userPassword
-      });
+      , ageConfirmed: true});
 
     token = regRes.body.token;
     user = regRes.body.user;

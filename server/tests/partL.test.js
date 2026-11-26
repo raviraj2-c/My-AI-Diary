@@ -10,7 +10,7 @@ describe('PART L: Date Range, AI Exclusion & Gentle Crisis Handling', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'PartLUser', email: 'partl@test.com', password: 'Password123' });
+      .send({ name: 'PartLUser', email: 'partl@test.com', password: 'Password123' , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
 

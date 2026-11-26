@@ -121,7 +121,7 @@ export const DiaryPage: React.FC = () => {
           >
             {t('common.back', 'Back to Journal')}
           </Button>
-          <h1 className="text-xl font-serif font-bold text-calm-900 dark:text-calm-50">
+          <h1 className="text-xl font-serif font-bold text-ink-900 dark:text-sky-50">
             {editingEntry?.id ? t('write.editTitle', 'Edit Entry') : t('write.title', 'New Entry')}
           </h1>
         </div>
@@ -146,8 +146,8 @@ export const DiaryPage: React.FC = () => {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('write.title', 'My Journal')}</h1>
-          <p className="text-sm text-calm-500 dark:text-calm-400 mt-0.5">
+          <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('write.title', 'My Journal')}</h1>
+          <p className="text-sm text-muted dark:text-muted mt-0.5">
             {entries.length} {t('dashboard.recentEntries', 'reflections')}
           </p>
         </div>

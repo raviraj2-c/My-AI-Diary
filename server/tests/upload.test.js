@@ -8,7 +8,7 @@ describe('Media Upload Security & Magic-Byte Validation', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Uploader', email: 'uploader@test.com', password: 'Password123' });
+      .send({ name: 'Uploader', email: 'uploader@test.com', password: 'Password123' , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
   });

@@ -52,15 +52,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
   const hasActiveFilters = !!(filters.mood || filters.tags?.length || filters.dateRange);
 
   return (
-    <Card className="p-4 border-calm-200 dark:border-calm-800">
+    <Card className="p-4 border-border dark:border-ink-800">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-calm-100 dark:bg-calm-800 text-calm-600 dark:text-calm-300 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-sky-100 dark:bg-ink-800 text-muted dark:text-sky-200 flex items-center justify-center">
             <Filter className="h-4 w-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-calm-900 dark:text-calm-100">{t('common.filter', 'Filter Reflections')}</h3>
-            <p className="text-xs text-calm-500">{t('search.subtitle', 'Filter by mood, tag, or time range')}</p>
+            <h3 className="text-sm font-semibold text-ink-900 dark:text-sky-100">{t('common.filter', 'Filter Reflections')}</h3>
+            <p className="text-xs text-muted">{t('search.subtitle', 'Filter by mood, tag, or time range')}</p>
           </div>
           {hasActiveFilters && (
             <Badge variant="primary" size="sm">{t('search.filterMood', 'Active Filters')}</Badge>
@@ -71,7 +71,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs text-calm-500 hover:text-calm-800 dark:hover:text-calm-200 inline-flex items-center gap-1 px-2 py-1 rounded-md hover:bg-calm-100 dark:hover:bg-calm-800 transition-colors"
+              className="text-xs text-muted hover:text-ink-800 dark:hover:text-border inline-flex items-center gap-1 px-2 py-1 rounded-md hover:bg-sky-100 dark:hover:bg-ink-800 transition-colors"
             >
               <RotateCcw className="w-3 h-3" />
               {t('sos.resetGrounding', 'Reset')}
@@ -79,7 +79,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           )}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1.5 text-calm-400 hover:text-calm-700 dark:hover:text-calm-200 hover:bg-calm-100 dark:hover:bg-calm-800 rounded-lg transition-colors"
+            className="p-1.5 text-muted hover:text-text dark:hover:text-border hover:bg-sky-100 dark:hover:bg-ink-800 rounded-lg transition-colors"
             aria-label={isExpanded ? 'Collapse filters' : 'Expand filters'}
           >
             {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -88,10 +88,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
       </div>
 
       {isExpanded && (
-        <div className="space-y-5 pt-4 mt-4 border-t border-calm-100 dark:border-calm-800 animate-fade-in text-sm">
+        <div className="space-y-5 pt-4 mt-4 border-t border-sky-100 dark:border-ink-800 animate-fade-in text-sm">
           {/* Mood Selector */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
               {t('filter.byMood')}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -99,8 +99,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                 onClick={() => onFiltersChange({ ...filters, mood: undefined })}
                 className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
                   !filters.mood
-                    ? 'bg-calm-900 text-white dark:bg-calm-100 dark:text-calm-900 border-transparent'
-                    : 'bg-white dark:bg-[#0f172a] border-calm-200 dark:border-calm-700 text-calm-700 dark:text-calm-300'
+                    ? 'bg-ink-900 text-white dark:bg-sky-100 dark:text-ink-900 border-transparent'
+                    : 'bg-white dark:bg-[#0f172a] border-border dark:border-text text-text dark:text-sky-200'
                 }`}
               >
                 {t('filter.allMoods')}
@@ -114,7 +114,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
                       isSelected
                         ? 'border-primary-500 bg-primary-50 dark:bg-primary-950/40 text-primary-900 dark:text-primary-100 ring-1 ring-primary-500'
-                        : 'bg-white dark:bg-[#0f172a] border-calm-200 dark:border-calm-700 text-calm-700 dark:text-calm-300 hover:bg-calm-50 dark:hover:bg-calm-800'
+                        : 'bg-white dark:bg-[#0f172a] border-border dark:border-text text-text dark:text-sky-200 hover:bg-sky-50 dark:hover:bg-ink-800'
                     }`}
                   >
                     <span>{m.emoji}</span>
@@ -128,7 +128,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
           {/* Tags */}
           {availableTags.length > 0 && (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
                 {t('filter.byTags')}
               </label>
               <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-1">
@@ -141,7 +141,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
                       className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                         isSelected
                           ? 'bg-primary-600 text-white border-primary-600'
-                          : 'bg-calm-50 dark:bg-calm-800 border-calm-200 dark:border-calm-700 text-calm-700 dark:text-calm-300 hover:bg-calm-100'
+                          : 'bg-sky-50 dark:bg-ink-800 border-border dark:border-text text-text dark:text-sky-200 hover:bg-sky-100'
                       }`}
                     >
                       #{tag}
@@ -154,24 +154,24 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChan
 
           {/* Date Range */}
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
               {t('export.selectHorizon')}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-calm-500 mb-1">{t('export.from')}</label>
+                <label className="block text-xs text-muted mb-1">{t('export.from')}</label>
                 <input
                   type="date"
                   onChange={(e) => handleDateRangeChange('start', e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-400 focus:outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs text-calm-500 mb-1">{t('export.until')}</label>
+                <label className="block text-xs text-muted mb-1">{t('export.until')}</label>
                 <input
                   type="date"
                   onChange={(e) => handleDateRangeChange('end', e.target.value)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-400 focus:outline-none"
                 />
               </div>
             </div>

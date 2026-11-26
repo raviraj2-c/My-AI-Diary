@@ -14,6 +14,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -52,10 +53,15 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
       return;
     }
 
+    if (!ageConfirmed) {
+      setError(t('auth.ageConfirmRequired'));
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await register(name.trim(), email.trim(), password);
+      await register(name.trim(), email.trim(), password, ageConfirmed);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
@@ -64,13 +70,12 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   };
 
   return (
-    <Card className="p-8 shadow-xl border-calm-200/80 dark:border-calm-800">
+    <Card className="p-8 shadow-xl border-border dark:border-ink-800">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-calm-100 dark:bg-calm-800 rounded-2xl mb-3 text-calm-700 dark:text-calm-200">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-sky-100 dark:bg-ink-800 rounded-2xl mb-3 text-text dark:text-border">
           <Sparkles className="w-7 h-7 text-primary-500" />
         </div>
-        <h2 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('auth.registerTitle')}</h2>
-        <p className="text-sm text-calm-500 dark:text-calm-400 mt-1">{t('auth.registerSubtitle')}</p>
+        <h2 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('auth.registerTitle')}</h2>
       </div>
 
       {error && (
@@ -81,11 +86,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="signup-name" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-1.5">
+          <label htmlFor="signup-name" className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-1.5">
             {t('auth.nameLabel')}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
               <User className="h-4 w-4" />
             </div>
             <input
@@ -94,7 +99,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm text-ink-900 dark:text-sky-100 placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
               placeholder="Your name"
               autoComplete="name"
             />
@@ -102,11 +107,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         </div>
 
         <div>
-          <label htmlFor="signup-email" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-1.5">
+          <label htmlFor="signup-email" className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-1.5">
             {t('auth.emailLabel')}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
               <Mail className="h-4 w-4" />
             </div>
             <input
@@ -115,7 +120,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm text-ink-900 dark:text-sky-100 placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
               placeholder="you@example.com"
               autoComplete="email"
             />
@@ -123,11 +128,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         </div>
 
         <div>
-          <label htmlFor="signup-password" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-1.5">
+          <label htmlFor="signup-password" className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-1.5">
             {t('auth.passwordLabel')}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
               <Lock className="h-4 w-4" />
             </div>
             <input
@@ -136,7 +141,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="block w-full pl-10 pr-11 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              className="block w-full pl-10 pr-11 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm text-ink-900 dark:text-sky-100 placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
               placeholder="At least 8 characters"
               autoComplete="new-password"
             />
@@ -144,24 +149,24 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-calm-400 hover:text-calm-600 dark:hover:text-calm-200"
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-muted hover:text-muted dark:hover:text-border"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
 
           {password && (
-            <div className="mt-2 flex items-center gap-3 text-xs text-calm-500">
-              <span className={`inline-flex items-center gap-1 ${hasMinLength ? 'text-calm-700 dark:text-calm-300 font-medium' : ''}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${hasMinLength ? 'text-primary-600' : 'text-calm-300'}`} />
+            <div className="mt-2 flex items-center gap-3 text-xs text-muted">
+              <span className={`inline-flex items-center gap-1 ${hasMinLength ? 'text-text dark:text-sky-200 font-medium' : ''}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${hasMinLength ? 'text-primary-600' : 'text-sky-200'}`} />
                 {t('auth.charMin')}
               </span>
-              <span className={`inline-flex items-center gap-1 ${hasLetter ? 'text-calm-700 dark:text-calm-300 font-medium' : ''}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${hasLetter ? 'text-primary-600' : 'text-calm-300'}`} />
+              <span className={`inline-flex items-center gap-1 ${hasLetter ? 'text-text dark:text-sky-200 font-medium' : ''}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${hasLetter ? 'text-primary-600' : 'text-sky-200'}`} />
                 {t('auth.letters')}
               </span>
-              <span className={`inline-flex items-center gap-1 ${hasNumber ? 'text-calm-700 dark:text-calm-300 font-medium' : ''}`}>
-                <CheckCircle2 className={`w-3.5 h-3.5 ${hasNumber ? 'text-primary-600' : 'text-calm-300'}`} />
+              <span className={`inline-flex items-center gap-1 ${hasNumber ? 'text-text dark:text-sky-200 font-medium' : ''}`}>
+                <CheckCircle2 className={`w-3.5 h-3.5 ${hasNumber ? 'text-primary-600' : 'text-sky-200'}`} />
                 {t('auth.numbers')}
               </span>
             </div>
@@ -169,11 +174,11 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         </div>
 
         <div>
-          <label htmlFor="signup-confirm-password" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-1.5">
+          <label htmlFor="signup-confirm-password" className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-1.5">
             {t('auth.confirmNewPasswordLabel')}
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted">
               <Lock className="h-4 w-4" />
             </div>
             <input
@@ -182,11 +187,25 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm text-ink-900 dark:text-sky-100 placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
               placeholder="Re-enter password"
               autoComplete="new-password"
             />
           </div>
+        </div>
+
+        <div className="flex items-start gap-2.5 pt-1">
+          <input
+            id="signup-age-confirm"
+            type="checkbox"
+            checked={ageConfirmed}
+            onChange={(e) => setAgeConfirmed(e.target.checked)}
+            required
+            className="mt-0.5 h-4 w-4 rounded border-sky-200 text-primary-600 focus:ring-primary-500"
+          />
+          <label htmlFor="signup-age-confirm" className="text-xs text-text dark:text-sky-200 leading-snug cursor-pointer">
+            {t('auth.ageConfirmLabel')}
+          </label>
         </div>
 
         <Button
@@ -200,14 +219,14 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
         </Button>
 
         {slowNotice && (
-          <p className="text-xs text-center text-calm-500 dark:text-calm-400 animate-fade-in bg-calm-50 dark:bg-calm-900/40 p-2 rounded-lg border border-calm-200 dark:border-calm-800">
+          <p className="text-xs text-center text-muted dark:text-muted animate-fade-in bg-sky-50 dark:bg-ink-900 p-2 rounded-lg border border-border dark:border-ink-800">
             {t('auth.serverWakeNotice')}
           </p>
         )}
       </form>
 
-      <div className="mt-6 pt-5 border-t border-calm-100 dark:border-calm-800 text-center">
-        <p className="text-xs text-calm-600 dark:text-calm-400">
+      <div className="mt-6 pt-5 border-t border-sky-100 dark:border-ink-800 text-center">
+        <p className="text-xs text-muted dark:text-muted">
           {t('auth.haveAccountPrompt')}{' '}
           <button
             onClick={onToggleForm}

@@ -44,12 +44,12 @@ export const PromptPicker: React.FC<PromptPickerProps> = ({ onSelectPrompt, clas
       >
         <div className="space-y-6">
           {/* Quick Random Spotlight */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-primary-50 to-warm-50 dark:from-primary-950/30 dark:to-warm-950/20 border border-primary-200/60 dark:border-primary-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-surface   dark: dark: border border-primary-200/60 dark:border-primary-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="space-y-1">
               <span className="text-[11px] font-semibold text-primary-700 dark:text-primary-300 uppercase tracking-wider">
                 {t('promptPicker.spark')}
               </span>
-              <p className="text-sm font-serif italic text-calm-900 dark:text-calm-100">
+              <p className="text-sm font-serif italic text-ink-900 dark:text-sky-100">
                 "{quickRandom}"
               </p>
             </div>
@@ -57,7 +57,7 @@ export const PromptPicker: React.FC<PromptPickerProps> = ({ onSelectPrompt, clas
               <button
                 type="button"
                 onClick={rollNewPrompt}
-                className="p-2 rounded-xl bg-white dark:bg-[#1e293b] border border-calm-200 text-calm-600 hover:text-calm-900 dark:hover:text-calm-100 text-xs flex items-center gap-1 transition-colors"
+                className="p-2 rounded-xl bg-white dark:bg-[#1e293b] border border-border text-muted hover:text-ink-900 dark:hover:text-sky-100 text-xs flex items-center gap-1 transition-colors"
                 title={t('promptPicker.useThis')}
               >
                 <Dices className="w-4 h-4" />
@@ -76,8 +76,8 @@ export const PromptPicker: React.FC<PromptPickerProps> = ({ onSelectPrompt, clas
           {/* Categories Grid and Prompts List */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Category tabs */}
-            <div className="space-y-1 md:border-r border-calm-100 dark:border-calm-800 pr-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-calm-400 block px-2 mb-1">
+            <div className="space-y-1 md:border-r border-sky-100 dark:border-ink-800 pr-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted block px-2 mb-1">
                 {t('promptPicker.categories')}
               </span>
               {PROMPT_CATEGORIES.map((cat) => (
@@ -88,7 +88,7 @@ export const PromptPicker: React.FC<PromptPickerProps> = ({ onSelectPrompt, clas
                   className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all flex items-center justify-between ${
                     activeCategory.id === cat.id
                       ? 'bg-primary-600 text-white font-semibold shadow-xs'
-                      : 'text-calm-700 dark:text-calm-300 hover:bg-calm-100 dark:hover:bg-calm-800'
+                      : 'text-text dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-ink-800'
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -102,14 +102,14 @@ export const PromptPicker: React.FC<PromptPickerProps> = ({ onSelectPrompt, clas
 
             {/* Prompts in active category */}
             <div className="md:col-span-2 space-y-2 max-h-72 overflow-y-auto pr-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-calm-400 block px-1 mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted block px-1 mb-1">
                 {t('promptPicker.categoryPrompts', { category: activeCategory.name })}
               </span>
               {activeCategory.prompts.map((p, idx) => (
                 <div
                   key={idx}
                   onClick={() => handleSelect(p)}
-                  className="p-3 rounded-xl border border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b] hover:border-primary-400 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 cursor-pointer transition-all text-xs font-serif text-calm-800 dark:text-calm-200 leading-relaxed group"
+                  className="p-3 rounded-xl border border-border dark:border-ink-800 bg-white dark:bg-[#1e293b] hover:border-primary-400 hover:bg-primary-50/30 dark:hover:bg-primary-950/20 cursor-pointer transition-all text-xs font-serif text-ink-800 dark:text-border leading-relaxed group"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span>{p}</span>

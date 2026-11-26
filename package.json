@@ -13,6 +13,7 @@
     "test:frontend": "npm --prefix frontend test",
     "test:all": "npm test && npm run test:frontend",
     "seed:demo": "npm --prefix server run seed:demo",
+    "ai:check": "npm --prefix server run ai:check",
     "i18n:check": "npm --prefix frontend run i18n:check",
     "start": "npm --prefix server run start",
     "lint": "npm --prefix frontend run lint"

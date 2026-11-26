@@ -34,9 +34,9 @@ if (process.env.NODE_ENV === 'production') {
     console.error('❌ FATAL: In production, CORS_ORIGIN or FRONTEND_URL is required to protect API endpoints.');
     process.exit(1);
   }
-  if (!process.env.AI_MODEL) {
-    console.error('❌ FATAL: In production, AI_MODEL must be configured explicitly.');
-    process.exit(1);
+  const { isAIConfigured } = require('./config/ai');
+  if (!isAIConfigured()) {
+    console.warn('⚠️ WARNING: GEMINI_MODEL or GEMINI_API_KEY is missing in production. AI features are disabled (503 "AI is not configured").');
   }
 } else if (process.env.NODE_ENV !== 'test') {
   if (!process.env.MONGODB_URI) {
@@ -167,8 +167,8 @@ app.use('/api/letters', letterRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
+  const { getModel, isAIConfigured, getGeminiTier, isDemoFreeTierAI } = require('./config/ai');
   const dbConnected = mongoose.connection.readyState === 1;
-  const aiKeyConfigured = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key');
   res.status(dbConnected ? 200 : 503).json({
     status: dbConnected ? 'ok' : 'error',
     success: dbConnected,
@@ -177,8 +177,10 @@ app.get('/api/health', (req, res) => {
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
     database: dbConnected ? 'connected' : 'disconnected',
-    aiModel: process.env.AI_MODEL || 'gemini-2.5-flash',
-    aiConfigured: aiKeyConfigured,
+    aiModel: getModel() || null,
+    aiConfigured: isAIConfigured(),
+    geminiTier: getGeminiTier(),
+    demoAiBanner: isDemoFreeTierAI(),
     uptime: process.uptime(),
   });
 });

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { DiaryEntry, SearchFilters } from '../types';
 import { DiaryService } from '../services/diaryService';
 import { useAuth } from './AuthContext';
+import { useInvalidateWellness } from '../hooks/useQueries';
 
 export interface DiaryContextType {
   entries: DiaryEntry[];
@@ -26,6 +27,7 @@ const DiaryContext = createContext<DiaryContextType | undefined>(undefined);
 
 export const DiaryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, isAuthenticated } = useAuth();
+  const invalidateWellness = useInvalidateWellness();
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -112,6 +114,7 @@ export const DiaryProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setEntries((prev) => [saved, ...prev.filter((e) => e.id !== saved.id)]);
       setTotal((prev) => prev + 1);
       refreshStats();
+      void invalidateWellness();
       return saved;
     } catch (error) {
       console.error('Error saving entry:', error);

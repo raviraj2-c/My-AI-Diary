@@ -247,4 +247,36 @@ export class WellnessService {
     }
     return res.data;
   }
+
+  static async getMoodDays(from?: string, to?: string): Promise<Array<{ date: string; score: number; source: 'checkin' | 'entry'; emotions: string[] }>> {
+    const res = await apiRequest<Array<{ date: string; score: number; source: 'checkin' | 'entry'; emotions: string[] }>>(
+      API_CONFIG.ENDPOINTS.WELLNESS.MOOD_DAYS(from, to)
+    );
+    if (!res.success || !Array.isArray(res.data)) {
+      throw new Error(res.message || 'Failed to fetch mood days');
+    }
+    return res.data;
+  }
+
+  static async getHomeSummary(): Promise<{
+    todayDone: boolean;
+    todayScore: number | null;
+    weekDays: Array<{ date: string; score: number | null }>;
+    streakDays: number;
+    lastEntry: { id: string; title: string; date: string; mood: string } | null;
+    dueLetters: number;
+  }> {
+    const res = await apiRequest<{
+      todayDone: boolean;
+      todayScore: number | null;
+      weekDays: Array<{ date: string; score: number | null }>;
+      streakDays: number;
+      lastEntry: { id: string; title: string; date: string; mood: string } | null;
+      dueLetters: number;
+    }>(API_CONFIG.ENDPOINTS.WELLNESS.HOME_SUMMARY);
+    if (!res.success || !res.data) {
+      throw new Error(res.message || 'Failed to fetch home summary');
+    }
+    return res.data;
+  }
 }

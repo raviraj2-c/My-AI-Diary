@@ -28,6 +28,7 @@ export interface UserSettings {
   appLockTimeoutMinutes?: number;
   allowAIFeatures?: boolean;
   allowDiaryAI?: boolean;
+  isStudent?: boolean;
 }
 
 export interface UserStats {

@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { AIService } from '../services/aiService';
+import { ChatService } from '../services/chatService';
 import { AskDiaryResponse, UsedDiaryEntry } from '../types';
 import { Card, Button, Spinner, Modal } from '../components/common';
 import { useToast } from '../components/common/Toast';
 import {
-  MessageSquareQuote,
   Send,
   Sparkles,
   Calendar,
@@ -40,6 +39,7 @@ export const AskDiaryPage: React.FC = () => {
   const [lastQuestion, setLastQuestion] = useState('');
   const [selectedEntry, setSelectedEntry] = useState<UsedDiaryEntry | null>(null);
   const [aiDisabled, setAiDisabled] = useState(false);
+  const [askError, setAskError] = useState<string | null>(null);
   const [historyMessages, setHistoryMessages] = useState<HistoryMessage[]>([]);
 
   const isAIOffInSettings = user?.settings?.allowAIFeatures === false || user?.settings?.allowDiaryAI === false;
@@ -48,9 +48,14 @@ export const AskDiaryPage: React.FC = () => {
     let isMounted = true;
     const loadHistory = async () => {
       try {
-        const msgs = await AIService.getAskDiaryHistory();
+        const msgs = await ChatService.getMessages('diary');
         if (isMounted) {
-          setHistoryMessages(msgs);
+          setHistoryMessages(msgs.map((m, idx) => ({
+            id: m._id || m.id || `h-${idx}`,
+            sender: m.role,
+            content: m.content,
+            createdAt: m.createdAt || new Date()
+          })));
         }
       } catch {
         // Soft fallback
@@ -64,7 +69,7 @@ export const AskDiaryPage: React.FC = () => {
 
   const handleForgetChat = async () => {
     try {
-      await AIService.clearAskDiaryHistory();
+      await ChatService.clearMessages('diary');
       setHistoryMessages([]);
       setResult(null);
       setLastQuestion('');
@@ -77,8 +82,7 @@ export const AskDiaryPage: React.FC = () => {
   const suggestedQuestions = [
     t('askDiary.q1'),
     t('askDiary.q2'),
-    t('askDiary.q3'),
-    t('askDiary.q4')
+    t('askDiary.q3')
   ];
 
   const handleAsk = async (queryText?: string) => {
@@ -92,11 +96,13 @@ export const AskDiaryPage: React.FC = () => {
 
     setIsLoading(true);
     setResult(null);
+    setAskError(null);
     setLastQuestion(q);
     setAiDisabled(false);
 
     try {
-      const data = await AIService.askDiary(q);
+      const chatRes = await ChatService.sendMessage(q, 'diary');
+      const data = chatRes.diaryResult!;
       setResult(data);
       // Append to local history list
       setHistoryMessages(prev => [
@@ -110,7 +116,15 @@ export const AskDiaryPage: React.FC = () => {
       if (apiErr?.code === 'DIARY_AI_DISABLED' || apiErr?.code === 'AI_DISABLED') {
         setAiDisabled(true);
       } else {
-        toast.error(apiErr?.message || t('askDiary.genericError'));
+        const msg = apiErr?.code === 'AI_BLOCKED'
+          ? t('ai.blocked')
+          : apiErr?.code === 'AI_TRUNCATED'
+            ? t('ai.truncated')
+            : apiErr?.code === 'AI_EMPTY'
+              ? t('ai.empty')
+              : (apiErr?.message || t('askDiary.genericError'));
+        setAskError(msg);
+        toast.error(msg);
       }
     } finally {
       setIsLoading(false);
@@ -140,18 +154,11 @@ export const AskDiaryPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 py-4 animate-fade-in">
       {/* Header */}
-      <div className="border-b border-calm-200 dark:border-calm-800 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="border-b border-border dark:border-ink-800 pb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-calm-100 dark:bg-calm-950/60 text-calm-800 dark:text-calm-300 text-xs font-semibold mb-2">
-            <MessageSquareQuote className="w-4 h-4 text-calm-600 dark:text-calm-400" />
-            <span>{t('askDiary.badge')}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-calm-900 dark:text-calm-50">
+          <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">
             {t('askDiary.title')}
           </h1>
-          <p className="text-sm text-calm-600 dark:text-calm-400 mt-1">
-            {t('askDiary.subtitle')}
-          </p>
         </div>
 
         {historyMessages.length > 0 && (
@@ -169,16 +176,16 @@ export const AskDiaryPage: React.FC = () => {
 
       {/* AI Disabled State */}
       {(isAIOffInSettings || aiDisabled) && (
-        <Card className="p-6 border-l-4 border-l-amber-500 bg-amber-50/50 dark:bg-amber-950/20">
+        <Card className="p-6 border-l-4 border-l-sky-500 bg-sky-50 dark:bg-ink-900">
           <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-sky-700 dark:text-sky-400 shrink-0 mt-0.5" />
             <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+              <h3 className="text-sm font-semibold text-ink-900 dark:text-sky-200">
                 {user?.settings?.allowAIFeatures === false
                   ? t('askDiary.aiOffTitle')
                   : t('askDiary.diaryOffTitle')}
               </h3>
-              <p className="text-xs text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+              <p className="text-xs text-sky-700 dark:text-sky-200 leading-relaxed">
                 {user?.settings?.allowAIFeatures === false
                   ? t('askDiary.aiOffDesc')
                   : t('askDiary.diaryOffDesc')}
@@ -193,9 +200,21 @@ export const AskDiaryPage: React.FC = () => {
         </Card>
       )}
 
+      {/* Retryable AI Error State */}
+      {askError && (
+        <Card className="p-4 border-l-4 border-l-danger bg-sky-50 dark:bg-danger flex items-center justify-between gap-3">
+          <p className="text-xs text-danger dark:text-danger">{askError}</p>
+          {lastQuestion && (
+            <Button variant="outline" size="sm" onClick={() => handleAsk(lastQuestion)} className="shrink-0 text-xs">
+              {t('ai.retry')}
+            </Button>
+          )}
+        </Card>
+      )}
+
       {/* Input Box */}
       <Card className="p-4 sm:p-5 space-y-3">
-        <label htmlFor="ask-diary-input" className="block text-xs font-medium text-calm-600 dark:text-calm-400">
+        <label htmlFor="ask-diary-input" className="block text-xs font-medium text-muted dark:text-muted">
           {t('askDiary.inputPlaceholder')}
         </label>
         <div className="relative">
@@ -207,7 +226,7 @@ export const AskDiaryPage: React.FC = () => {
             disabled={isLoading || isAIOffInSettings}
             rows={3}
             placeholder={t('askDiary.inputPlaceholder')}
-            className="w-full p-3.5 pr-12 rounded-xl text-sm border border-calm-200 dark:border-calm-700 bg-calm-50/50 dark:bg-calm-900/50 text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50 resize-none"
+            className="w-full p-3.5 pr-12 rounded-xl text-sm border border-border dark:border-text bg-sky-50 dark:bg-ink-900 text-ink-900 dark:text-sky-100 placeholder-muted focus:outline-none focus:ring-2 focus:ring-primary-500/50 disabled:opacity-50 resize-none"
           />
           <button
             type="button"
@@ -223,7 +242,7 @@ export const AskDiaryPage: React.FC = () => {
 
         {/* Suggested Questions */}
         <div className="pt-2">
-          <div className="flex items-center gap-1.5 text-xs font-medium text-calm-500 dark:text-calm-400 mb-2">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted dark:text-muted mb-2">
             <Sparkles className="w-3.5 h-3.5 text-primary-500" />
             <span>{t('askDiary.suggestedTitle')}:</span>
           </div>
@@ -237,7 +256,7 @@ export const AskDiaryPage: React.FC = () => {
                   handleAsk(sq);
                 }}
                 disabled={isLoading || isAIOffInSettings}
-                className="text-xs text-left px-3 py-1.5 rounded-full border border-calm-200 dark:border-calm-700 bg-white dark:bg-calm-900/80 hover:bg-calm-100 dark:hover:bg-calm-800 text-calm-700 dark:text-calm-300 transition-colors disabled:opacity-50"
+                className="text-xs text-left px-3 py-1.5 rounded-full border border-border dark:border-text bg-white dark:bg-ink-900 hover:bg-sky-100 dark:hover:bg-ink-800 text-text dark:text-sky-200 transition-colors disabled:opacity-50"
               >
                 {sq}
               </button>
@@ -252,10 +271,10 @@ export const AskDiaryPage: React.FC = () => {
           <div className="w-10 h-10 mx-auto rounded-full bg-primary-100 dark:bg-primary-950/60 text-primary-600 dark:text-primary-400 flex items-center justify-center">
             <Spinner size="md" />
           </div>
-          <p className="text-sm font-medium text-calm-700 dark:text-calm-300">
+          <p className="text-sm font-medium text-text dark:text-sky-200">
             {t('askDiary.loading')}
           </p>
-          <p className="text-xs text-calm-400">
+          <p className="text-xs text-muted">
             {t('askDiary.loadingDetail')}
           </p>
         </Card>
@@ -276,27 +295,27 @@ export const AskDiaryPage: React.FC = () => {
           )}
 
           <Card className="p-6 space-y-4 border-l-4 border-l-primary-500 shadow-soft-sm">
-            <div className="flex items-center justify-between border-b border-calm-100 dark:border-calm-800 pb-3">
-              <div className="flex items-center gap-2 text-xs font-semibold text-calm-700 dark:text-calm-300">
+            <div className="flex items-center justify-between border-b border-sky-100 dark:border-ink-800 pb-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-text dark:text-sky-200">
                 <BookOpen className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 <span>{t('askDiary.questionLabel', { question: lastQuestion })}</span>
               </div>
               {result.quotaRemaining !== undefined && (
-                <span className="text-[11px] text-calm-400">
+                <span className="text-[11px] text-muted">
                   {t('askDiary.quotaNotice', { count: result.quotaRemaining })}
                 </span>
               )}
             </div>
 
-            <div className="text-sm text-calm-800 dark:text-calm-200 leading-relaxed font-serif whitespace-pre-wrap">
+            <div className="text-sm text-ink-800 dark:text-border leading-relaxed font-serif whitespace-pre-wrap">
               {result.answer}
             </div>
 
             {/* Based on these entries section */}
             {result.usedEntries && result.usedEntries.length > 0 && (
-              <div className="pt-4 border-t border-calm-100 dark:border-calm-800 space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-calm-600 dark:text-calm-400">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <div className="pt-4 border-t border-sky-100 dark:border-ink-800 space-y-3">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted dark:text-muted">
+                  <ShieldCheck className="w-4 h-4 text-sky-700" />
                   <span>{t('askDiary.basedOnEntries')}:</span>
                 </div>
 
@@ -305,18 +324,18 @@ export const AskDiaryPage: React.FC = () => {
                     <div
                       key={entry.id}
                       onClick={() => setSelectedEntry(entry)}
-                      className="p-3 rounded-xl border border-calm-200 dark:border-calm-700/80 bg-white/70 dark:bg-calm-900/40 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-soft-sm transition-all cursor-pointer group"
+                      className="p-3 rounded-xl border border-border dark:border-text bg-white/70 dark:bg-ink-900 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-soft-sm transition-all cursor-pointer group"
                     >
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-semibold text-calm-900 dark:text-calm-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        <span className="font-semibold text-ink-900 dark:text-sky-100 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                           {entry.title}
                         </span>
-                        <div className="flex items-center gap-1 text-[11px] text-calm-400 shrink-0">
+                        <div className="flex items-center gap-1 text-[11px] text-muted shrink-0">
                           <Calendar className="w-3 h-3" />
                           <span>{formatDate(entry.date)}</span>
                         </div>
                       </div>
-                      <p className="text-[11px] text-calm-500 dark:text-calm-400 line-clamp-2 leading-relaxed">
+                      <p className="text-[11px] text-muted dark:text-muted line-clamp-2 leading-relaxed">
                         {entry.snippet}
                       </p>
                     </div>
@@ -337,12 +356,12 @@ export const AskDiaryPage: React.FC = () => {
           maxWidth="md"
         >
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xs text-calm-500 pb-2 border-b border-calm-100 dark:border-calm-800">
+            <div className="flex items-center gap-2 text-xs text-muted pb-2 border-b border-sky-100 dark:border-ink-800">
               <Calendar className="w-3.5 h-3.5" />
               <span>{formatDate(selectedEntry.date)}</span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-calm-50 dark:bg-calm-900 text-xs text-calm-700 dark:text-calm-300 leading-relaxed font-serif whitespace-pre-wrap border border-calm-200/60 dark:border-calm-800">
+            <div className="p-3.5 rounded-xl bg-sky-50 dark:bg-ink-900 text-xs text-text dark:text-sky-200 leading-relaxed font-serif whitespace-pre-wrap border border-border dark:border-ink-800">
               {selectedEntry.snippet}
             </div>
 
@@ -371,8 +390,8 @@ export const AskDiaryPage: React.FC = () => {
       )}
 
       {/* Privacy & Medical Disclaimer */}
-      <div className="p-4 rounded-xl border border-calm-200/80 dark:border-calm-800/80 bg-calm-50/50 dark:bg-calm-950/30 flex items-start gap-2.5 text-[11px] text-calm-500 dark:text-calm-400 leading-relaxed">
-        <HelpCircle className="w-4 h-4 shrink-0 text-calm-400 mt-0.5" />
+      <div className="p-4 rounded-xl border border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-950 flex items-start gap-2.5 text-[11px] text-muted dark:text-muted leading-relaxed">
+        <HelpCircle className="w-4 h-4 shrink-0 text-muted mt-0.5" />
         <div>
           {t('askDiary.disclaimer')}{' '}
           <Link to="/privacy" className="text-primary-600 dark:text-primary-400 hover:underline">

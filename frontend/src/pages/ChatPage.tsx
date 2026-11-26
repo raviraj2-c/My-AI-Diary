@@ -2,18 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../hooks/useSettings';
 import { AIService } from '../services/aiService';
+import { ChatService } from '../services/chatService';
 import { ChatMessage, AIUsage } from '../types';
 import { SafetyBanner } from '../components/Wellness/SafetyBanner';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
+import { BottomSheet } from '../components/ui';
 import { useToast } from '../components/common/Toast';
 import {
   Send,
   Trash2,
-  Sparkles,
   Bot,
   User,
-  HeartHandshake,
+  Info,
   Paperclip,
   ArrowRight
 } from 'lucide-react';
@@ -22,7 +23,6 @@ import { Link } from 'react-router-dom';
 const QUICK_STARTS = [
   "I'm feeling stressed about my workload today.",
   "I can't sleep and my mind is racing.",
-  "I had a surprisingly good day and want to savor it.",
   "Help me untangle why I'm feeling so anxious right now."
 ];
 
@@ -37,6 +37,7 @@ export const ChatPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [usage, setUsage] = useState<AIUsage | null>(null);
   const [safetyLevel, setSafetyLevel] = useState<'none' | 'concern' | 'high'>('none');
+  const [showInfoSheet, setShowInfoSheet] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +48,7 @@ export const ChatPage: React.FC = () => {
   useEffect(() => {
     // Load chat history & usage status
     Promise.all([
-      AIService.getChatMessages().catch(() => []),
+      ChatService.getMessages('general').catch(() => []),
       AIService.getAIUsage().catch(() => null)
     ]).then(([msgs, u]) => {
       setMessages(msgs);
@@ -79,18 +80,20 @@ export const ChatPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await AIService.sendChatMessage(text, attachCheckIn);
+      const res = await ChatService.sendMessage(text, 'general', { attachCheckIn });
 
       // Check safety trigger
       if (res.safety && (res.safety.level === 'high' || res.safety.level === 'concern')) {
         setSafetyLevel(res.safety.level as 'concern' | 'high');
       }
 
-      setMessages(prev => [
-        ...prev.slice(0, -1),
-        res.userMessage,
-        res.assistantMessage
-      ]);
+      if (res.userMessage && res.assistantMessage) {
+        setMessages(prev => [
+          ...prev.slice(0, -1),
+          res.userMessage!,
+          res.assistantMessage!
+        ]);
+      }
 
       if (res.quotaRemaining != null && usage) {
         setUsage(prev => prev ? { ...prev, remaining: res.quotaRemaining || 0 } : null);
@@ -107,7 +110,7 @@ export const ChatPage: React.FC = () => {
 
   const handleClear = async () => {
     try {
-      await AIService.clearChat();
+      await ChatService.clearMessages('general');
       setMessages([]);
       toast.info('Conversation cleared.');
     } catch {
@@ -124,21 +127,25 @@ export const ChatPage: React.FC = () => {
         trustedContact={settings.trustedContact}
       />
 
-      {/* Header & Disclaimer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-calm-200 dark:border-calm-800 pb-4">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-xs font-semibold mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
-            {t('chat.companionTagline', 'AI Companion Sanctuary')}
-          </div>
-          <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">
-            {t('chat.title', 'Support Companion')}
+      {/* Header & 1-line Notice */}
+      <div className="flex items-center justify-between gap-3 border-b border-border dark:border-ink-800 pb-3">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">
+            {t('chat.title', 'Support')}
           </h1>
+          <button
+            type="button"
+            onClick={() => setShowInfoSheet(true)}
+            aria-label={t('chat.disclaimer', 'Info')}
+            className="p-1.5 rounded-full text-muted hover:text-primary-600 hover:bg-sky-50 dark:hover:bg-ink-800"
+          >
+            <Info className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="flex items-center gap-2">
           {usage && (
-            <span className="text-xs font-mono text-calm-500 bg-calm-100 dark:bg-calm-800/80 px-2.5 py-1 rounded-xl">
+            <span className="text-xs font-mono text-muted bg-sky-100 dark:bg-ink-800 px-2.5 py-1 rounded-xl">
               {t('chat.remainingToday', { remaining: usage.remaining, limit: usage.limit })}
             </span>
           )}
@@ -147,7 +154,7 @@ export const ChatPage: React.FC = () => {
               variant="ghost"
               size="sm"
               onClick={handleClear}
-              icon={<Trash2 className="w-3.5 h-3.5 text-gray-400 hover:text-red-500" />}
+              icon={<Trash2 className="w-3.5 h-3.5 text-muted hover:text-danger" />}
             >
               {t('chat.clearHistory')}
             </Button>
@@ -155,18 +162,22 @@ export const ChatPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Prominent Clinical Disclaimer */}
-      <div className="p-3 bg-primary-50/70 dark:bg-primary-950/20 border border-primary-200/60 dark:border-primary-900/40 rounded-2xl flex items-center gap-2.5 text-xs text-primary-800 dark:text-primary-300">
-        <HeartHandshake className="w-4 h-4 shrink-0 text-primary-600 dark:text-primary-400" />
-        <span>
-          {t('chat.disclaimer')}
-        </span>
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-sky-50 dark:bg-ink-900 border border-border dark:border-ink-800 text-xs text-muted">
+        <span className="truncate">{t('chat.disclaimer')}</span>
+        <button
+          type="button"
+          onClick={() => setShowInfoSheet(true)}
+          aria-label="Details"
+          className="shrink-0 text-primary-600 hover:underline font-medium"
+        >
+          <Info className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Notice if AI is disabled */}
       {!settings.allowAIFeatures && (
-        <Card className="p-5 border-amber-200 dark:border-amber-900/60 bg-amber-50/60 dark:bg-amber-950/20 text-center space-y-2">
-          <p className="text-xs text-amber-800 dark:text-amber-200">
+        <Card className="p-5 border-sky-200 dark:border-ink-900 bg-sky-50 dark:bg-ink-900 text-center space-y-2">
+          <p className="text-xs text-sky-700 dark:text-sky-200">
             {t('chat.aiDisabledNotice')}
           </p>
           <Link to="/settings">
@@ -182,14 +193,14 @@ export const ChatPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4 my-auto">
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-ink-900 text-sky-700 dark:text-sky-400 flex items-center justify-center">
                 <Bot className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-serif font-bold text-calm-900 dark:text-calm-100">
+                <h3 className="text-base font-serif font-bold text-ink-900 dark:text-sky-100">
                   {t('chat.companionName', 'A gentle ear whenever you need')}
                 </h3>
-                <p className="text-xs text-calm-500 dark:text-calm-400 max-w-sm mt-1">
+                <p className="text-xs text-muted dark:text-muted max-w-sm mt-1">
                   {t('chat.emptyPrompt', 'Share whatever is on your heart. You can also pick a prompt below to get started:')}
                 </p>
               </div>
@@ -200,10 +211,10 @@ export const ChatPage: React.FC = () => {
                   <button
                     key={qs}
                     onClick={() => handleSend(qs)}
-                    className="p-3 text-left rounded-xl border border-calm-200 dark:border-calm-800 hover:border-purple-300 dark:hover:border-purple-700 bg-calm-50/50 dark:bg-calm-900/30 text-xs text-calm-700 dark:text-calm-300 transition-colors flex items-center justify-between group"
+                    className="p-3 text-left rounded-xl border border-border dark:border-ink-800 hover:border-sky-200 dark:hover:border-sky-700 bg-sky-50 dark:bg-ink-900 text-xs text-text dark:text-sky-200 transition-colors flex items-center justify-between group"
                   >
                     <span>{qs}</span>
-                    <ArrowRight className="w-3.5 h-3.5 text-calm-400 group-hover:text-purple-600 transition-colors shrink-0 ml-1.5" />
+                    <ArrowRight className="w-3.5 h-3.5 text-muted group-hover:text-sky-700 transition-colors shrink-0 ml-1.5" />
                   </button>
                 ))}
               </div>
@@ -220,7 +231,7 @@ export const ChatPage: React.FC = () => {
                     className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-semibold ${
                       isUser
                         ? 'bg-primary-600 text-white'
-                        : 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
+                        : 'bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-200'
                     }`}
                   >
                     {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
@@ -230,13 +241,13 @@ export const ChatPage: React.FC = () => {
                     className={`max-w-[80%] rounded-2xl px-4 py-3 text-xs leading-relaxed ${
                       isUser
                         ? 'bg-primary-600 text-white rounded-tr-none'
-                        : 'bg-calm-100 dark:bg-[#1a253d] text-calm-900 dark:text-calm-100 rounded-tl-none border border-calm-200/60 dark:border-calm-800'
+                        : 'bg-sky-100 dark:bg-[#1a253d] text-ink-900 dark:text-sky-100 rounded-tl-none border border-border dark:border-ink-800'
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{m.content}</p>
                     <span
                       className={`block text-[10px] mt-1 text-right ${
-                        isUser ? 'text-primary-200' : 'text-calm-400'
+                        isUser ? 'text-primary-200' : 'text-muted'
                       }`}
                     >
                       {m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
@@ -249,14 +260,14 @@ export const ChatPage: React.FC = () => {
 
           {isLoading && (
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-200 flex items-center justify-center shrink-0">
                 <Bot className="w-4 h-4 animate-pulse" />
               </div>
-              <div className="bg-calm-100 dark:bg-[#1a253d] rounded-2xl rounded-tl-none px-4 py-3 border border-calm-200/60 dark:border-calm-800">
+              <div className="bg-sky-100 dark:bg-[#1a253d] rounded-2xl rounded-tl-none px-4 py-3 border border-border dark:border-ink-800">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce" />
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-2 h-2 rounded-full bg-purple-400 animate-bounce [animation-delay:0.4s]" />
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-bounce" />
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-bounce [animation-delay:0.2s]" />
+                  <span className="w-2 h-2 rounded-full bg-sky-400 animate-bounce [animation-delay:0.4s]" />
                 </div>
               </div>
             </div>
@@ -266,21 +277,21 @@ export const ChatPage: React.FC = () => {
         </div>
 
         {/* Input area */}
-        <div className="pt-4 border-t border-calm-100 dark:border-calm-800 space-y-2">
+        <div className="pt-4 border-t border-sky-100 dark:border-ink-800 space-y-2">
           {/* Options: Attach today's check-in */}
-          <div className="flex items-center justify-between text-[11px] text-calm-500">
-            <label className="flex items-center gap-1.5 cursor-pointer hover:text-calm-800 dark:hover:text-calm-200">
+          <div className="flex items-center justify-between text-[11px] text-muted">
+            <label className="flex items-center gap-1.5 cursor-pointer hover:text-ink-800 dark:hover:text-border">
               <input
                 type="checkbox"
                 checked={attachCheckIn}
                 onChange={(e) => setAttachCheckIn(e.target.checked)}
-                className="rounded text-purple-600 focus:ring-purple-500"
+                className="rounded text-sky-700 focus:ring-sky-500"
               />
-              <Paperclip className="w-3 h-3 text-calm-400" />
+              <Paperclip className="w-3 h-3 text-muted" />
               <span>{t('chat.attachCheckin')}</span>
             </label>
 
-            <span className="text-[10px] text-calm-400">{t('chat.memoryContext')}</span>
+            <span className="text-[10px] text-muted">{t('chat.memoryContext')}</span>
           </div>
 
           <form
@@ -296,7 +307,7 @@ export const ChatPage: React.FC = () => {
               onChange={(e) => setInputText(e.target.value)}
               placeholder={settings.allowAIFeatures ? t('chat.placeholder', "Type your thoughts gently...") : t('settings.allowAiLabel', "Enable AI in settings to send...")}
               disabled={!settings.allowAIFeatures || isLoading}
-              className="flex-1 px-4 py-2.5 bg-calm-50 dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-900 dark:text-calm-100 focus:ring-2 focus:ring-purple-500 outline-none disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 bg-sky-50 dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-900 dark:text-sky-100 focus:ring-2 focus:ring-sky-500 outline-none disabled:opacity-50"
             />
             <Button
               type="submit"
@@ -311,6 +322,16 @@ export const ChatPage: React.FC = () => {
           </form>
         </div>
       </Card>
+
+      <BottomSheet
+        open={showInfoSheet}
+        onClose={() => setShowInfoSheet(false)}
+        title={t('chat.title', 'Support')}
+      >
+        <p className="text-sm text-text dark:text-sky-200 leading-relaxed">
+          {t('chat.disclaimer')}
+        </p>
+      </BottomSheet>
     </div>
   );
 };

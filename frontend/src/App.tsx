@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DiaryProvider } from './contexts/DiaryContext';
@@ -9,6 +10,7 @@ import { Spinner } from './components/common/Spinner';
 import { AppLockScreen } from './components/common/AppLockScreen';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { SOSButton } from './components/common/SOSButton';
+import { API_CONFIG } from './config/api';
 
 // Eagerly loaded primary auth page
 import { AuthPage } from './pages/AuthPage';
@@ -16,25 +18,21 @@ import { AuthPage } from './pages/AuthPage';
 // Lazy-loaded pages for performance & code-splitting
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const DiaryPage = lazy(() => import('./pages/DiaryPage').then(m => ({ default: m.DiaryPage })));
-const CalendarPage = lazy(() => import('./pages/CalendarPage').then(m => ({ default: m.CalendarPage })));
-const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
+const JournalPage = lazy(() => import('./pages/JournalPage').then(m => ({ default: m.JournalPage })));
+const MoodPage = lazy(() => import('./pages/MoodPage').then(m => ({ default: m.MoodPage })));
+const TalkPage = lazy(() => import('./pages/TalkPage').then(m => ({ default: m.TalkPage })));
 const ExportPage = lazy(() => import('./pages/ExportPage').then(m => ({ default: m.ExportPage })));
 const StoriesPage = lazy(() => import('./pages/StoriesPage').then(m => ({ default: m.StoriesPage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then(m => ({ default: m.SettingsPage })));
-const CheckInPage = lazy(() => import('./pages/CheckInPage').then(m => ({ default: m.CheckInPage })));
-const InsightsPage = lazy(() => import('./pages/InsightsPage').then(m => ({ default: m.InsightsPage })));
-const GratitudePage = lazy(() => import('./pages/GratitudePage').then(m => ({ default: m.GratitudePage })));
-const HappyBox = lazy(() => import('./pages/HappyBox').then(m => ({ default: m.HappyBox })));
 const CalmPage = lazy(() => import('./pages/CalmPage').then(m => ({ default: m.CalmPage })));
 const SelfCheckPage = lazy(() => import('./pages/SelfCheckPage').then(m => ({ default: m.SelfCheckPage })));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })));
-const ChatPage = lazy(() => import('./pages/ChatPage').then(m => ({ default: m.ChatPage })));
-const AskDiaryPage = lazy(() => import('./pages/AskDiaryPage').then(m => ({ default: m.AskDiaryPage })));
 const StudentPage = lazy(() => import('./pages/StudentPage').then(m => ({ default: m.StudentPage })));
 const CounselorReportView = lazy(() => import('./pages/CounselorReportView').then(m => ({ default: m.CounselorReportView })));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
-const YearInPixelsPage = lazy(() => import('./pages/YearInPixelsPage').then(m => ({ default: m.YearInPixelsPage })));
 const LettersPage = lazy(() => import('./pages/LettersPage').then(m => ({ default: m.LettersPage })));
+const GratitudePage = lazy(() => import('./pages/GratitudePage').then(m => ({ default: m.GratitudePage })));
+const DevUiPage = lazy(() => import('./pages/DevUiPage').then(m => ({ default: m.DevUiPage })));
 
 const PageFallback = () => {
   const { t } = useTranslation();
@@ -52,6 +50,17 @@ function AppContent() {
   const { t } = useTranslation();
   const { isAuthenticated, loading } = useAuth();
   const [slowNotice, setSlowNotice] = useState(false);
+  const [demoAiBanner, setDemoAiBanner] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.HEALTH}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.demoAiBanner) setDemoAiBanner(true);
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     if (!loading) {
@@ -87,6 +96,7 @@ function AppContent() {
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/shared/:token" element={<CounselorReportView />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+          <Route path="/dev/ui" element={<DevUiPage />} />
 
           {/* Conditional routes based on authentication */}
           {!isAuthenticated ? (
@@ -97,26 +107,35 @@ function AppContent() {
               element={
                 <DiaryProvider>
                   <AppLockScreen>
+                    {demoAiBanner && (
+                      <div className="bg-amber-50 dark:bg-amber-950/60 border-b border-amber-200 dark:border-amber-900 px-4 py-1.5 text-center text-xs font-medium text-amber-900 dark:text-amber-200">
+                        {t('ai.demoBanner')}
+                      </div>
+                    )}
                     <Layout>
                       <Routes>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/write" element={<DiaryPage />} />
-                        <Route path="/calendar" element={<CalendarPage />} />
-                        <Route path="/pixels" element={<YearInPixelsPage />} />
+                        <Route path="/journal" element={<JournalPage />} />
+                        <Route path="/mood" element={<MoodPage />} />
+                        <Route path="/calm" element={<CalmPage />} />
+                        <Route path="/talk" element={<TalkPage />} />
                         <Route path="/letters" element={<LettersPage />} />
-                        <Route path="/search" element={<SearchPage />} />
+                        <Route path="/gratitude" element={<GratitudePage />} />
                         <Route path="/export" element={<ExportPage />} />
                         <Route path="/stories" element={<StoriesPage />} />
                         <Route path="/settings" element={<SettingsPage />} />
-                        <Route path="/checkin" element={<CheckInPage />} />
-                        <Route path="/insights" element={<InsightsPage />} />
-                        <Route path="/gratitude" element={<GratitudePage />} />
-                        <Route path="/happy-box" element={<HappyBox />} />
-                        <Route path="/calm" element={<CalmPage />} />
                         <Route path="/self-check" element={<SelfCheckPage />} />
-                        <Route path="/chat" element={<ChatPage />} />
-                        <Route path="/ask" element={<AskDiaryPage />} />
                         <Route path="/student" element={<StudentPage />} />
+                        {/* Redirect legacy routes to new 5-tab hubs */}
+                        <Route path="/checkin" element={<Navigate to="/mood" replace />} />
+                        <Route path="/pixels" element={<Navigate to="/mood?tab=year" replace />} />
+                        <Route path="/insights" element={<Navigate to="/mood?tab=trends" replace />} />
+                        <Route path="/calendar" element={<Navigate to="/journal?tab=calendar" replace />} />
+                        <Route path="/search" element={<Navigate to="/journal?tab=search" replace />} />
+                        <Route path="/happy-box" element={<Navigate to="/journal?filter=favorites" replace />} />
+                        <Route path="/ask" element={<Navigate to="/talk?mode=diary" replace />} />
+                        <Route path="/chat" element={<Navigate to="/talk" replace />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                     </Layout>
@@ -132,16 +151,31 @@ function AppContent() {
   );
 }
 
+export function createAppQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 60 * 1000,
+        retry: 1
+      }
+    }
+  });
+}
+
+const appQueryClient = createAppQueryClient();
+
 function App() {
   return (
     <ErrorBoundary>
-      <Router>
-        <AuthProvider>
-          <ToastProvider>
-            <AppContent />
-          </ToastProvider>
-        </AuthProvider>
-      </Router>
+      <QueryClientProvider client={appQueryClient}>
+        <Router>
+          <AuthProvider>
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
+          </AuthProvider>
+        </Router>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

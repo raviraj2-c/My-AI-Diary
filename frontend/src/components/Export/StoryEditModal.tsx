@@ -95,14 +95,14 @@ export const StoryEditModal: React.FC<StoryEditModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={t('storyEdit.modalTitle')} maxWidth="xl">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
             {t('storyEdit.titleLabel')}
           </label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm font-serif font-bold text-calm-900 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+            className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm font-serif font-bold text-ink-900 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
             placeholder={t('storyEdit.titlePlaceholder')}
             maxLength={150}
           />
@@ -110,7 +110,7 @@ export const StoryEditModal: React.FC<StoryEditModalProps> = ({
 
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200">
               {t('storyEdit.chaptersCount', { count: chapters.length })}
             </label>
             <Button
@@ -127,21 +127,21 @@ export const StoryEditModal: React.FC<StoryEditModalProps> = ({
           {chapters.map((ch, idx) => (
             <div
               key={idx}
-              className="p-4 rounded-xl border border-calm-200 dark:border-calm-800 bg-calm-50/50 dark:bg-calm-900/30 space-y-3"
+              className="p-4 rounded-xl border border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-900 space-y-3"
             >
               <div className="flex items-center justify-between gap-3">
                 <input
                   type="text"
                   value={ch.title}
                   onChange={(e) => handleChapterChange(idx, 'title', e.target.value)}
-                  className="flex-1 px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-lg text-sm font-serif font-semibold text-calm-900 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                  className="flex-1 px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-lg text-sm font-serif font-semibold text-ink-900 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
                   placeholder={t('storyEdit.chapterTitlePlaceholder', { count: idx + 1 })}
                 />
                 {chapters.length > 1 && (
                   <button
                     type="button"
                     onClick={() => handleRemoveChapter(idx)}
-                    className="p-1.5 text-calm-400 hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    className="p-1.5 text-muted hover:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     title={t('storyEdit.deleteChapter')}
                   >
                     <Trash2 className="w-4 h-4" />
@@ -153,14 +153,14 @@ export const StoryEditModal: React.FC<StoryEditModalProps> = ({
                 value={ch.content}
                 onChange={(e) => handleChapterChange(idx, 'content', e.target.value)}
                 rows={5}
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-lg text-sm font-serif leading-relaxed text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-400 focus:outline-none resize-y"
+                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-lg text-sm font-serif leading-relaxed text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-400 focus:outline-none resize-y"
                 placeholder={t('storyEdit.chapterContentPlaceholder')}
               />
             </div>
           ))}
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-calm-100 dark:border-calm-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-sky-100 dark:border-ink-800">
           <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSaving}>
             {t('common.cancel')}
           </Button>

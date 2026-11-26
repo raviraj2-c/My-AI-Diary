@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckIn } from '../components/Wellness/CheckIn';
 import { HabitTracker } from '../components/Wellness/HabitTracker';
-import { WellnessService } from '../services/wellnessService';
-import { CheckIn as CheckInType, HabitLog } from '../types';
+import { useToday, useInvalidateWellness } from '../hooks/useQueries';
 import { Heart, Activity, ArrowLeft, TrendingUp } from 'lucide-react';
 import { Button } from '../components/common/Button';
 
@@ -12,26 +11,10 @@ export const CheckInPage: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'checkin' | 'habits'>('checkin');
-  const [initialCheckIn, setInitialCheckIn] = useState<CheckInType | null>(null);
-  const [initialHabit, setInitialHabit] = useState<HabitLog | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-    Promise.all([
-      WellnessService.getTodayCheckIn().catch(() => null),
-      WellnessService.getTodayHabit().catch(() => null)
-    ]).then(([ci, hb]) => {
-      if (mounted) {
-        setInitialCheckIn(ci);
-        setInitialHabit(hb);
-        setLoading(false);
-      }
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { data, isLoading: loading, isError, refetch } = useToday();
+  const invalidateWellness = useInvalidateWellness();
+  const initialCheckIn = data?.checkIn ?? null;
+  const initialHabit = data?.habit ?? null;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
@@ -69,7 +52,7 @@ export const CheckInPage: React.FC = () => {
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
-            <Heart className="w-4 h-4 text-rose-500" />
+            <Heart className="w-4 h-4 text-danger" />
             <span>{t('checkin.title', 'Feelings & Mood Check')}</span>
           </button>
           <button
@@ -81,19 +64,30 @@ export const CheckInPage: React.FC = () => {
                 : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
             }`}
           >
-            <Activity className="w-4 h-4 text-emerald-500" />
+            <Activity className="w-4 h-4 text-sky-500" />
             <span>{t('checkin.habitsTitle', 'Habits & Body Log')}</span>
           </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      {!loading && (
+      {loading ? (
+        <div className="space-y-4 animate-pulse">
+          <div className="h-10 rounded-xl bg-gray-100 dark:bg-gray-800" />
+          <div className="h-64 rounded-2xl bg-gray-100 dark:bg-gray-800" />
+        </div>
+      ) : isError ? (
+        <div className="p-6 text-center rounded-2xl border border-danger dark:border-danger space-y-3">
+          <p className="text-sm text-danger dark:text-danger">{t('common.error')}</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>{t('common.retry')}</Button>
+        </div>
+      ) : (
         <div className="animate-fade-in">
           {activeTab === 'checkin' ? (
             <CheckIn
               initialCheckIn={initialCheckIn}
               onSuccess={() => {
+                void invalidateWellness();
                 navigate('/insights');
               }}
               onCancel={() => navigate('/')}
@@ -103,6 +97,7 @@ export const CheckInPage: React.FC = () => {
               <HabitTracker
                 initialHabit={initialHabit}
                 onSaved={() => {
+                  void invalidateWellness();
                   navigate('/insights');
                 }}
               />

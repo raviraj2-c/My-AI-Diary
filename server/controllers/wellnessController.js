@@ -1,5 +1,6 @@
-const { User, CheckIn, HabitLog, GratitudeEntry, DiaryEntry, CalmSession, SelfCheck, CounselorReport, CopingPlan } = require('../config/models');
+const { User, CheckIn, HabitLog, GratitudeEntry, DiaryEntry, CalmSession, SelfCheck, CounselorReport, CopingPlan, FutureLetter } = require('../config/models');
 const { computeWellnessInsights, toDayKey } = require('../utils/insights');
+const { getMoodDays } = require('../utils/moodScale');
 const { checkRisk } = require('../utils/riskCheck');
 const { stripAllTags } = require('../utils/sanitize');
 const {
@@ -8,6 +9,7 @@ const {
   dayRange,
   todayKey,
   keyOf,
+  getPreviousDateKey,
   resolveTimezone
 } = require('../utils/dates');
 const crypto = require('crypto');
@@ -511,18 +513,22 @@ const getHappyBox = async (req, res, next) => {
 const getInsights = async (req, res, next) => {
   try {
     const { range = 'month' } = req.query;
+    const user = await User.findById(req.user.id).select('timezone');
+    const tz = user?.timezone || 'UTC';
 
     const daysCount = range === 'week' ? 7 : range === '3months' ? 90 : 30;
-    const cutoffDate = new Date();
-    cutoffDate.setUTCDate(cutoffDate.getUTCDate() - daysCount);
+    const toKey = todayKey(tz);
+    const fromKey = getPreviousDateKey(toKey, daysCount - 1);
+    const cutoffDate = startOfDay(fromKey, tz);
 
-    const [checkIns, habits, entries] = await Promise.all([
+    const [checkIns, habits, entries, moodDays] = await Promise.all([
       CheckIn.find({ user: req.user.id, date: { $gte: cutoffDate } }),
       HabitLog.find({ user: req.user.id, date: { $gte: cutoffDate } }),
-      DiaryEntry.find({ user: req.user.id, entryDate: { $gte: cutoffDate } })
+      DiaryEntry.find({ user: req.user.id, entryDate: { $gte: cutoffDate } }).select('entryDate dateKey mood moodScore emotions'),
+      getMoodDays({ userId: req.user.id, tz, fromKey, toKey })
     ]);
 
-    const insights = computeWellnessInsights(checkIns, habits, entries);
+    const insights = computeWellnessInsights(checkIns, habits, entries, moodDays, tz);
 
     res.json({
       success: true,
@@ -853,6 +859,116 @@ const getYearPixels = async (req, res, next) => {
   }
 };
 
+// ==================== UNIFIED MOOD DAYS & HOME SUMMARY ====================
+
+const getMoodDaysEndpoint = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('timezone');
+    const tz = user?.timezone || 'UTC';
+    const defaultTo = todayKey(tz);
+    const defaultFrom = getPreviousDateKey(defaultTo, 29);
+
+    const fromKey = typeof req.query.from === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.from)
+      ? req.query.from
+      : defaultFrom;
+    const toKey = typeof req.query.to === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.to)
+      ? req.query.to
+      : defaultTo;
+
+    if (fromKey > toKey) {
+      return res.status(400).json({ success: false, message: 'from date must not be after to date' });
+    }
+
+    const moodDays = await getMoodDays({ userId: req.user.id, tz, fromKey, toKey });
+    res.json({
+      success: true,
+      from: fromKey,
+      to: toKey,
+      data: moodDays
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getHomeSummary = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('timezone');
+    const tz = user?.timezone || 'UTC';
+    const today = todayKey(tz);
+    const weekFrom = getPreviousDateKey(today, 6);
+
+    const [weekMoodDays, todayCheckIn, lastEntryDoc, dueLetters, allCheckIns, allEntries] = await Promise.all([
+      getMoodDays({ userId: req.user.id, tz, fromKey: weekFrom, toKey: today }),
+      CheckIn.findOne({
+        user: req.user.id,
+        $or: [
+          { dateKey: today },
+          { date: { $gte: startOfDay(today, tz), $lte: endOfDay(today, tz) } }
+        ]
+      }).select('moodScore').lean(),
+      DiaryEntry.findOne({ user: req.user.id })
+        .sort({ entryDate: -1, createdAt: -1 })
+        .select('_id title entryDate mood')
+        .lean(),
+      FutureLetter.countDocuments({
+        user: req.user.id,
+        deliverOn: { $lte: new Date() },
+        openedAt: null
+      }),
+      CheckIn.find({ user: req.user.id }).select('date dateKey').lean(),
+      DiaryEntry.find({ user: req.user.id }).select('entryDate dateKey').lean()
+    ]);
+
+    const moodMap = new Map(weekMoodDays.map((d) => [d.date, d]));
+    const weekDays = [];
+    for (let offset = 6; offset >= 0; offset--) {
+      const date = getPreviousDateKey(today, offset);
+      const found = moodMap.get(date);
+      weekDays.push({ date, score: found ? found.score : null });
+    }
+
+    const activeDates = new Set();
+    for (const ci of allCheckIns) {
+      const k = ci.dateKey || (ci.date ? keyOf(ci.date, tz) : null);
+      if (k) activeDates.add(k);
+    }
+    for (const e of allEntries) {
+      const k = e.dateKey || (e.entryDate ? keyOf(e.entryDate, tz) : null);
+      if (k) activeDates.add(k);
+    }
+
+    let streakDays = 0;
+    let cursor = activeDates.has(today) ? today : getPreviousDateKey(today, 1);
+    while (activeDates.has(cursor)) {
+      streakDays += 1;
+      cursor = getPreviousDateKey(cursor, 1);
+    }
+
+    const todayMood = moodMap.get(today) || null;
+    res.json({
+      success: true,
+      data: {
+        todayDone: Boolean(todayCheckIn),
+        todayScore: todayMood ? todayMood.score : null,
+        weekDays,
+        streakDays,
+        lastEntry: lastEntryDoc
+          ? {
+              id: lastEntryDoc._id.toString(),
+              title: lastEntryDoc.title,
+              date: lastEntryDoc.entryDate,
+              mood: lastEntryDoc.mood
+            }
+          : null,
+        dueLetters
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ==================== COPING PLAN (SOS) ====================
 
 const sanitizeArrayItems = (arr, maxItems = 10, maxLen = 200) => {
@@ -976,5 +1092,7 @@ module.exports = {
   revokeCounselorReportShare,
   getYearPixels,
   getCopingPlan,
-  saveCopingPlan
+  saveCopingPlan,
+  getMoodDaysEndpoint,
+  getHomeSummary
 };

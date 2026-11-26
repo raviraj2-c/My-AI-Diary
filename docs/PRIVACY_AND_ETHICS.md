@@ -59,9 +59,9 @@ All private, descriptive user thoughts and emotional notes are encrypted using *
 
 ---
 
-## 4. Third-Party AI Data Transmission (Anthropic Claude)
+## 4. Third-Party AI Data Transmission (Google Gemini)
 
-MindDiary integrates Anthropic's Claude API for optional AI reflections and companion chat. Strict boundaries are enforced:
+MindDiary integrates Google's Gemini API for optional AI reflections and companion chat. Strict boundaries are enforced:
 
 ### When Data Is Sent to AI
 - Data is sent **only** when the user explicitly triggers an AI action (e.g., clicks "Reflect", sends a chat message, or requests a storybook).
@@ -74,6 +74,12 @@ MindDiary integrates Anthropic's Claude API for optional AI reflections and comp
 - The shared wellness system prompt (`safetyPrompt.js`), which enforces data isolation (treating diary excerpts as pure data, never instructions), strict citation limits (max 15 words per quote), pattern descriptions as possibilities, non-diagnostic framing, and compassionate boundaries.
 - No database IDs, no email addresses, no real names, and no IP addresses are ever attached to AI payloads.
 - Recent conversation context in Ask My Diary (last 6 messages) is stored encrypted at rest with AES-256-GCM (`mode: 'diary'`) and can be permanently erased at any time via "Forget this chat" (`DELETE /api/ai/ask-diary/history`).
+
+### Free Tier vs Paid Tier & 18+ Policy
+- **Free Tier (`GEMINI_TIER=free`):** On Google's Gemini API free tier, Google may collect and use submitted prompts and responses to train and improve Google products, and human reviewers may process them. Because of this, MindDiary disables diary AI in production on the free tier unless `ALLOW_FREE_TIER_DIARY_AI=true` is explicitly set for non-personal demos.
+- **Paid Tier (`GEMINI_TIER=paid`, billing enabled):** On the paid tier, Google does not use API prompts or responses to train or improve Google products.
+- **18+ Requirement:** MindDiary is for adults 18 and older (confirmed via a required checkbox at sign-up, stored as `ageConfirmedAt`).
+- **Official Terms:** See [Google Gemini API Terms of Service](https://ai.google.dev/gemini-api/terms).
 
 ### When Data Is NOT Sent (Crisis Guardrail & Local Safety Scanning)
 - When a user inputs high-risk text (expressions of self-harm, suicidal intent, suicide methods, or acute distress):
@@ -94,8 +100,8 @@ MindDiary honors full data sovereignty under GDPR / DPDP principles:
 
 1. **Self-Service Hard Delete:** Navigate to **Settings** $\to$ **Delete Account**.
 2. **Password Verification:** Requires entering the current account password to prevent unauthorized or accidental clicks.
-3. **Cascading Erasure:** The backend issues atomic deletions across all 12 MongoDB collections:
-   - `DiaryEntry`, `CheckIn`, `HabitLog`, `GratitudeEntry`, `CalmSession`, `SelfCheck`, `Storybook`, `ChatMessage`, `ThoughtRecord`, `StudySession`, `Exam`, `SmallWin`, and `User`.
+3. **Cascading Erasure:** The backend issues atomic deletions across all 16 MongoDB collections:
+   - `DiaryEntry`, `CheckIn`, `HabitLog`, `GratitudeEntry`, `CalmSession`, `SelfCheck`, `Storybook`, `ChatMessage`, `ThoughtRecord`, `StudySession`, `Exam`, `SmallWin`, `CounselorReport`, `FutureLetter`, `CopingPlan`, and `User`.
 4. **Media Purge:** Attached Cloudinary photo and voice assets are deleted via authenticated Cloudinary API calls.
 5. **No Soft Deletion:** Deletion is permanent and immediate. Records are not retained in hidden "trash" archives.
 

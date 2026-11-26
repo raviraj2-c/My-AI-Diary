@@ -39,7 +39,7 @@ async function runChecks() {
         }
       } else if (/\.(ts|tsx|js|html|css|json)$/.test(f)) {
         const content = fs.readFileSync(full, 'utf8');
-        if (content.includes('ANTHROPIC_API_KEY') || content.includes('sk-ant-')) {
+        if (content.includes('GEMINI_API_KEY') || content.includes('AIzaSy')) {
           throw new Error('LEAK DETECTED in ' + full);
         }
       }
@@ -91,7 +91,7 @@ async function runChecks() {
     console.log(`      Category: ${item.category}`);
     console.log(`      Direct Pre-Flight Risk: ${risk.level}`);
     console.log(`      Prompt Guardrails Enforced: ${promptProtected}`);
-    console.log(`      Safe Response Action: ${isDirectHighRisk ? 'Direct safety intercept banner without AI call' : 'Claude clinical boundary system prompt'}`);
+    console.log(`      Safe Response Action: ${isDirectHighRisk ? 'Direct safety intercept banner without AI call' : 'Gemini clinical boundary system prompt'}`);
   }
 
   console.log('\n✔ All checks passed successfully!');

@@ -41,16 +41,16 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
       <div
         role="alert"
         aria-live="polite"
-        className="my-4 p-4 rounded-2xl bg-calm-50/90 dark:bg-calm-950/40 border border-calm-200 dark:border-calm-800 text-calm-900 dark:text-calm-100 shadow-soft-sm animate-fade-in"
+        className="my-4 p-4 rounded-2xl bg-sky-50 dark:bg-ink-950 border border-border dark:border-ink-800 text-ink-900 dark:text-sky-100 shadow-soft-sm animate-fade-in"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
-            <span className="p-2 rounded-xl bg-calm-100 dark:bg-calm-900/60 text-calm-700 dark:text-calm-300 shrink-0 mt-0.5">
+            <span className="p-2 rounded-xl bg-sky-100 dark:bg-ink-900 text-text dark:text-sky-200 shrink-0 mt-0.5">
               <Heart className="w-4 h-4 fill-current" />
             </span>
             <div className="space-y-1">
               <h4 className="text-sm font-semibold">{t('safety.concernTitle', 'We are here with you')}</h4>
-              <p className="text-xs text-calm-600 dark:text-calm-300 leading-relaxed font-serif">
+              <p className="text-xs text-muted dark:text-sky-200 leading-relaxed font-serif">
                 {t('safety.concernDesc', 'If thoughts feel heavy or exhausting today, remember that you never have to carry them alone. Gentle, confidential support is always available whenever you need a listening ear.')}
               </p>
               <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -66,35 +66,35 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowHelplineList((prev) => !prev)}
-                  className="text-xs font-medium text-calm-700 dark:text-calm-300 hover:underline"
+                  className="text-xs font-medium text-text dark:text-sky-200 hover:underline"
                 >
                   {showHelplineList ? t('safety.hideResources', 'Hide additional resources') : t('safety.moreResources', 'More helplines & resources')}
                 </button>
               </div>
 
               {showHelplineList && (
-                <div className="pt-3 mt-2 border-t border-calm-200/60 dark:border-calm-800 space-y-2">
+                <div className="pt-3 mt-2 border-t border-border dark:border-ink-800 space-y-2">
                   {countryData.helplines.map((h) => (
                     <div key={h.name} className="flex items-center justify-between text-xs py-1">
                       <div>
-                        <span className="font-semibold text-calm-800 dark:text-calm-200">{h.name}: </span>
-                        <span className="text-calm-500">{h.description}</span>
+                        <span className="font-semibold text-ink-800 dark:text-border">{h.name}: </span>
+                        <span className="text-muted">{h.description}</span>
                         {isHelplineVerificationStale(h.lastVerified) && (
-                          <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                          <div className="text-[10px] text-sky-700 dark:text-sky-400 font-medium">
                             {t('sos.verifyNumber')}
                           </div>
                         )}
                       </div>
                       <a
                         href={h.callUrl}
-                        className="px-2 py-1 rounded-lg bg-calm-100 dark:bg-calm-800 text-calm-800 dark:text-calm-200 font-semibold hover:bg-calm-200 transition-colors shrink-0 ml-2"
+                        className="px-2 py-1 rounded-lg bg-sky-100 dark:bg-ink-800 text-ink-800 dark:text-border font-semibold hover:bg-border transition-colors shrink-0 ml-2"
                       >
                         {h.number}
                       </a>
                     </div>
                   ))}
                   {primaryHelpline?.lastVerified && !isHelplineVerificationStale(primaryHelpline.lastVerified) && (
-                    <div className="text-[10px] text-calm-500 dark:text-calm-400 pt-1">
+                    <div className="text-[10px] text-muted dark:text-muted pt-1">
                       {t('sos.lastVerifiedDate', { date: primaryHelpline.lastVerified })}
                     </div>
                   )}
@@ -108,7 +108,7 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
               type="button"
               onClick={onDismiss}
               aria-label="Close message"
-              className="p-1 rounded-lg text-calm-400 hover:text-calm-600 transition-colors"
+              className="p-1 rounded-lg text-muted hover:text-muted transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -128,8 +128,8 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
     >
       <div className="w-full max-w-lg bg-white dark:bg-[#131d31] rounded-3xl border border-gray-100 dark:border-gray-800 p-6 sm:p-8 shadow-soft-xl text-center space-y-6">
         {/* Soft Dignified Icon */}
-        <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center shadow-soft-sm">
-          <Heart className="w-7 h-7 fill-rose-500/20" />
+        <div className="w-14 h-14 rounded-2xl bg-sky-50 dark:bg-danger text-danger dark:text-danger mx-auto flex items-center justify-center shadow-soft-sm">
+          <Heart className="w-7 h-7 fill-danger" />
         </div>
 
         {/* Message */}
@@ -150,7 +150,7 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
           {primaryHelpline && (
             <a
               href={primaryHelpline.callUrl}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-base shadow-soft-md transition-all active:scale-[0.98]"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-danger hover:bg-danger text-white font-semibold text-base shadow-soft-md transition-all active:scale-[0.98]"
             >
               <Phone className="w-5 h-5" />
               <span>{t('safety.callNow', 'Call Helpline Now')} - {primaryHelpline.name} ({primaryHelpline.number})</span>
@@ -161,9 +161,9 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
           {trustedContact?.phone && (
             <a
               href={`tel:${trustedContact.phone}`}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-calm-100 dark:bg-calm-800 hover:bg-calm-200 text-calm-900 dark:text-calm-100 font-medium text-sm transition-all"
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-sky-100 dark:bg-ink-800 hover:bg-border text-ink-900 dark:text-sky-100 font-medium text-sm transition-all"
             >
-              <MessageSquare className="w-4 h-4 text-calm-600" />
+              <MessageSquare className="w-4 h-4 text-muted" />
               <span>
                 {t('safety.messageContact', 'Message Trusted Contact')} ({trustedContact.name || 'Friend'}: {trustedContact.phone})
               </span>
@@ -193,7 +193,7 @@ export const SafetyBanner: React.FC<SafetyBannerProps> = ({
                   <div className="font-semibold text-gray-800 dark:text-gray-200">{h.name}</div>
                   <div className="text-[11px] text-gray-500">{h.description}</div>
                   {isHelplineVerificationStale(h.lastVerified) && (
-                    <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
+                    <div className="text-[10px] text-sky-700 dark:text-sky-400 font-medium mt-0.5">
                       {t('sos.verifyNumber')}
                     </div>
                   )}

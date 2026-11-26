@@ -163,14 +163,14 @@ export const AppLockScreen: React.FC<{ children: React.ReactNode }> = ({ childre
           </div>
 
           {errorMsg && (
-            <div className="flex items-center justify-center gap-1.5 text-xs text-rose-400 animate-fade-in">
+            <div className="flex items-center justify-center gap-1.5 text-xs text-danger animate-fade-in">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {lockoutSeconds > 0 && (
-            <p className="text-xs font-mono text-amber-400">
+            <p className="text-xs font-mono text-sky-400">
               {t('applock.waitTime', { seconds: lockoutSeconds })}
             </p>
           )}

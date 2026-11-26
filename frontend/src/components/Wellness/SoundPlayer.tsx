@@ -36,14 +36,14 @@ const SOUNDS: SoundTrack[] = [
     name: 'Forest Canopy',
     icon: Trees,
     description: 'Rustling leaves and gentle organic breeze through tall pines.',
-    color: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40'
+    color: 'text-sky-700 bg-sky-50 dark:bg-ink-900'
   },
   {
     id: 'white',
     name: 'Warm Brown Noise',
     icon: Wind,
     description: 'Deep, calming low-frequency hum that masks distractions and soothes ADHD.',
-    color: 'text-amber-600 bg-amber-50 dark:bg-amber-950/40'
+    color: 'text-sky-700 bg-sky-50 dark:bg-ink-900'
   }
 ];
 

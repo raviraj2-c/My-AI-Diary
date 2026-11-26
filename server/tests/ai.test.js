@@ -9,7 +9,7 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'AIUser', email: 'aiuser@test.com', password: 'Password123' });
+      .send({ name: 'AIUser', email: 'aiuser@test.com', password: 'Password123' , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
   });
@@ -256,7 +256,7 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
       // Create user B and an entry for user B
       const regB = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'UserB', email: 'userb@test.com', password: 'Password123' });
+        .send({ name: 'UserB', email: 'userb@test.com', password: 'Password123' , ageConfirmed: true});
 
       const entryB = await DiaryEntry.create({
         user: regB.body.user.id,
@@ -358,7 +358,7 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
       // User B cannot edit User A storybook
       const regB = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'UserB2', email: 'userb2@test.com', password: 'Password123' });
+        .send({ name: 'UserB2', email: 'userb2@test.com', password: 'Password123' , ageConfirmed: true});
 
       const hackRes = await request(app)
         .put(`/api/ai/storybooks/${storybook._id}`)
@@ -481,7 +481,7 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
       // Create User B
       const resB = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'UserB', email: 'userb@test.com', password: 'Password123' });
+        .send({ name: 'UserB', email: 'userb@test.com', password: 'Password123' , ageConfirmed: true});
       const userB = resB.body.user;
       const tokenB = resB.body.token;
       await User.findByIdAndUpdate(userB.id, { allowAIFeatures: true, allowDiaryAI: true });
@@ -661,6 +661,237 @@ describe('AI Endpoints, Safeguards & Mocked LLM', () => {
         if (origKey === undefined) delete process.env.GEMINI_API_KEY;
         else process.env.GEMINI_API_KEY = origKey;
       }
+    });
+  });
+
+  describe('Gemini Fetch Integration, Edge Cases & Quota Refunds', () => {
+    let origKey;
+
+    beforeEach(async () => {
+      origKey = process.env.GEMINI_API_KEY;
+      process.env.GEMINI_API_KEY = 'test-gemini-key-mock';
+      await User.findByIdAndUpdate(user.id, { allowAIFeatures: true });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      if (origKey === undefined) delete process.env.GEMINI_API_KEY;
+      else process.env.GEMINI_API_KEY = origKey;
+    });
+
+    const assertNoEmptyAssistantAndRefunded = async () => {
+      const updatedUser = await User.findById(user.id);
+      expect(updatedUser.aiDailyUsage.count).toBe(0);
+      const { ChatMessage } = require('../config/models');
+      const assistantMsgs = await ChatMessage.find({ user: user.id, role: 'assistant' });
+      for (const m of assistantMsgs) {
+        expect(m.content.trim().length).toBeGreaterThan(0);
+      }
+      expect(assistantMsgs).toHaveLength(0);
+    };
+
+    it('1. success: returns reply, increments quota, and saves assistant message', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: 'I hear you and I am here.' }] }, finishReason: 'STOP' }]
+        })
+      });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Feeling stressed about exams.' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.assistantMessage.content).toBe('I hear you and I am here.');
+      const updatedUser = await User.findById(user.id);
+      expect(updatedUser.aiDailyUsage.count).toBe(1);
+    });
+
+    it('2. blockReason: refunds quota, saves no empty assistant message, returns gentle reply + safety', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          promptFeedback: { blockReason: 'SAFETY' }
+        })
+      });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Something blocked by safety filter' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.blocked).toBe(true);
+      expect(res.body.safety.level).toBe('concern');
+      expect(res.body.data.assistantMessage.content.length).toBeGreaterThan(10);
+      await assertNoEmptyAssistantAndRefunded();
+    });
+
+    it('3. empty candidates: returns friendly 502 AI_EMPTY, refunds quota, saves no empty message', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ candidates: [] })
+      });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Hello there' });
+
+      expect(res.status).toBe(502);
+      expect(res.body.code).toBe('AI_EMPTY');
+      expect(res.body.message).toBeTruthy();
+      await assertNoEmptyAssistantAndRefunded();
+    });
+
+    it('4. finishReason MAX_TOKENS: retries once with larger maxOutputTokens, then errors AI_TRUNCATED if still empty', async () => {
+      const fetchSpy = jest.spyOn(global, 'fetch')
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            candidates: [{ content: { parts: [] }, finishReason: 'MAX_TOKENS' }]
+          })
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            candidates: [{ content: { parts: [] }, finishReason: 'MAX_TOKENS' }]
+          })
+        });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Tell me something long' });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      const firstBody = JSON.parse(fetchSpy.mock.calls[0][1].body);
+      const secondBody = JSON.parse(fetchSpy.mock.calls[1][1].body);
+      expect(secondBody.generationConfig.maxOutputTokens).toBeGreaterThan(firstBody.generationConfig.maxOutputTokens);
+      expect(res.status).toBe(502);
+      expect(res.body.code).toBe('AI_TRUNCATED');
+      expect(res.body.message).toBeTruthy();
+      await assertNoEmptyAssistantAndRefunded();
+    });
+
+    it('5. 404 model not found: returns friendly 502, refunds quota, saves no empty message', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ error: { message: 'Model not found' } })
+      });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Hello' });
+
+      expect(res.status).toBe(502);
+      expect(res.body.message).toContain('model not found');
+      await assertNoEmptyAssistantAndRefunded();
+    });
+
+    it('6. 401 unauthorized: returns friendly 502, refunds quota, saves no empty message', async () => {
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: false,
+        status: 401,
+        json: async () => ({ error: { message: 'API key not valid' } })
+      });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Hello' });
+
+      expect(res.status).toBe(502);
+      expect(res.body.message).toContain('configuration issue');
+      await assertNoEmptyAssistantAndRefunded();
+    });
+
+    it('7. 429 then success: retries once after 1.5s and succeeds', async () => {
+      const fetchSpy = jest.spyOn(global, 'fetch')
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 429,
+          json: async () => ({ error: { message: 'Rate limit exceeded' } })
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: async () => ({
+            candidates: [{ content: { parts: [{ text: 'Recovered after retry.' }] }, finishReason: 'STOP' }]
+          })
+        });
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Hello after rate limit' });
+
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+      expect(res.status).toBe(200);
+      expect(res.body.data.assistantMessage.content).toBe('Recovered after retry.');
+      const updatedUser = await User.findById(user.id);
+      expect(updatedUser.aiDailyUsage.count).toBe(1);
+    });
+
+    it('8. timeout: returns friendly 504, refunds quota, saves no empty message', async () => {
+      const timeoutErr = new Error('The operation was aborted due to timeout');
+      timeoutErr.name = 'TimeoutError';
+      jest.spyOn(global, 'fetch').mockRejectedValueOnce(timeoutErr);
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Hello timeout' });
+
+      expect(res.status).toBe(504);
+      expect(res.body.message).toContain('too long');
+      await assertNoEmptyAssistantAndRefunded();
+    });
+  });
+
+  describe('Free vs Paid Gemini Tier Production Guard', () => {
+    let origNodeEnv, origTier, origAllowDemo;
+
+    beforeEach(async () => {
+      origNodeEnv = process.env.NODE_ENV;
+      origTier = process.env.GEMINI_TIER;
+      origAllowDemo = process.env.ALLOW_FREE_TIER_DIARY_AI;
+      await User.findByIdAndUpdate(user.id, { allowAIFeatures: true });
+    });
+
+    afterEach(() => {
+      process.env.NODE_ENV = origNodeEnv;
+      if (origTier === undefined) delete process.env.GEMINI_TIER;
+      else process.env.GEMINI_TIER = origTier;
+      if (origAllowDemo === undefined) delete process.env.ALLOW_FREE_TIER_DIARY_AI;
+      else process.env.ALLOW_FREE_TIER_DIARY_AI = origAllowDemo;
+    });
+
+    it('blocks diary AI in production when GEMINI_TIER is free and ALLOW_FREE_TIER_DIARY_AI is not true', async () => {
+      process.env.NODE_ENV = 'production';
+      process.env.GEMINI_TIER = 'free';
+      delete process.env.ALLOW_FREE_TIER_DIARY_AI;
+
+      const res = await request(app)
+        .post('/api/chat/messages')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ message: 'Test production free tier guard' });
+
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe('FREE_TIER_DIARY_AI_DISABLED');
+    });
+
+    it('exposes demoAiBanner: true on /api/health when GEMINI_TIER=free and ALLOW_FREE_TIER_DIARY_AI=true', async () => {
+      process.env.GEMINI_TIER = 'free';
+      process.env.ALLOW_FREE_TIER_DIARY_AI = 'true';
+
+      const healthRes = await request(app).get('/api/health');
+      expect(healthRes.status).toBe(200);
+      expect(healthRes.body.geminiTier).toBe('free');
+      expect(healthRes.body.demoAiBanner).toBe(true);
     });
   });
 });

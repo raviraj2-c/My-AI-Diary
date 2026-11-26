@@ -15,6 +15,7 @@ const defaultSettings: UserSettings = {
   reminderTime: '20:00',
   allowAIFeatures: false,
   allowDiaryAI: false,
+  isStudent: false,
   appLockEnabled: false,
   appLockTimeoutMinutes: 5,
   trustedContact: { name: '', phone: '', relation: '' }

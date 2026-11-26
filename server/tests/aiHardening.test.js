@@ -309,4 +309,28 @@ describe('AI Hardening & Privacy airtightness', () => {
       expect(result.excerpts[0].excerpt).toContain('PWNED');
     });
   });
+
+  describe('7. GEMINI_MODEL Env Configuration', () => {
+    it('respects GEMINI_MODEL, falls back to AI_MODEL, and defaults to gemini-2.5-flash', () => {
+      const { getModel } = require('../config/ai');
+      const prevGemini = process.env.GEMINI_MODEL;
+      const prevAi = process.env.AI_MODEL;
+      try {
+        process.env.GEMINI_MODEL = 'gemini-flash-latest';
+        process.env.AI_MODEL = 'legacy-model';
+        expect(getModel()).toBe('gemini-flash-latest');
+
+        delete process.env.GEMINI_MODEL;
+        expect(getModel()).toBe('legacy-model');
+
+        delete process.env.AI_MODEL;
+        expect(getModel()).toBe('gemini-2.5-flash');
+      } finally {
+        if (prevGemini !== undefined) process.env.GEMINI_MODEL = prevGemini;
+        else delete process.env.GEMINI_MODEL;
+        if (prevAi !== undefined) process.env.AI_MODEL = prevAi;
+        else delete process.env.AI_MODEL;
+      }
+    });
+  });
 });

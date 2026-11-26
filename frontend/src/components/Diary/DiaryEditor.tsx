@@ -17,14 +17,17 @@ import {
   Sparkles,
   FileCheck2,
   Sliders,
-  ChevronDown,
-  ChevronUp,
-  Info
+  Info,
+  Image as ImageIcon,
+  EyeOff,
+  Eye,
+  MoreHorizontal
 } from 'lucide-react';
 import { DiaryEntry, MediaItem } from '../../types';
 import { getAllMoods, getMoodMeta } from '../../utils/moods';
 import { Button } from '../common/Button';
 import { Badge } from '../common/Badge';
+import { BottomSheet } from '../ui';
 import { useToast } from '../common/Toast';
 import { useSettings } from '../../hooks/useSettings';
 import { AIService } from '../../services/aiService';
@@ -67,13 +70,14 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
   const [moodScore, setMoodScore] = useState<number>(entry?.moodScore ?? 5);
   const [emotions, setEmotions] = useState<string[]>(entry?.emotions || []);
   const [prompt, setPrompt] = useState<string | undefined>(entry?.prompt);
-  const [showEmotionsSection, setShowEmotionsSection] = useState(false);
   const [date, setDate] = useState<string>(initialDateStr);
   const [media, setMedia] = useState<MediaItem[]>(entry?.media || []);
   const [aiExcluded, setAiExcluded] = useState<boolean>(Boolean(entry?.aiExcluded));
   const [newTag, setNewTag] = useState('');
   const [focusMode, setFocusMode] = useState(false);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [showMoreSheet, setShowMoreSheet] = useState(false);
+  const [activeDrawer, setActiveDrawer] = useState<'none' | 'media' | 'tags'>('none');
 
   // AI Mood Discrepancy & Writing Starters
   const [moodDiscrepancy, setMoodDiscrepancy] = useState<{ suggestedScore: number; suggestedEmotions: string[] } | null>(null);
@@ -286,7 +290,7 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
   };
 
   const activeMoodMeta = getMoodMeta(mood);
-  const MoodIcon = activeMoodMeta.icon;
+  void activeMoodMeta;
 
   return (
     <div className={`transition-all duration-300 ${focusMode
@@ -305,7 +309,7 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
               </h2>
               {draftSavedAt && (
                 <p className="text-[11px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
-                  <FileCheck2 className="h-3 w-3 text-calm-600 dark:text-calm-400" />
+                  <FileCheck2 className="h-3 w-3 text-muted dark:text-muted" />
                   <span>{t('write.draftSaved', { time: draftSavedAt })}</span>
                 </p>
               )}
@@ -360,92 +364,33 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
                   <div className="flex items-center gap-1.5 overflow-x-auto max-w-xs sm:max-w-none pb-1">
                     {allMoods.map((m) => {
                       const isSelected = mood === m.value;
-                      const Icon = m.icon;
                       return (
                         <button
                           key={m.value}
                           type="button"
                           onClick={() => setMood(m.value)}
                           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-medium transition-all ${isSelected
-                            ? `${m.badgeClass} ring-2 ring-offset-1 ring-calm-400 font-semibold shadow-soft-sm`
-                            : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                            ? `${m.badgeClass} ring-2 ring-offset-1 ring-muted font-semibold shadow-soft-sm`
+                            : 'bg-surface dark:bg-ink-900 text-muted border border-border dark:border-ink-800 hover:border-primary-300'
                             }`}
                         >
-                          <Icon className="h-3 w-3" />
+                          <span>{m.emoji}</span>
                           <span>{m.label}</span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
-
-                {/* Mood Score Slider */}
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">
-                      {t('diary.moodScoreLabel')}
-                    </label>
-                    <span className="text-xs font-semibold text-primary-600 dark:text-primary-400">
-                      {t('diary.moodScoreDisplay', { score: moodScore })}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="10"
-                    value={moodScore}
-                    onChange={(e) => setMoodScore(parseInt(e.target.value, 10))}
-                    className="w-24 sm:w-28 accent-primary-600 cursor-pointer"
-                  />
-                </div>
-
-                {/* Nuanced feelings button */}
-                <div className="self-end pb-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setShowEmotionsSection((prev) => !prev)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${emotions.length > 0 || showEmotionsSection
-                      ? 'border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-300'
-                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300'
-                      }`}
-                  >
-                    <Sliders className="w-3.5 h-3.5" />
-                    <span>{emotions.length > 0 ? `${emotions.length} Feelings` : 'Feelings Wheel'}</span>
-                    {showEmotionsSection ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                  </button>
-                </div>
-
-                {/* Explicit Check My Mood Button (On-demand AI) */}
-                {settings.allowAIFeatures && !aiExcluded && (
-                  <div className="self-end pb-0.5">
-                    <button
-                      type="button"
-                      onClick={handleCheckMood}
-                      disabled={isCheckingMood}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-300 hover:text-primary-600 dark:hover:text-primary-400 disabled:opacity-50 transition-colors"
-                      title={t('diary.checkMoodTitle')}
-                    >
-                      <Sparkles className={`w-3.5 h-3.5 text-primary-500 ${isCheckingMood ? 'animate-spin' : ''}`} />
-                      <span>{isCheckingMood ? t('diary.checkingTone') : t('diary.checkMood')}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Mood reminder label */}
-              <div className="hidden lg:flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-                <MoodIcon className="h-3.5 w-3.5 text-calm-500" />
-                <span>{activeMoodMeta.description}</span>
               </div>
             </div>
 
-            {/* Tone Discrepancy Soft Suggestion */}
+            {/* 1-line Tone Discrepancy Soft Suggestion */}
             {moodDiscrepancy && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 rounded-xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 dark:text-amber-200 animate-fade-in">
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>
-                    {t('diary.moodDiscrepancyNotice', { emotions: moodDiscrepancy.suggestedEmotions.join(', ') })}
+              <div className="px-3 py-2 bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-800 rounded-xl text-xs flex items-center justify-between gap-2 text-ink-900 dark:text-sky-200">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Info className="w-4 h-4 text-sky-700 shrink-0" />
+                  <span className="truncate">
+                    {t('diary.moodDiscrepancyShort', 'Your words sound heavier than your mood.')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -456,170 +401,31 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
                       setMoodScore(moodDiscrepancy.suggestedScore);
                       setMoodDiscrepancy(null);
                     }}
-                    className="px-2.5 py-1 bg-amber-200 dark:bg-amber-900/50 rounded-lg font-medium hover:bg-amber-300 transition-colors"
+                    className="px-2 py-0.5 bg-sky-200 dark:bg-ink-800 rounded-lg font-medium"
                   >
-                    {t('diary.adjustToReflective')}
+                    {t('diary.adjustToReflective', 'Adjust')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setMoodDiscrepancy(null)}
-                    className="text-amber-600 hover:text-amber-800 text-[11px] underline"
+                    className="text-sky-700 dark:text-sky-400 underline"
                   >
-                    {t('diary.keepAsIs')}
+                    {t('diary.keepAsIs', 'Keep')}
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* Collapsible Emotion Wheel */}
-            {showEmotionsSection && (
-              <div className="pt-3 border-t border-gray-100 dark:border-gray-800">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  {t('diary.selectEmotionsHint')}
-                </p>
-                <EmotionWheel
-                  selectedEmotions={emotions}
-                  onChange={setEmotions}
-                  maxSelection={5}
-                />
               </div>
             )}
           </div>
         )}
 
-        {/* Floating/Sticky Clean Toolbar */}
-        <div className="sticky top-16 z-20 px-6 py-2 bg-white/95 dark:bg-[#131d31]/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800/80 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => editor?.chain().focus().toggleBold().run()}
-              aria-label="Bold text"
-              className={`p-2 rounded-lg text-xs transition-colors ${editor?.isActive('bold')
-                ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/60 dark:text-primary-300'
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-            >
-              <Bold className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor?.chain().focus().toggleItalic().run()}
-              aria-label="Italic text"
-              className={`p-2 rounded-lg text-xs transition-colors ${editor?.isActive('italic')
-                ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/60 dark:text-primary-300'
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-            >
-              <Italic className="h-4 w-4" />
-            </button>
-            <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
-            <button
-              type="button"
-              onClick={() => editor?.chain().focus().toggleBulletList().run()}
-              aria-label="Bullet list"
-              className={`p-2 rounded-lg text-xs transition-colors ${editor?.isActive('bulletList')
-                ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/60 dark:text-primary-300'
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-            >
-              <List className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-              aria-label="Ordered list"
-              className={`p-2 rounded-lg text-xs transition-colors ${editor?.isActive('orderedList')
-                ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/60 dark:text-primary-300'
-                : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-            >
-              <ListOrdered className="h-4 w-4" />
-            </button>
-            <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
-
-            {/* Voice to text dictation inside toolbar */}
-            <VoiceInput
-              onInsertText={(text) => {
-                if (editor) {
-                  editor.chain().focus().insertContent(text).run();
-                }
-              }}
-            />
-
-            <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
-
-            {/* Writing Prompt Picker */}
-            <PromptPicker
-              onSelectPrompt={(pickedPrompt) => {
-                setPrompt(pickedPrompt);
-                if (editor) {
-                  editor.chain().focus().insertContent(`<blockquote><p><strong>${pickedPrompt}</strong></p></blockquote><p></p>`).run();
-                }
-              }}
-            />
-
-            <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
-
-            {/* AI Writing Helper: Help me get started */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={handleGetStarters}
-                disabled={isLoadingStarters}
-                title="Help me get started with sentence openers"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors disabled:opacity-50"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                <span className="hidden sm:inline">{isLoadingStarters ? 'Thinking...' : 'Get Started'}</span>
-              </button>
-
-              {showStartersMenu && starters.length > 0 && (
-                <div className="absolute left-0 top-full mt-2 w-72 sm:w-80 bg-white dark:bg-[#1a253d] border border-calm-200 dark:border-calm-700 rounded-2xl shadow-soft-lg p-3 z-50 animate-fade-in space-y-2">
-                  <div className="flex items-center justify-between border-b border-calm-100 dark:border-calm-800 pb-1.5">
-                    <span className="text-xs font-semibold text-calm-800 dark:text-calm-200">{t('diary.sentenceStarters')}</span>
-                    <button
-                      type="button"
-                      onClick={() => setShowStartersMenu(false)}
-                      className="text-calm-400 hover:text-calm-600 text-[10px]"
-                    >
-                      {t('common.close')}
-                    </button>
-                  </div>
-                  <div className="space-y-1.5">
-                    {starters.map((s, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleInsertStarter(s)}
-                        className="w-full text-left p-2 rounded-xl text-xs text-calm-700 dark:text-calm-300 hover:bg-purple-50 dark:hover:bg-purple-950/40 hover:text-purple-900 dark:hover:text-purple-200 transition-colors"
-                      >
-                        "{s}"
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Stats: Word count & reading time */}
-          <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
-            <span>{t('write.wordCount', { count: wordCount, defaultValue: `${wordCount} words` })}</span>
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>{t('write.readingTime', { count: Math.max(1, Math.ceil(wordCount / 200)), defaultValue: `${Math.max(1, Math.ceil(wordCount / 200))} min read` })}</span>
-            </span>
-          </div>
-        </div>
-
         {/* TipTap Editor Writing Area */}
-        <div className="p-6 sm:p-8 min-h-[360px]">
+        <div className="p-6 sm:p-8 min-h-[380px]">
           <EditorContent editor={editor} />
         </div>
 
-        {/* Media Uploader Section (hidden in focus mode to preserve concentration) */}
-        {!focusMode && (
-          <div className="px-6 py-6 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/30 dark:bg-gray-900/20">
+        {/* Toggleable Photo / Media Drawer */}
+        {!focusMode && activeDrawer === 'media' && (
+          <div className="px-6 py-4 border-t border-border dark:border-ink-800 bg-bg/40 dark:bg-ink-950/40">
             <MediaUploader
               media={media}
               onChange={setMedia}
@@ -628,11 +434,11 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
           </div>
         )}
 
-        {/* Tags Section */}
-        {!focusMode && (
-          <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/20 dark:bg-gray-900/10">
+        {/* Toggleable Tags Drawer */}
+        {!focusMode && activeDrawer === 'tags' && (
+          <div className="px-6 py-3 border-t border-border dark:border-ink-800 bg-bg/40 dark:bg-ink-950/40">
             <div className="flex flex-wrap items-center gap-2">
-              <Tag className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+              <Tag className="h-3.5 w-3.5 text-muted shrink-0" />
               {tags.map((tag) => (
                 <Badge key={tag} size="sm" variant="calm" className="flex items-center gap-1">
                   <span>#{tag}</span>
@@ -640,7 +446,7 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
                     type="button"
                     onClick={() => removeTag(tag)}
                     aria-label={`Remove tag ${tag}`}
-                    className="hover:text-rose-600 transition-colors"
+                    className="hover:text-danger transition-colors"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -653,12 +459,12 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyDown={handleTagKeyPress}
                   placeholder={t('write.tagsPlaceholder', 'Add a tag...')}
-                  className="px-2.5 py-1 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 outline-none focus:ring-1 focus:ring-primary-500 w-28"
+                  className="px-2.5 py-1 text-xs rounded-lg border border-border dark:border-ink-800 bg-surface dark:bg-ink-900 text-text dark:text-sky-100 outline-none focus:ring-1 focus:ring-primary-500 w-28"
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200"
+                  className="text-xs px-2 py-1 bg-sky-100 dark:bg-ink-800 text-text dark:text-sky-200 rounded-lg"
                 >
                   {t('write.addTag', 'Add')}
                 </button>
@@ -667,38 +473,74 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
           </div>
         )}
 
-        {/* AI Exclusion Toggle */}
-        {!focusMode && (
-          <div className="px-6 py-3 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/20 dark:bg-gray-900/10 flex flex-wrap items-center justify-between gap-2">
-            <label htmlFor="aiExcludedToggle" className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                id="aiExcludedToggle"
-                type="checkbox"
-                checked={aiExcluded}
-                onChange={(e) => setAiExcluded(e.target.checked)}
-                className="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer"
-              />
-              <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                {t('write.hideFromAI', 'Hide this entry from AI')}
-              </span>
-            </label>
-            <span className="text-[11px] text-gray-400 dark:text-gray-500">
-              {t('write.hideFromAIDesc', 'Excluded from Ask My Diary and AI Storybooks')}
-            </span>
-          </div>
-        )}
+        {/* Fixed Bottom Toolbar (5 icons + More) & Save */}
+        <div className="sticky bottom-0 z-20 px-4 py-3 border-t border-border dark:border-ink-800 bg-surface/95 dark:bg-ink-900/95 backdrop-blur-sm flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            {/* 1. Mic */}
+            <VoiceInput
+              onInsertText={(text) => {
+                if (editor) {
+                  editor.chain().focus().insertContent(text).run();
+                }
+              }}
+            />
+            {/* 2. Photo */}
+            <button
+              type="button"
+              onClick={() => setActiveDrawer(activeDrawer === 'media' ? 'none' : 'media')}
+              aria-label={t('write.addMedia', 'Add photo')}
+              title={t('write.addMedia', 'Add photo')}
+              className={`p-2 rounded-lg transition-colors ${activeDrawer === 'media' || media.length > 0 ? 'bg-sky-100 text-primary-700 dark:bg-ink-800 dark:text-sky-300' : 'text-muted hover:bg-sky-50 dark:hover:bg-ink-800'}`}
+            >
+              <ImageIcon className="w-4 h-4" />
+            </button>
+            {/* 3. Prompt */}
+            <PromptPicker
+              onSelectPrompt={(pickedPrompt) => {
+                setPrompt(pickedPrompt);
+                if (editor) {
+                  editor.chain().focus().insertContent(`<blockquote><p><strong>${pickedPrompt}</strong></p></blockquote><p></p>`).run();
+                }
+              }}
+            />
+            {/* 4. Tags */}
+            <button
+              type="button"
+              onClick={() => setActiveDrawer(activeDrawer === 'tags' ? 'none' : 'tags')}
+              aria-label={t('write.tags', 'Tags')}
+              title={t('write.tags', 'Tags')}
+              className={`p-2 rounded-lg transition-colors ${activeDrawer === 'tags' || tags.length > 0 ? 'bg-sky-100 text-primary-700 dark:bg-ink-800 dark:text-sky-300' : 'text-muted hover:bg-sky-50 dark:hover:bg-ink-800'}`}
+            >
+              <Tag className="w-4 h-4" />
+            </button>
+            {/* 5. AI-hide */}
+            <button
+              type="button"
+              onClick={() => setAiExcluded((prev) => !prev)}
+              aria-label={t('write.hideFromAI', 'Hide from AI')}
+              title={aiExcluded ? t('write.hiddenFromAI', 'Hidden from AI') : t('write.hideFromAI', 'Hide from AI')}
+              className={`p-2 rounded-lg transition-colors ${aiExcluded ? 'bg-sky-100 text-primary-700 dark:bg-ink-800 dark:text-sky-300' : 'text-muted hover:bg-sky-50 dark:hover:bg-ink-800'}`}
+            >
+              {aiExcluded ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
 
-        {/* Bottom Actions */}
-        <div className="p-4 sm:p-6 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4 bg-gray-50/50 dark:bg-gray-800/20">
-          <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-            <Sparkles className="h-3.5 w-3.5 text-calm-500" />
-            <span>{t('write.contentPlaceholder', 'Honest expression heals the mind.')}</span>
+            {/* More */}
+            <button
+              type="button"
+              onClick={() => setShowMoreSheet(true)}
+              aria-label={t('common.more', 'More')}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-muted hover:bg-sky-50 dark:hover:bg-ink-800"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('common.more', 'More')}</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               type="button"
               variant="ghost"
+              size="sm"
               onClick={handleCancel}
             >
               {t('write.cancel', 'Cancel')}
@@ -706,15 +548,162 @@ export const DiaryEditor: React.FC<DiaryEditorProps> = ({ entry, onSave, onCance
             <Button
               type="button"
               variant="calm"
+              size="sm"
               icon={Save}
               onClick={handleSave}
               disabled={!title.trim()}
             >
-              {t('write.saveEntry', 'Save Entry')}
+              {t('write.saveEntry', 'Save')}
             </Button>
           </div>
         </div>
       </div>
+
+      {/* More Sheet: EmotionWheel, Focus Mode, Formatting, AI helpers */}
+      <BottomSheet
+        open={showMoreSheet}
+        onClose={() => setShowMoreSheet(false)}
+        title={t('common.more', 'More')}
+      >
+        <div className="space-y-5">
+          {/* Focus Mode & Formatting */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border dark:border-ink-800">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                aria-label="Bold"
+                className={`p-2 rounded-lg ${editor?.isActive('bold') ? 'bg-sky-100 text-primary-700 dark:bg-ink-800' : 'text-muted'}`}
+              >
+                <Bold className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                aria-label="Italic"
+                className={`p-2 rounded-lg ${editor?.isActive('italic') ? 'bg-sky-100 text-primary-700 dark:bg-ink-800' : 'text-muted'}`}
+              >
+                <Italic className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                aria-label="Bullet list"
+                className={`p-2 rounded-lg ${editor?.isActive('bulletList') ? 'bg-sky-100 text-primary-700 dark:bg-ink-800' : 'text-muted'}`}
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => editor?.chain().focus().toggleOrderedList().run()}
+                aria-label="Ordered list"
+                className={`p-2 rounded-lg ${editor?.isActive('orderedList') ? 'bg-sky-100 text-primary-700 dark:bg-ink-800' : 'text-muted'}`}
+              >
+                <ListOrdered className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setFocusMode((prev) => !prev);
+                setShowMoreSheet(false);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-border dark:border-ink-800 text-text dark:text-sky-200"
+            >
+              {focusMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              <span>{focusMode ? t('write.exitFocus', 'Exit focus') : t('write.focusMode', 'Focus mode')}</span>
+            </button>
+          </div>
+
+          {/* Mood Score */}
+          <div>
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="font-medium text-text dark:text-sky-200">{t('diary.moodScoreLabel')}</span>
+              <span className="font-semibold text-primary-600">{moodScore}/10</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="10"
+              value={moodScore}
+              onChange={(e) => setMoodScore(parseInt(e.target.value, 10))}
+              className="w-full accent-primary-600 cursor-pointer"
+            />
+          </div>
+
+          {/* Emotion Wheel */}
+          <div>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-text dark:text-sky-200 mb-2">
+              <Sliders className="w-3.5 h-3.5" />
+              <span>{t('diary.feelingsWheel', 'Feelings wheel')}</span>
+            </div>
+            <EmotionWheel
+              selectedEmotions={emotions}
+              onChange={setEmotions}
+              maxSelection={5}
+            />
+          </div>
+
+          {/* AI Helpers */}
+          {settings.allowAIFeatures && !aiExcluded && (
+            <div className="pt-3 border-t border-border dark:border-ink-800 space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    handleCheckMood();
+                    setShowMoreSheet(false);
+                  }}
+                  disabled={isCheckingMood}
+                  icon={Sparkles}
+                >
+                  {isCheckingMood ? t('diary.checkingTone') : t('diary.checkMood')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGetStarters}
+                  disabled={isLoadingStarters}
+                  icon={Sparkles}
+                >
+                  {isLoadingStarters ? t('common.loading', 'Loading...') : t('diary.getStarted', 'Get started')}
+                </Button>
+              </div>
+
+              {showStartersMenu && starters.length > 0 && (
+                <div className="space-y-1.5">
+                  {starters.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        handleInsertStarter(s);
+                        setShowMoreSheet(false);
+                      }}
+                      className="w-full text-left p-2 rounded-xl text-xs bg-sky-50 dark:bg-ink-800 text-text dark:text-sky-200 hover:bg-sky-100"
+                    >
+                      "{s}"
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Stats */}
+          <div className="flex items-center gap-4 text-xs text-muted pt-2 border-t border-border dark:border-ink-800">
+            <span>{t('write.wordCount', { count: wordCount, defaultValue: `${wordCount} words` })}</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              <span>{t('write.readingTime', { count: Math.max(1, Math.ceil(wordCount / 200)), defaultValue: `${Math.max(1, Math.ceil(wordCount / 200))} min read` })}</span>
+            </span>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 };

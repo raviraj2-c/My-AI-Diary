@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  GraduationCap,
   Calendar,
   Plus,
   Trash2,
@@ -134,29 +133,20 @@ export const StudentPage: React.FC = () => {
   return (
     <div className="space-y-8 animate-fade-in max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <div className="flex items-center gap-2.5 text-primary mb-1">
-            <GraduationCap className="w-6 h-6" />
-            <span className="text-xs font-semibold uppercase tracking-wider">{t('student.title', 'Student Companion')}</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold font-serif text-foreground">
-            {t('student.title', 'Academic Balance & Focus')}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {t('student.subtitle', 'Gentle productivity, balanced prep, and stress awareness for exams.')}
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+        <h1 className="text-2xl font-bold font-serif text-foreground">
+          {t('student.title', 'Student')}
+        </h1>
 
         {stats && (
           <div className="flex items-center gap-3">
-            <div className="card px-4 py-2 text-center bg-card">
-              <span className="text-xs text-muted-foreground block">{t('student.todayFocus')}</span>
-              <span className="text-lg font-bold text-foreground font-mono">{t('student.minutes', { count: stats.todayMinutes })}</span>
+            <div className="card px-3 py-1.5 text-center bg-card">
+              <span className="text-[11px] text-muted-foreground block">{t('student.todayFocus')}</span>
+              <span className="text-sm font-bold text-foreground font-mono">{t('student.minutes', { count: stats.todayMinutes })}</span>
             </div>
-            <div className="card px-4 py-2 text-center bg-card">
-              <span className="text-xs text-muted-foreground block">{t('student.sevenDayTotal')}</span>
-              <span className="text-lg font-bold text-foreground font-mono">
+            <div className="card px-3 py-1.5 text-center bg-card">
+              <span className="text-[11px] text-muted-foreground block">{t('student.sevenDayTotal')}</span>
+              <span className="text-sm font-bold text-foreground font-mono">
                 {t('student.hours', { count: Math.round((stats.weekMinutes / 60) * 10) / 10 })}
               </span>
             </div>
@@ -164,32 +154,13 @@ export const StudentPage: React.FC = () => {
         )}
       </div>
 
-      {/* Burnout Early Notice (Gentle, Non-diagnostic) */}
+      {/* Burnout Early Notice (1 gentle line) */}
       {burnout && burnout.status === 'notice' && (
-        <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 animate-slide-up">
-          <div className="flex items-start gap-3">
-            <HeartHandshake className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-            <div>
-              <h3 className="font-semibold text-base">{t('student.pauseReminder')}</h3>
-              <p className="text-sm mt-1 text-amber-800 dark:text-amber-300 leading-relaxed">
-                {burnout.code === 'BURNOUT_WARNING'
-                  ? t('student.burnoutMessage', {
-                      highStressDays: burnout.params?.highStressDays ?? burnout.highStressDays,
-                      checkedDays: burnout.params?.checkedDays ?? 7,
-                      avgSleepHours: burnout.params?.avgSleepHours ?? burnout.avgSleep
-                    })
-                  : burnout.message || t('student.burnoutDesc')}
-              </p>
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                <span className="inline-flex items-center gap-1 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded-full font-medium">
-                  {t('student.highStressDays', { count: burnout.highStressDays })}
-                </span>
-                <span className="inline-flex items-center gap-1 bg-amber-100 dark:bg-amber-900/40 px-2.5 py-1 rounded-full font-medium">
-                  {t('student.avgSleep', { count: burnout.avgSleep })}
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="px-4 py-3 rounded-xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-sky-700 text-ink-900 dark:text-sky-200 flex items-center gap-2.5 text-xs">
+          <HeartHandshake className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
+          <span className="truncate">
+            {t('student.pauseReminder')} — {t('student.highStressDays', { count: burnout.highStressDays })}, {t('student.avgSleep', { count: burnout.avgSleep })}
+          </span>
         </div>
       )}
 
@@ -225,7 +196,7 @@ export const StudentPage: React.FC = () => {
                   key={idx}
                   className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                     win.completed
-                      ? 'bg-calm-50/60 dark:bg-calm-950/20 border-calm-200 dark:border-calm-800'
+                      ? 'bg-sky-50 dark:bg-ink-950 border-border dark:border-ink-800'
                       : 'bg-background border-border hover:border-primary/40'
                   }`}
                 >
@@ -234,7 +205,7 @@ export const StudentPage: React.FC = () => {
                     onClick={() => handleToggleWin(idx)}
                     className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all ${
                       win.completed
-                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        ? 'bg-sky-700 border-sky-700 text-white'
                         : 'border-muted-foreground/40 hover:border-primary'
                     }`}
                   >
@@ -423,8 +394,8 @@ export const StudentPage: React.FC = () => {
                           : isToday
                           ? 'bg-primary text-primary-foreground font-bold animate-pulse'
                           : daysLeft <= 3
-                          ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-200'
-                          : 'bg-calm-100 dark:bg-calm-950/60 text-calm-800 dark:text-calm-200'
+                          ? 'bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-200'
+                          : 'bg-sky-100 dark:bg-ink-950 text-ink-800 dark:text-border'
                       }`}
                     >
                       {isPast

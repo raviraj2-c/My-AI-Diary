@@ -43,7 +43,7 @@ const CATEGORIES: CategoryConfig[] = [
     placeholderKey: 'copingPlan.warningSignsPlaceholder',
     defaultPlaceholder: 'e.g. Can not sleep, withdrawing from friends, racing thoughts',
     icon: AlertCircle,
-    colorClass: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40'
+    colorClass: 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-ink-900'
   },
   {
     key: 'copingStrategies',
@@ -65,7 +65,7 @@ const CATEGORIES: CategoryConfig[] = [
     placeholderKey: 'copingPlan.peoplePlaceholder',
     defaultPlaceholder: 'e.g. Maya (sister) - 555-0192, Dr. Sharma, Campus counseling line',
     icon: Users,
-    colorClass: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40'
+    colorClass: 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-ink-900'
   },
   {
     key: 'safePlaces',
@@ -76,7 +76,7 @@ const CATEGORIES: CategoryConfig[] = [
     placeholderKey: 'copingPlan.safePlacesPlaceholder',
     defaultPlaceholder: 'e.g. My bedroom with warm lamp, quiet corner at library, the neighborhood park bench',
     icon: Compass,
-    colorClass: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40'
+    colorClass: 'text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-ink-900'
   },
   {
     key: 'reasonsToKeepGoing',
@@ -87,7 +87,7 @@ const CATEGORIES: CategoryConfig[] = [
     placeholderKey: 'copingPlan.reasonsPlaceholder',
     defaultPlaceholder: 'e.g. My dog Bruno, wanting to see the ocean again, my future self',
     icon: Sparkles,
-    colorClass: 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40'
+    colorClass: 'text-danger dark:text-danger bg-sky-50 dark:bg-danger'
   }
 ];
 
@@ -197,16 +197,16 @@ export const CopingPlanSettings: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl" id="coping-plan">
       {/* Intro Box */}
-      <Card className="p-5 bg-gradient-to-r from-calm-50 to-primary-50/40 dark:from-slate-900/80 dark:to-primary-950/20 border-primary-100 dark:border-primary-900/40">
+      <Card className="p-5 bg-surface   dark: dark: border-primary-100 dark:border-primary-900/40">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-xl bg-primary-600 text-white shrink-0">
             <HeartHandshake className="w-5 h-5" />
           </div>
           <div className="space-y-1">
-            <h3 className="font-serif font-bold text-base text-calm-900 dark:text-calm-100">
+            <h3 className="font-serif font-bold text-base text-ink-900 dark:text-sky-100">
               {t('copingPlan.heading', 'Personal Safety & Coping Plan')}
             </h3>
-            <p className="text-xs text-calm-600 dark:text-calm-300 leading-relaxed font-serif">
+            <p className="text-xs text-muted dark:text-sky-200 leading-relaxed font-serif">
               {t(
                 'copingPlan.introText',
                 'When intense emotions or crisis thoughts arrive, thinking clearly is hard. Having your own written anchors ready makes all the difference. Your plan is saved with AES-256 encryption and shown directly in the SOS panel.'
@@ -231,16 +231,16 @@ export const CopingPlanSettings: React.FC = () => {
                     <Icon className="w-4 h-4" />
                   </span>
                   <div>
-                    <h4 className="font-semibold text-sm text-calm-900 dark:text-calm-100">
+                    <h4 className="font-semibold text-sm text-ink-900 dark:text-sky-100">
                       {t(cat.titleKey, cat.defaultTitle)}
                     </h4>
-                    <p className="text-xs text-calm-500 dark:text-calm-400">
+                    <p className="text-xs text-muted dark:text-muted">
                       {t(cat.subtitleKey, cat.defaultSubtitle)}
                     </p>
                   </div>
                 </div>
 
-                <span className="text-[11px] text-calm-400 font-mono">
+                <span className="text-[11px] text-muted font-mono">
                   {items.length}/10
                 </span>
               </div>
@@ -253,13 +253,13 @@ export const CopingPlanSettings: React.FC = () => {
                     return (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-calm-100 dark:bg-slate-800 text-xs text-calm-800 dark:text-calm-200 border border-calm-200/60 dark:border-slate-700 animate-fade-in"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 dark:bg-slate-800 text-xs text-ink-800 dark:text-border border border-border dark:border-slate-700 animate-fade-in"
                       >
                         <span>{text}</span>
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(cat.key, idx)}
-                          className="text-calm-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors ml-0.5"
+                          className="text-muted hover:text-danger dark:hover:text-danger transition-colors ml-0.5"
                           aria-label="Remove item"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -287,7 +287,7 @@ export const CopingPlanSettings: React.FC = () => {
                       }
                     }}
                     placeholder={t(cat.placeholderKey, cat.defaultPlaceholder)}
-                    className="flex-1 px-3 py-2 rounded-xl border border-calm-200 dark:border-calm-800 bg-white dark:bg-slate-900 text-xs text-calm-900 dark:text-calm-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    className="flex-1 px-3 py-2 rounded-xl border border-border dark:border-ink-800 bg-white dark:bg-slate-900 text-xs text-ink-900 dark:text-sky-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                   <Button
                     type="button"
@@ -307,9 +307,9 @@ export const CopingPlanSettings: React.FC = () => {
       </div>
 
       {/* Save Button & Security Footer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-calm-200 dark:border-calm-800">
-        <div className="flex items-center gap-1.5 text-xs text-calm-500 dark:text-calm-400">
-          <Lock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-3 border-t border-border dark:border-ink-800">
+        <div className="flex items-center gap-1.5 text-xs text-muted dark:text-muted">
+          <Lock className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400 shrink-0" />
           <span>{t('copingPlan.encryptedFooter', 'Encrypted at rest with AES-256. Private to your account.')}</span>
         </div>
 

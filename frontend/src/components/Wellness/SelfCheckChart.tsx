@@ -21,8 +21,8 @@ export const SelfCheckChart: React.FC<SelfCheckChartProps> = ({ type, results })
   const { t } = useTranslation();
   if (!results || results.length < 2) {
     return (
-      <div className="p-6 rounded-2xl bg-calm-50/70 dark:bg-gray-800/40 border border-calm-200/80 dark:border-gray-800 text-center space-y-2">
-        <p className="text-xs font-medium text-calm-700 dark:text-calm-300">
+      <div className="p-6 rounded-2xl bg-sky-50 dark:bg-gray-800/40 border border-border dark:border-gray-800 text-center space-y-2">
+        <p className="text-xs font-medium text-text dark:text-sky-200">
           {t('selfcheck.chartHint')}
         </p>
         <p className="text-[11px] text-gray-400 dark:text-gray-500 italic">

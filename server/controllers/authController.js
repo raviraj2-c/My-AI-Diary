@@ -49,7 +49,8 @@ function formatUserSettings(user) {
     appLockEnabled: user.appLockEnabled || false,
     appLockTimeoutMinutes: user.appLockTimeoutMinutes || 5,
     allowAIFeatures: user.allowAIFeatures || false,
-    allowDiaryAI: user.allowDiaryAI || false
+    allowDiaryAI: user.allowDiaryAI || false,
+    isStudent: user.isStudent || false
   };
 }
 
@@ -72,7 +73,15 @@ function formatUserResponse(user) {
 
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, timezone } = req.body;
+    const { name, email, password, timezone, ageConfirmed } = req.body;
+
+    if (ageConfirmed !== true) {
+      return res.status(400).json({
+        success: false,
+        code: 'AGE_CONFIRMATION_REQUIRED',
+        message: 'You must confirm that you are 18 years or older to create an account'
+      });
+    }
 
     if (!isNonEmptyString(name) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
       return res.status(400).json({
@@ -119,7 +128,8 @@ const register = async (req, res, next) => {
       name: name.trim(),
       email: normalizedEmail,
       password,
-      timezone: userTz
+      timezone: userTz,
+      ageConfirmedAt: new Date()
     });
 
     const token = generateToken(user._id, user.tokenVersion || 0);
@@ -320,6 +330,9 @@ const updateSettings = async (req, res, next) => {
     }
     if (settings.allowDiaryAI !== undefined) {
       updateData.allowDiaryAI = Boolean(settings.allowDiaryAI);
+    }
+    if (settings.isStudent !== undefined) {
+      updateData.isStudent = Boolean(settings.isStudent);
     }
     if (settings.timezone !== undefined) {
       if (!isValidTimezone(settings.timezone)) {

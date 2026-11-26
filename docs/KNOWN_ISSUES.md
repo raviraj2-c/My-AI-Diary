@@ -94,22 +94,22 @@ Examiners appreciate intellectual honesty. No production system is without trade
 
 | Country | Name | Phone / Link | Official URL | Last Checked | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **India (IN)** | Tele-MANAS (Govt of India) | `14416` | [https://telemanas.mohfw.gov.in](https://telemanas.mohfw.gov.in) | 2026-11-20 | **Needs manual check** |
-| **India (IN)** | Tele-MANAS Toll Free Alternative | `1800-891-4416` | [https://telemanas.mohfw.gov.in](https://telemanas.mohfw.gov.in) | 2026-11-20 | **Needs manual check** |
-| **India (IN)** | KIRAN (Dept of Empowerment of PwDs) | `1800-599-0019` | [https://disabilityaffairs.gov.in](https://disabilityaffairs.gov.in) | 2026-11-20 | **Needs manual check** |
-| **India (IN)** | Vandrevala Foundation | `+91 9999 666 555` | [https://www.vandrevalafoundation.com](https://www.vandrevalafoundation.com) | 2026-11-20 | **Needs manual check** |
-| **United States (US)** | 988 Suicide & Crisis Lifeline | `988` | [https://988lifeline.org](https://988lifeline.org) | 2026-11-20 | **Needs manual check** |
-| **United States (US)** | Crisis Text Line | Text `HOME` to `741741` | [https://www.crisistextline.org](https://www.crisistextline.org) | 2026-11-20 | **Needs manual check** |
-| **United States (US)** | The Trevor Project (LGBTQ Youth) | `1-866-488-7386` | [https://www.thetrevorproject.org](https://www.thetrevorproject.org) | 2026-11-20 | **Needs manual check** |
-| **United Kingdom (UK)** | NHS Mental Health Services | `111` | [https://111.nhs.uk](https://111.nhs.uk) | 2026-11-20 | **Needs manual check** |
-| **United Kingdom (UK)** | Samaritans | `116 123` | [https://www.samaritans.org](https://www.samaritans.org) | 2026-11-20 | **Needs manual check** |
-| **United Kingdom (UK)** | Shout Crisis Text Line | Text `SHOUT` to `85258` | [https://giveusashout.org](https://giveusashout.org) | 2026-11-20 | **Needs manual check** |
-| **Canada (CA)** | 988 Suicide Crisis Helpline | `988` | [https://988.ca](https://988.ca) | 2026-11-20 | **Needs manual check** |
-| **Canada (CA)** | Kids Help Phone | `1-800-668-6868` | [https://kidshelpphone.ca](https://kidshelpphone.ca) | 2026-11-20 | **Needs manual check** |
-| **Australia (AU)** | Lifeline Australia | `13 11 14` | [https://www.lifeline.org.au](https://www.lifeline.org.au) | 2026-11-20 | **Needs manual check** |
-| **Australia (AU)** | Beyond Blue | `1300 22 4636` | [https://www.beyondblue.org.au](https://www.beyondblue.org.au) | 2026-11-20 | **Needs manual check** |
-| **Global / International** | Find A Helpline (Global Directory) | `findahelpline.com` | [https://findahelpline.com](https://findahelpline.com) | 2026-11-20 | **Needs manual check** |
-| **Global / International** | Befrienders Worldwide | `befrienders.org` | [https://www.befrienders.org](https://www.befrienders.org) | 2026-11-20 | **Needs manual check** |
+| **India (IN)** | Tele-MANAS (Govt of India) | `14416` | [https://telemanas.mohfw.gov.in](https://telemanas.mohfw.gov.in) | `null` | `- [ ]` Needs manual check |
+| **India (IN)** | Tele-MANAS Toll Free Alternative | `1800-891-4416` | [https://telemanas.mohfw.gov.in](https://telemanas.mohfw.gov.in) | `null` | `- [ ]` Needs manual check |
+| **India (IN)** | KIRAN (Dept of Empowerment of PwDs) | `1800-599-0019` | [https://depwd.gov.in](https://depwd.gov.in) | `null` | `- [ ]` Needs manual check |
+| **India (IN)** | Vandrevala Foundation | `+91 9999 666 555` | [https://www.vandrevalafoundation.com](https://www.vandrevalafoundation.com) | `null` | `- [ ]` Needs manual check |
+| **United States (US)** | 988 Suicide & Crisis Lifeline | `988` | [https://988lifeline.org](https://988lifeline.org) | `null` | `- [ ]` Needs manual check |
+| **United States (US)** | Crisis Text Line | Text `HOME` to `741741` | [https://www.crisistextline.org](https://www.crisistextline.org) | `null` | `- [ ]` Needs manual check |
+| **United States (US)** | The Trevor Project (LGBTQ Youth) | `1-866-488-7386` | [https://www.thetrevorproject.org](https://www.thetrevorproject.org) | `null` | `- [ ]` Needs manual check |
+| **United Kingdom (UK)** | NHS Mental Health Services | `111` | [https://111.nhs.uk](https://111.nhs.uk) | `null` | `- [ ]` Needs manual check |
+| **United Kingdom (UK)** | Samaritans | `116 123` | [https://www.samaritans.org](https://www.samaritans.org) | `null` | `- [ ]` Needs manual check |
+| **United Kingdom (UK)** | Shout Crisis Text Line | Text `SHOUT` to `85258` | [https://giveusashout.org](https://giveusashout.org) | `null` | `- [ ]` Needs manual check |
+| **Canada (CA)** | 988 Suicide Crisis Helpline | `988` | [https://988.ca](https://988.ca) | `null` | `- [ ]` Needs manual check |
+| **Canada (CA)** | Kids Help Phone | `1-800-668-6868` | [https://kidshelpphone.ca](https://kidshelpphone.ca) | `null` | `- [ ]` Needs manual check |
+| **Australia (AU)** | Lifeline Australia | `13 11 14` | [https://www.lifeline.org.au](https://www.lifeline.org.au) | `null` | `- [ ]` Needs manual check |
+| **Australia (AU)** | Beyond Blue | `1300 22 4636` | [https://www.beyondblue.org.au](https://www.beyondblue.org.au) | `null` | `- [ ]` Needs manual check |
+| **Global / International** | Find A Helpline (Global Directory) | `findahelpline.com` | [https://findahelpline.com](https://findahelpline.com) | `null` | `- [ ]` Needs manual check |
+| **Global / International** | Befrienders Worldwide | `befrienders.org` | [https://www.befrienders.org](https://www.befrienders.org) | `null` | `- [ ]` Needs manual check |
 
 ---
 

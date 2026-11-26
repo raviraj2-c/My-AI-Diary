@@ -38,8 +38,8 @@ export const ExportPage: React.FC = () => {
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('export.title')}</h1>
-          <p className="text-sm text-calm-500 dark:text-calm-400 mt-0.5">
+          <h1 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('export.title')}</h1>
+          <p className="text-sm text-muted dark:text-muted mt-0.5">
             {t('export.subtitle')}
           </p>
         </div>
@@ -52,35 +52,35 @@ export const ExportPage: React.FC = () => {
 
       <StorybookExport entries={entries} />
 
-      <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800">
-        <h3 className="text-base font-semibold text-calm-900 dark:text-calm-50 mb-1">{t('export.ownershipTitle')}</h3>
-        <p className="text-xs text-calm-500 dark:text-calm-400 mb-6">
+      <Card className="p-6 md:p-8 border-border dark:border-ink-800">
+        <h3 className="text-base font-semibold text-ink-900 dark:text-sky-50 mb-1">{t('export.ownershipTitle')}</h3>
+        <p className="text-xs text-muted dark:text-muted mb-6">
           {t('export.ownershipDesc')}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-calm-200 dark:border-calm-800 bg-calm-50/50 dark:bg-calm-900/30 flex flex-col justify-between">
+          <div className="p-4 rounded-xl border border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-900 flex flex-col justify-between">
             <div>
               <div className="flex items-center gap-2.5 mb-2 text-primary-600 dark:text-primary-400">
                 <FileText className="h-5 w-5" />
-                <h4 className="font-semibold text-sm text-calm-900 dark:text-calm-100">{t('export.storybookCardTitle')}</h4>
+                <h4 className="font-semibold text-sm text-ink-900 dark:text-sky-100">{t('export.storybookCardTitle')}</h4>
               </div>
-              <p className="text-xs text-calm-600 dark:text-calm-400 leading-relaxed">
+              <p className="text-xs text-muted dark:text-muted leading-relaxed">
                 {t('export.storybookCardDesc')}
               </p>
             </div>
-            <div className="mt-4 flex items-center text-xs text-calm-400">
+            <div className="mt-4 flex items-center text-xs text-muted">
               <span>{t('export.storybookConfigurable')}</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl border border-calm-200 dark:border-calm-800 bg-calm-50/50 dark:bg-calm-900/30 flex flex-col justify-between">
+          <div className="p-4 rounded-xl border border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-900 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2.5 mb-2 text-calm-700 dark:text-calm-200">
+              <div className="flex items-center gap-2.5 mb-2 text-text dark:text-border">
                 <Database className="h-5 w-5" />
-                <h4 className="font-semibold text-sm text-calm-900 dark:text-calm-100">{t('export.jsonCardTitle')}</h4>
+                <h4 className="font-semibold text-sm text-ink-900 dark:text-sky-100">{t('export.jsonCardTitle')}</h4>
               </div>
-              <p className="text-xs text-calm-600 dark:text-calm-400 leading-relaxed">
+              <p className="text-xs text-muted dark:text-muted leading-relaxed">
                 {t('export.jsonCardDesc')}
               </p>
             </div>
@@ -98,8 +98,8 @@ export const ExportPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-calm-100 dark:border-calm-800 flex items-center gap-2 text-xs text-calm-400">
-          <ShieldCheck className="w-4 h-4 text-calm-500" />
+        <div className="mt-6 pt-4 border-t border-sky-100 dark:border-ink-800 flex items-center gap-2 text-xs text-muted">
+          <ShieldCheck className="w-4 h-4 text-muted" />
           <span>{t('export.browserNotice')}</span>
         </div>
       </Card>

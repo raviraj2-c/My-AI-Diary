@@ -12,49 +12,89 @@ import 'react-calendar/dist/Calendar.css';
 import { CalendarProps } from 'react-calendar';
 type Value = CalendarProps['value'];
 
+export interface CalendarMonthItem {
+  date: string;
+  count: number;
+  mood: string;
+  hasMedia: boolean;
+}
+
 interface CalendarViewProps {
   entries: DiaryEntry[];
+  monthItems?: CalendarMonthItem[];
+  onMonthChange?: (month: string) => void;
+  onDayTap?: (dateKey: string) => void;
   onDateSelect: (date: Date) => void;
   onEntrySelect: (entry: DiaryEntry) => void;
 }
 
-export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelect, onEntrySelect }) => {
+export const CalendarView: React.FC<CalendarViewProps> = ({
+  entries,
+  monthItems,
+  onMonthChange,
+  onDayTap,
+  onDateSelect,
+  onEntrySelect
+}) => {
   const { t, i18n } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const toLocalDateKey = (d: Date): string => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+
+  const monthDateSet = new Set((monthItems || []).map((item) => item.date));
 
   const getEntriesForDate = (date: Date): DiaryEntry[] => {
     return entries.filter(entry => isSameDay(new Date(entry.entryDate || entry.date || Date.now()), date));
   };
 
   const hasEntryOnDate = (date: Date): boolean => {
+    if (monthItems) {
+      return monthDateSet.has(toLocalDateKey(date));
+    }
     return entries.some(entry => isSameDay(new Date(entry.entryDate || entry.date || Date.now()), date));
   };
 
   const handleDateChange = (value: Value) => {
     if (value instanceof Date) {
       setSelectedDate(value);
-      onDateSelect(value);
+      if (onDayTap) {
+        onDayTap(toLocalDateKey(value));
+      } else {
+        onDateSelect(value);
+      }
     }
   };
 
   const selectedDateEntries = getEntriesForDate(selectedDate);
 
   return (
-    <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800">
+    <Card className="p-6 md:p-8 border-border dark:border-ink-800">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
           <div className="flex items-center gap-2 mb-4">
             <CalendarIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
-            <h3 className="text-base font-semibold text-calm-900 dark:text-calm-50">{t('calendar.selectDate')}</h3>
+            <h3 className="text-base font-semibold text-ink-900 dark:text-sky-50">{t('calendar.selectDate')}</h3>
           </div>
 
-          <div className="calendar-wrapper rounded-2xl overflow-hidden p-2 bg-calm-50/50 dark:bg-calm-900/30 border border-calm-200/80 dark:border-calm-800">
+          <div className="calendar-wrapper rounded-2xl overflow-hidden p-2 bg-sky-50 dark:bg-ink-900 border border-border dark:border-ink-800">
             <Calendar
               onChange={handleDateChange}
               value={selectedDate}
+              onActiveStartDateChange={({ activeStartDate }) => {
+                if (activeStartDate && onMonthChange) {
+                  const y = activeStartDate.getFullYear();
+                  const m = String(activeStartDate.getMonth() + 1).padStart(2, '0');
+                  onMonthChange(`${y}-${m}`);
+                }
+              }}
               tileClassName={({ date, view }) => {
                 if (view === 'month' && hasEntryOnDate(date)) {
-                  return 'calm-has-entry';
+                  return 'sky-has-entry';
                 }
                 return '';
               }}
@@ -66,10 +106,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
         <div className="flex flex-col">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-semibold text-calm-900 dark:text-calm-50">
+              <h3 className="text-base font-semibold text-ink-900 dark:text-sky-50">
                 {selectedDate.toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </h3>
-              <p className="text-xs text-calm-500">
+              <p className="text-xs text-muted">
                 {selectedDateEntries.length} {t('dashboard.recentEntries', 'reflections')}
               </p>
             </div>
@@ -92,10 +132,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
                   <div
                     key={entry.id}
                     onClick={() => onEntrySelect(entry)}
-                    className="p-4 rounded-xl border border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b] hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xs transition-all cursor-pointer group"
+                    className="p-4 rounded-xl border border-border dark:border-ink-800 bg-white dark:bg-[#1e293b] hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xs transition-all cursor-pointer group"
                   >
                     <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <h4 className="font-serif font-semibold text-calm-900 dark:text-calm-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
+                      <h4 className="font-serif font-semibold text-ink-900 dark:text-sky-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
                         {entry.title || 'Untitled reflection'}
                       </h4>
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${moodMeta.badgeClass}`}>
@@ -103,7 +143,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
                         <span>{moodMeta.label}</span>
                       </span>
                     </div>
-                    <p className="text-xs text-calm-600 dark:text-calm-400 line-clamp-2 leading-relaxed">
+                    <p className="text-xs text-muted dark:text-muted line-clamp-2 leading-relaxed">
                       {plainPreview || 'No text content.'}
                     </p>
                     {entry.tags.length > 0 && (
@@ -118,10 +158,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
               })}
             </div>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b]">
-              <Sparkles className="w-8 h-8 text-calm-300 dark:text-calm-600 mb-2" />
-              <p className="text-sm text-calm-600 dark:text-calm-300 font-medium">{t('calendar.noEntry')}</p>
-              <p className="text-xs text-calm-400 max-w-xs mt-1">
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border dark:border-ink-800 bg-white dark:bg-[#1e293b]">
+              <Sparkles className="w-8 h-8 text-sky-200 dark:text-muted mb-2" />
+              <p className="text-sm text-muted dark:text-sky-200 font-medium">{t('calendar.noEntry')}</p>
+              <p className="text-xs text-muted max-w-xs mt-1">
                 {t('calendar.noEntryPrompt')}
               </p>
               <Button
@@ -181,10 +221,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
           color: white !important;
           font-weight: 600 !important;
         }
-        .calm-has-entry {
+        .sky-has-entry {
           position: relative;
         }
-        .calm-has-entry::after {
+        .sky-has-entry::after {
           content: '';
           position: absolute;
           bottom: 3px;
@@ -195,7 +235,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
           border-radius: 50%;
           background-color: #10b981;
         }
-        .react-calendar__tile--active.calm-has-entry::after {
+        .react-calendar__tile--active.sky-has-entry::after {
           background-color: white;
         }
         .dark .react-calendar__tile {

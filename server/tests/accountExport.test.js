@@ -22,7 +22,7 @@ describe('Account Export and Deletion Flow', () => {
         name: 'Export Tester',
         email: `export-${Date.now()}@example.com`,
         password: userPassword
-      });
+      , ageConfirmed: true});
 
     token = regRes.body.token;
     user = regRes.body.user;

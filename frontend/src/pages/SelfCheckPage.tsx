@@ -168,7 +168,7 @@ export const SelfCheckPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-gray-500 font-serif max-w-lg mx-auto leading-relaxed">
             {t('selfcheck.subtitle', 'Standard, scientifically validated screening tools to help you identify how your mind and body are holding up.')}
           </p>
-          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-[11px] text-amber-800 dark:text-amber-300 max-w-lg mx-auto">
+          <div className="p-2.5 rounded-xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 text-[11px] text-sky-700 dark:text-sky-200 max-w-lg mx-auto">
             {t('selfcheck.clinicalReviewNote', 'Clinical Notice: Translated text is for reflection and needs clinical review.')}
           </div>
         </div>
@@ -249,7 +249,7 @@ export const SelfCheckPage: React.FC = () => {
             return (
               <Card
                 key={typeKey}
-                className="p-6 border-calm-200 dark:border-gray-800 flex flex-col justify-between space-y-4 hover:shadow-soft-md transition-shadow"
+                className="p-6 border-border dark:border-gray-800 flex flex-col justify-between space-y-4 hover:shadow-soft-md transition-shadow"
               >
                 <div className="space-y-2">
                   <div className="text-xs font-semibold uppercase tracking-wider text-primary-600 dark:text-primary-400">
@@ -283,9 +283,9 @@ export const SelfCheckPage: React.FC = () => {
       {/* In-Progress: One Question Per Screen */}
       {/* TODO: Replace with clinically validated Hindi version of PHQ-9 and GAD-7 */}
       {isInProgress && (
-        <Card className="p-6 sm:p-10 border-calm-200 dark:border-gray-800 space-y-6">
+        <Card className="p-6 sm:p-10 border-border dark:border-gray-800 space-y-6">
           {/* Clinical Review Notice Banner */}
-          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-[11px] text-amber-800 dark:text-amber-300">
+          <div className="p-2.5 rounded-xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 text-[11px] text-sky-700 dark:text-sky-200">
             {t('selfcheck.clinicalReviewNote', 'Clinical Notice: Translated text is for reflection and needs clinical review.')}
           </div>
 
@@ -354,7 +354,7 @@ export const SelfCheckPage: React.FC = () => {
 
       {/* Completed Results Screen */}
       {completedResult && (
-        <Card className="p-6 sm:p-10 border-calm-200 dark:border-gray-800 space-y-6">
+        <Card className="p-6 sm:p-10 border-border dark:border-gray-800 space-y-6">
           <div className="text-center space-y-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">
               {completedResult.questionnaire.shortName} {t('selfcheck.scoreLabel', 'Screening Result')}
@@ -384,13 +384,13 @@ export const SelfCheckPage: React.FC = () => {
           </div>
 
           {/* CRITICAL Clinical Disclaimer Banner */}
-          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 flex items-start gap-3 text-xs text-amber-900 dark:text-amber-200">
-            <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 flex items-start gap-3 text-xs text-ink-900 dark:text-sky-200">
+            <AlertCircle className="w-5 h-5 shrink-0 text-sky-700 mt-0.5" />
             <div className="space-y-1">
               <p className="font-bold">
                 {t('selfcheck.clinicalNote', 'This is a screening, not a diagnosis. Please talk to a doctor or counselor.')}
               </p>
-              <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+              <p className="text-[11px] leading-relaxed text-sky-700 dark:text-sky-200">
                 {t('selfcheck.clinicalReviewNote', 'Clinical Notice: Translated text is for reflection and needs clinical review.')}
               </p>
             </div>

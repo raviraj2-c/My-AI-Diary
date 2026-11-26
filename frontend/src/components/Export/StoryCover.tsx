@@ -23,37 +23,37 @@ const themeStyles: Record<
   }
 > = {
   romantic: {
-    gradient: 'from-rose-900 via-pink-900 to-rose-950',
-    border: 'border-rose-400/30',
-    accent: 'text-rose-200',
+    gradient: ' via-pink-900 ',
+    border: 'border-danger',
+    accent: 'text-danger',
     Icon: Heart,
     motif: '💌'
   },
   dramatic: {
-    gradient: 'from-slate-950 via-indigo-950 to-purple-950',
-    border: 'border-indigo-400/30',
-    accent: 'text-indigo-200',
+    gradient: '  ',
+    border: 'border-sky-400',
+    accent: 'text-sky-200',
     Icon: Sparkles,
     motif: '🎭'
   },
   adventure: {
-    gradient: 'from-emerald-950 via-teal-950 to-amber-950',
-    border: 'border-emerald-400/30',
-    accent: 'text-emerald-200',
+    gradient: '  ',
+    border: 'border-sky-400',
+    accent: 'text-sky-200',
     Icon: Compass,
     motif: '🧭'
   },
   mystery: {
-    gradient: 'from-gray-950 via-slate-900 to-sky-950',
+    gradient: '  ',
     border: 'border-sky-400/30',
     accent: 'text-sky-200',
     Icon: Search,
     motif: '🔍'
   },
   comedy: {
-    gradient: 'from-amber-950 via-orange-950 to-yellow-950',
-    border: 'border-amber-400/30',
-    accent: 'text-amber-200',
+    gradient: '  to-yellow-950',
+    border: 'border-sky-400',
+    accent: 'text-sky-200',
     Icon: Sun,
     motif: '☀️'
   }
@@ -82,13 +82,13 @@ export const StoryCover: React.FC<StoryCoverProps> = ({
 
   return (
     <div
-      className={`relative select-none overflow-hidden rounded-2xl bg-gradient-to-br ${current.gradient} ${current.border} border shadow-soft-xl flex flex-col justify-between items-center text-white ${sizeClasses} ${className}`}
+      className={`relative select-none overflow-hidden rounded-2xl bg-surface ${current.gradient} ${current.border} border shadow-soft-xl flex flex-col justify-between items-center text-white ${sizeClasses} ${className}`}
       style={{
         boxShadow: '0 20px 40px -15px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.15)'
       }}
     >
       {/* Subtle decorative book spine shading on left */}
-      <div className="absolute top-0 bottom-0 left-0 w-3 bg-gradient-to-r from-black/50 to-transparent pointer-events-none" />
+      <div className="absolute top-0 bottom-0 left-0 w-3 bg-surface from-black/50 to-transparent pointer-events-none" />
       <div className="absolute top-0 bottom-0 left-3 w-px bg-white/10 pointer-events-none" />
 
       {/* Subtle corner ornamental SVG frames */}

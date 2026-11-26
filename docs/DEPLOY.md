@@ -31,7 +31,9 @@ This guide covers deploying the **MindDiary** full-stack system:
 | `CLOUDINARY_API_KEY` | Yes | Cloudinary API Key |
 | `CLOUDINARY_API_SECRET` | Yes | Cloudinary API Secret |
 | `GEMINI_API_KEY` | Optional | `AIza...` (required for Gemini AI reflections and chat) |
-| `AI_MODEL` | Optional | `gemini-2.5-flash` |
+| `GEMINI_MODEL` | Optional | Set to a model name printed by `npm run ai:check` (default `gemini-2.5-flash`) |
+| `GEMINI_TIER` | Optional | `free` (default) or `paid`. **Use `paid` only if the Google Cloud project has billing enabled.** |
+| `ALLOW_FREE_TIER_DIARY_AI` | Optional | `false` (default). Set `true` only for demos with fake/non-personal data when `GEMINI_TIER=free` in production. |
 | `SMTP_HOST` | Optional | E.g. `smtp.sendgrid.net` or `smtp.gmail.com` |
 | `SMTP_PORT` | Optional | `587` |
 | `SMTP_USER` | Optional | SMTP username |

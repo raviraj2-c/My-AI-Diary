@@ -152,7 +152,7 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
                   type="button"
                   onClick={() => setDeleteConfirmOpen(true)}
                   aria-label={`Delete ${entry.title}`}
-                  className="p-2 text-gray-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors"
+                  className="p-2 text-gray-400 hover:text-danger dark:hover:text-danger hover:bg-sky-50 dark:hover:bg-danger rounded-xl transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -225,7 +225,7 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
                 </button>
               )}
 
-              <div className="flex items-center gap-2 text-[11px] text-calm-400">
+              <div className="flex items-center gap-2 text-[11px] text-muted">
                 {imageCount > 0 && (
                   <span className="inline-flex items-center gap-1" title={`${imageCount} images attached`}>
                     <ImageIcon className="h-3 w-3 text-primary-500" />
@@ -234,13 +234,13 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
                 )}
                 {videoCount > 0 && (
                   <span className="inline-flex items-center gap-1" title={`${videoCount} videos attached`}>
-                    <Film className="h-3 w-3 text-amber-500" />
+                    <Film className="h-3 w-3 text-sky-500" />
                     <span>{videoCount}</span>
                   </span>
                 )}
                 {audioCount > 0 && (
                   <span className="inline-flex items-center gap-1" title={`${audioCount} voice notes attached`}>
-                    <FileAudio className="h-3 w-3 text-emerald-500" />
+                    <FileAudio className="h-3 w-3 text-sky-500" />
                     <span>{audioCount}</span>
                   </span>
                 )}
@@ -264,7 +264,7 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
               {isAIOff && (
                 <div
                   role="alert"
-                  className="p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-900/40 text-xs text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2"
+                  className="p-3.5 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 text-xs text-ink-900 dark:text-sky-200 flex flex-wrap items-center justify-between gap-2"
                 >
                   <span>{t('diary.aiDisabledMsg', 'AI reflection is turned off in your settings.')}</span>
                   <Link
@@ -288,13 +288,13 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
               {reflectionError && (
                 <div
                   role="alert"
-                  className="p-3.5 rounded-2xl bg-rose-50/80 dark:bg-rose-950/30 border border-rose-200/70 dark:border-rose-900/40 text-xs text-rose-700 dark:text-rose-300 flex items-center justify-between gap-2"
+                  className="p-3.5 rounded-2xl bg-sky-50 dark:bg-danger border border-danger dark:border-danger text-xs text-danger dark:text-danger flex items-center justify-between gap-2"
                 >
                   <span>{reflectionError}</span>
                   <button
                     type="button"
                     onClick={handleReflect}
-                    className="inline-flex items-center gap-1 font-semibold underline hover:text-rose-900 dark:hover:text-rose-100 shrink-0"
+                    className="inline-flex items-center gap-1 font-semibold underline hover:text-danger dark:hover:text-danger shrink-0"
                   >
                     <RotateCcw className="h-3 w-3" />
                     <span>{t('diary.retry', 'Retry')}</span>
@@ -310,7 +310,7 @@ export const DiaryEntry: React.FC<DiaryEntryProps> = ({ entry, onEdit, onDelete 
                     trustedContact={settings?.trustedContact}
                   />
                 ) : (
-                  <div className="p-4 rounded-2xl bg-calm-50/80 dark:bg-calm-950/40 border border-calm-200/80 dark:border-calm-800 text-xs space-y-2">
+                  <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-950 border border-border dark:border-ink-800 text-xs space-y-2">
                     <div className="flex items-center gap-1.5 font-semibold text-primary-700 dark:text-primary-300">
                       <Sparkles className="h-3.5 w-3.5" />
                       <span>{t('diary.reflectionTitle', 'Gentle Reflection')}</span>

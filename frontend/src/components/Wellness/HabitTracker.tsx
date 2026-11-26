@@ -58,22 +58,22 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
   };
 
   return (
-    <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-calm-100 dark:border-calm-800">
+    <Card className="p-6 md:p-8 border-border dark:border-ink-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-sky-100 dark:border-ink-800">
         <div>
-          <h3 className="text-lg font-serif font-bold text-calm-900 dark:text-calm-50">{t('checkin.habitsTitle', 'Daily Habits')}</h3>
-          <p className="text-xs text-calm-500">{t('checkin.subtitle', 'Gentle tracking of physical foundations')}</p>
+          <h3 className="text-lg font-serif font-bold text-ink-900 dark:text-sky-50">{t('checkin.habitsTitle', 'Daily Habits')}</h3>
+          <p className="text-xs text-muted">{t('checkin.subtitle', 'Gentle tracking of physical foundations')}</p>
         </div>
 
         {/* Date Selector / Yesterday Shortcut */}
-        <div className="flex items-center gap-1.5 bg-calm-100 dark:bg-calm-800 p-1 rounded-xl">
+        <div className="flex items-center gap-1.5 bg-sky-100 dark:bg-ink-800 p-1 rounded-xl">
           <button
             type="button"
             onClick={() => setIsYesterday(false)}
             className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
               !isYesterday
-                ? 'bg-white dark:bg-[#1e293b] text-calm-900 dark:text-calm-100 shadow-xs'
-                : 'text-calm-500 hover:text-calm-800 dark:hover:text-calm-200'
+                ? 'bg-white dark:bg-[#1e293b] text-ink-900 dark:text-sky-100 shadow-xs'
+                : 'text-muted hover:text-ink-800 dark:hover:text-border'
             }`}
           >
             {t('checkin.loggedToday', 'Today')}
@@ -83,8 +83,8 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
             onClick={() => setIsYesterday(true)}
             className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
               isYesterday
-                ? 'bg-white dark:bg-[#1e293b] text-calm-900 dark:text-calm-100 shadow-xs'
-                : 'text-calm-500 hover:text-calm-800 dark:hover:text-calm-200'
+                ? 'bg-white dark:bg-[#1e293b] text-ink-900 dark:text-sky-100 shadow-xs'
+                : 'text-muted hover:text-ink-800 dark:hover:text-border'
             }`}
           >
             {t('common.back', 'Yesterday')}
@@ -127,13 +127,13 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
         </div>
 
         {/* Sleep Hours */}
-        <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 flex flex-col justify-between">
+        <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-100 dark:border-ink-900 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-indigo-800 dark:text-indigo-300">
-              <Moon className="w-4 h-4 text-indigo-500" />
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-200">
+              <Moon className="w-4 h-4 text-sky-500" />
               <span>{t('checkin.sleepHours', 'Sleep')}</span>
             </span>
-            <span className="text-xl font-bold text-indigo-900 dark:text-indigo-100">{sleep} {t('common.done', 'hrs')}</span>
+            <span className="text-xl font-bold text-ink-900 dark:text-sky-100">{sleep} {t('common.done', 'hrs')}</span>
           </div>
 
           <input
@@ -144,18 +144,18 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
             value={sleep}
             onChange={(e) => setSleep(Number(e.target.value))}
             aria-label="Sleep hours slider"
-            className="w-full h-2 bg-indigo-200 dark:bg-indigo-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+            className="w-full h-2 bg-sky-200 dark:bg-sky-700 rounded-lg appearance-none cursor-pointer accent-sky-700"
           />
         </div>
 
         {/* Exercise Minutes */}
-        <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 flex flex-col justify-between">
+        <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-100 dark:border-ink-900 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-              <Dumbbell className="w-4 h-4 text-emerald-500" />
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-sky-700 dark:text-sky-200">
+              <Dumbbell className="w-4 h-4 text-sky-500" />
               <span>{t('checkin.exerciseMinutes')}</span>
             </span>
-            <span className="text-xl font-bold text-emerald-900 dark:text-emerald-100">{t('common.minutesShort', { count: exercise })}</span>
+            <span className="text-xl font-bold text-ink-900 dark:text-sky-100">{t('common.minutesShort', { count: exercise })}</span>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -166,8 +166,8 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
                 onClick={() => setExercise(mins)}
                 className={`flex-1 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   exercise === mins
-                    ? 'bg-emerald-600 text-white border-emerald-600 font-bold'
-                    : 'bg-white dark:bg-[#0f172a] border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300'
+                    ? 'bg-sky-700 text-white border-sky-700 font-bold'
+                    : 'bg-white dark:bg-[#0f172a] border-sky-200 dark:border-sky-700 text-sky-700 dark:text-sky-200'
                 }`}
               >
                 {t('common.minutesShort', { count: mins })}
@@ -177,13 +177,13 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
         </div>
 
         {/* Screen Time Hours */}
-        <div className="p-4 rounded-2xl bg-warm-50/70 dark:bg-warm-900/10 border border-warm-200/60 dark:border-warm-900/30 flex flex-col justify-between">
+        <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
-            <span className="flex items-center gap-1.5 text-xs font-semibold text-calm-800 dark:text-calm-200">
-              <Monitor className="w-4 h-4 text-calm-500" />
+            <span className="flex items-center gap-1.5 text-xs font-semibold text-ink-800 dark:text-border">
+              <Monitor className="w-4 h-4 text-muted" />
               <span>{t('checkin.screenTimeHours', 'Screen Time')}</span>
             </span>
-            <span className="text-xl font-bold text-calm-900 dark:text-calm-100">{screenTime} {t('common.done', 'hrs')}</span>
+            <span className="text-xl font-bold text-ink-900 dark:text-sky-100">{screenTime} {t('common.done', 'hrs')}</span>
           </div>
 
           <input
@@ -194,12 +194,12 @@ export const HabitTracker: React.FC<HabitTrackerProps> = ({ initialHabit, onSave
             value={screenTime}
             onChange={(e) => setScreenTime(Number(e.target.value))}
             aria-label="Screen time slider"
-            className="w-full h-2 bg-calm-200 dark:bg-calm-700 rounded-lg appearance-none cursor-pointer accent-calm-600"
+            className="w-full h-2 bg-border dark:bg-text rounded-lg appearance-none cursor-pointer accent-muted"
           />
         </div>
       </div>
 
-      <div className="pt-4 border-t border-calm-100 dark:border-calm-800 flex justify-end">
+      <div className="pt-4 border-t border-sky-100 dark:border-ink-800 flex justify-end">
         <Button
           onClick={handleSave}
           variant="primary"

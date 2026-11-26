@@ -14,37 +14,37 @@ describe('Auth API & Security', () => {
     // Missing email
     const res1 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', password: 'Password123' });
+      .send({ name: 'Alice', password: 'Password123' , ageConfirmed: true});
     expect(res1.status).toBe(400);
 
     // Invalid email format
     const res2 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', email: 'notanemail', password: 'Password123' });
+      .send({ name: 'Alice', email: 'notanemail', password: 'Password123' , ageConfirmed: true});
     expect(res2.status).toBe(400);
 
     // Short password (< 8 chars)
     const res3 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', email: 'alice2@example.com', password: 'short' });
+      .send({ name: 'Alice', email: 'alice2@example.com', password: 'short' , ageConfirmed: true});
     expect(res3.status).toBe(400);
 
     // Long password (> 72 chars)
     const res4 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', email: 'alice3@example.com', password: 'A1' + 'a'.repeat(71) });
+      .send({ name: 'Alice', email: 'alice3@example.com', password: 'A1' + 'a'.repeat(71) , ageConfirmed: true});
     expect(res4.status).toBe(400);
 
     // Password without number
     const res5 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', email: 'alice4@example.com', password: 'PasswordOnly' });
+      .send({ name: 'Alice', email: 'alice4@example.com', password: 'PasswordOnly' , ageConfirmed: true});
     expect(res5.status).toBe(400);
 
     // Password without letter
     const res6 = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Alice', email: 'alice5@example.com', password: '1234567890' });
+      .send({ name: 'Alice', email: 'alice5@example.com', password: '1234567890' , ageConfirmed: true});
     expect(res6.status).toBe(400);
   });
 
@@ -52,13 +52,13 @@ describe('Auth API & Security', () => {
     // First registration
     const firstRes = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Original', email: 'duplicate@example.com', password: 'Password123' });
+      .send({ name: 'Original', email: 'duplicate@example.com', password: 'Password123' , ageConfirmed: true});
     expect(firstRes.status).toBe(201);
 
     // Duplicate registration attempt
     const secondRes = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Imposter', email: 'duplicate@example.com', password: 'Password999' });
+      .send({ name: 'Imposter', email: 'duplicate@example.com', password: 'Password999' , ageConfirmed: true});
     expect(secondRes.status).toBe(400);
     expect(secondRes.body.message).toMatch(/already exists/i);
   });
@@ -70,7 +70,7 @@ describe('Auth API & Security', () => {
         name: 'Attacker',
         email: { $gt: '' },
         password: 'Password123'
-      });
+      , ageConfirmed: true});
     expect(res1.status).toBe(400);
 
     const res2 = await request(app)
@@ -85,7 +85,7 @@ describe('Auth API & Security', () => {
   it('registers a new user and logs in successfully', async () => {
     const regRes = await request(app)
       .post('/api/auth/register')
-      .send(validUser);
+      .send({ ...validUser, ageConfirmed: true });
     expect(regRes.status).toBe(201);
     expect(regRes.body.token).toBeDefined();
     expect(regRes.body.user.email).toBe(validUser.email);
@@ -124,7 +124,7 @@ describe('Auth API & Security', () => {
   it('password reset: token generation, 30-min expiry, single-use enforcement, and old password invalidation', async () => {
     await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Charlie', email: 'charlie@example.com', password: 'OldPassword123' });
+      .send({ name: 'Charlie', email: 'charlie@example.com', password: 'OldPassword123' , ageConfirmed: true});
 
     // Request password reset
     const forgotRes = await request(app)
@@ -210,7 +210,7 @@ describe('Auth API & Security', () => {
     beforeEach(async () => {
       const reg = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'Settings User', email: 'settingsuser@example.com', password: 'Password123' });
+        .send({ name: 'Settings User', email: 'settingsuser@example.com', password: 'Password123' , ageConfirmed: true});
       authToken = reg.body.token;
     });
 
@@ -312,7 +312,7 @@ describe('Auth API & Security', () => {
     it('returns 401 TOKEN_EXPIRED on tokenVersion mismatch (session revoked/expired)', async () => {
       const regRes = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'Bob Version', email: 'bob.version@example.com', password: 'Password123' });
+        .send({ name: 'Bob Version', email: 'bob.version@example.com', password: 'Password123' , ageConfirmed: true});
       const bobToken = regRes.body.token;
 
       // Bump tokenVersion directly in database
@@ -328,7 +328,7 @@ describe('Auth API & Security', () => {
     it('returns 503 SERVICE_UNAVAILABLE when database throws in auth middleware without wiping session', async () => {
       const regRes = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'DB Error User', email: 'db.error@example.com', password: 'Password123' });
+        .send({ name: 'DB Error User', email: 'db.error@example.com', password: 'Password123' , ageConfirmed: true});
       const dbToken = regRes.body.token;
 
       // Mock User.findById to simulate database connection drop / timeout
@@ -352,7 +352,7 @@ describe('Auth API & Security', () => {
     it('returns 401 BAD_CREDENTIALS on wrong PIN without returning TOKEN_INVALID/TOKEN_EXPIRED', async () => {
       const regRes = await request(app)
         .post('/api/auth/register')
-        .send({ name: 'Pin Tester', email: 'pin.tester@example.com', password: 'Password123' });
+        .send({ name: 'Pin Tester', email: 'pin.tester@example.com', password: 'Password123' , ageConfirmed: true});
       const pinToken = regRes.body.token;
 
       // Setup PIN
@@ -370,6 +370,30 @@ describe('Auth API & Security', () => {
       expect(wrongPinRes.status).toBe(401);
       expect(wrongPinRes.body.code).toBe('BAD_CREDENTIALS');
       expect(wrongPinRes.body.attemptsRemaining).toBe(4);
+    });
+  });
+
+  describe('18+ Age Confirmation on Registration', () => {
+    it('rejects registration with 400 when ageConfirmed is missing or false', async () => {
+      const resMissing = await request(app)
+        .post('/api/auth/register')
+        .send({ name: 'Underage Test', email: 'underage1@example.com', password: 'Password123' });
+      expect(resMissing.status).toBe(400);
+      expect(resMissing.body.code).toBe('AGE_CONFIRMATION_REQUIRED');
+
+      const resFalse = await request(app)
+        .post('/api/auth/register')
+        .send({ name: 'Underage Test', email: 'underage2@example.com', password: 'Password123', ageConfirmed: false });
+      expect(resFalse.status).toBe(400);
+    });
+
+    it('stores ageConfirmedAt on User when ageConfirmed is true', async () => {
+      const res = await request(app)
+        .post('/api/auth/register')
+        .send({ name: 'Adult User', email: 'adult@example.com', password: 'Password123', ageConfirmed: true });
+      expect(res.status).toBe(201);
+      const dbUser = await User.findById(res.body.user.id);
+      expect(dbUser.ageConfirmedAt).toBeInstanceOf(Date);
     });
   });
 });

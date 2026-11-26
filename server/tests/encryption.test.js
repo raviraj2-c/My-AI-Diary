@@ -9,7 +9,7 @@ describe('Field-Level Encryption at Rest', () => {
   beforeEach(async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'EncryptUser', email: 'encrypt@test.com', password: 'Password123' });
+      .send({ name: 'EncryptUser', email: 'encrypt@test.com', password: 'Password123' , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
   });
@@ -182,6 +182,33 @@ describe('Field-Level Encryption at Rest', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(getWins.status).toBe(200);
     expect(getWins.body.data.tasks[0].text).toBe(secretTask);
+  });
+
+  it('CopingPlan: raw DB fields are encrypted and API returns readable decrypted arrays', async () => {
+    const saveRes = await request(app)
+      .put('/api/wellness/coping-plan')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        warningSigns: ['Skipping sleep'],
+        copingStrategies: ['Box breathing'],
+        peopleToContact: ['Best friend'],
+        safePlaces: ['Library quiet room'],
+        reasonsToKeepGoing: ['Graduation project']
+      });
+    expect(saveRes.status).toBe(200);
+    expect(saveRes.body.data.warningSigns).toEqual(['Skipping sleep']);
+
+    const rawPlan = await mongoose.connection.collection('copingplans').findOne({});
+    for (const field of ['warningSigns', 'copingStrategies', 'peopleToContact', 'safePlaces', 'reasonsToKeepGoing']) {
+      expect(rawPlan[field]).toMatch(/^enc:(v1|v2:[a-zA-Z0-9_-]+):[a-f0-9]+:[a-f0-9]+:[a-f0-9]+$/);
+    }
+
+    const getRes = await request(app)
+      .get('/api/wellness/coping-plan')
+      .set('Authorization', `Bearer ${token}`);
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.data.copingStrategies).toEqual(['Box breathing']);
+    expect(getRes.body.data.reasonsToKeepGoing).toEqual(['Graduation project']);
   });
 
   it('GET /api/auth/export-data returns complete decrypted data across all collections', async () => {

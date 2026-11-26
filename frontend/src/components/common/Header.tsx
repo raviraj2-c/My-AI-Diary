@@ -1,7 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { LogOut, Settings, User as UserIcon, LifeBuoy, ChevronDown, Moon, Sun } from 'lucide-react';
+import {
+  LogOut,
+  Settings,
+  LifeBuoy,
+  ChevronDown,
+  Moon,
+  Sun,
+  GraduationCap,
+  BookOpen,
+  Mail,
+  Archive,
+  Download,
+  ShieldCheck
+} from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSettings } from '../../hooks/useSettings';
 import { useToast } from './Toast';
@@ -19,7 +32,6 @@ export const Header: React.FC<HeaderProps> = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -37,8 +49,7 @@ export const Header: React.FC<HeaderProps> = () => {
   };
 
   const handleSosClick = () => {
-    // Spot reserved for Part 5 crisis grounding resources
-    info('Grounding breath: Inhale gently for 4s, hold for 4s, release for 6s. You are safe.');
+    window.dispatchEvent(new CustomEvent('minddiary_open_sos'));
   };
 
   const getInitials = (name?: string) => {
@@ -46,101 +57,112 @@ export const Header: React.FC<HeaderProps> = () => {
     return name.slice(0, 2).toUpperCase();
   };
 
+  const menuItems = [
+    { label: t('nav.settings', 'Settings'), href: '/settings', icon: Settings },
+    { label: t('nav.student', 'Student'), href: '/student', icon: GraduationCap },
+    { label: t('nav.stories', 'Stories'), href: '/stories', icon: BookOpen },
+    { label: t('nav.letters', 'Letters'), href: '/letters', icon: Mail },
+    { label: t('happybox.title', 'Happy Box'), href: '/happy-box', icon: Archive },
+    { label: t('nav.export', 'Export'), href: '/export', icon: Download },
+    { label: t('privacy.title', 'Privacy'), href: '/privacy', icon: ShieldCheck },
+  ];
+
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 z-40 bg-white/90 dark:bg-[#131d31]/90 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800/80 transition-colors">
-      <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
-        {/* Brand */}
-        <Link 
-          to="/" 
-          className="flex items-center gap-2 group transition-transform active:scale-95 focus-visible:ring-2 focus-visible:ring-primary-500 rounded-xl p-1"
+    <header className="fixed top-0 left-0 right-0 h-16 z-40 bg-surface border-b border-border transition-colors">
+      <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-2">
+        {/* App Name */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 rounded-card p-1 text-text font-semibold text-lg tracking-tight shrink-0"
         >
-          <span className="text-xl">🌿</span>
-          <span className="font-bold text-lg sm:text-xl tracking-tight text-gray-900 dark:text-gray-100 group-hover:text-calm-600 dark:group-hover:text-calm-400 transition-colors">
-            {t('common.appName')}
-          </span>
+          <span>🌿</span>
+          <span>{t('common.appName')}</span>
         </Link>
 
-        {/* Center / Right actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Always-visible SOS spot */}
+        {/* Right actions: SOS pill + Theme + Avatar Menu */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={handleSosClick}
-            aria-label={t('sos.button', 'SOS Help')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 transition-all active:scale-95 shadow-soft-sm"
+            aria-label={t('sos.button', 'SOS')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-chip text-xs font-semibold bg-danger text-white border border-danger hover:bg-danger/90 transition-colors shrink-0"
           >
-            <LifeBuoy className="h-3.5 w-3.5 animate-pulse" />
-            <span>{t('sos.button', 'SOS Help')}</span>
+            <LifeBuoy size={16} strokeWidth={1.75} />
+            <span>{t('sos.button', 'SOS')}</span>
           </button>
 
-          {/* Theme toggle quick button */}
           <button
             type="button"
             onClick={toggleTheme}
             aria-label={settings.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="p-2 rounded-xl text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors"
+            className="p-2 rounded-card text-muted hover:text-text hover:bg-sky-50 dark:hover:bg-ink-800 transition-colors shrink-0"
           >
             {settings.theme === 'dark' ? (
-              <Sun className="h-4 w-4 text-amber-400" />
+              <Sun size={20} strokeWidth={1.75} className="text-sky-400" />
             ) : (
-              <Moon className="h-4 w-4 text-slate-600" />
+              <Moon size={20} strokeWidth={1.75} />
             )}
           </button>
 
-          {/* User Profile Menu */}
           <div className="relative" ref={dropdownRef}>
             <button
               type="button"
               onClick={() => setDropdownOpen((prev) => !prev)}
               aria-label="User account menu"
               aria-expanded={dropdownOpen}
-              className="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus-visible:ring-2 focus-visible:ring-primary-500"
+              className="flex items-center gap-2 p-1.5 rounded-card hover:bg-sky-50 dark:hover:bg-ink-800 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-calm-100 dark:bg-calm-900/80 text-calm-800 dark:text-calm-200 font-semibold text-xs flex items-center justify-center border border-calm-200 dark:border-calm-800">
+              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-400 font-semibold text-xs flex items-center justify-center border border-border">
                 {getInitials(user?.name)}
               </div>
-              <span className="hidden sm:inline-block text-xs font-medium text-gray-700 dark:text-gray-200 max-w-[120px] truncate">
+              <span className="hidden sm:inline-block text-xs font-semibold text-text max-w-[120px] truncate">
                 {user?.name}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+              <ChevronDown size={16} strokeWidth={1.75} className="text-muted" />
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-[#131d31] rounded-2xl shadow-soft-lg border border-gray-100 dark:border-gray-800 p-1.5 z-50 animate-slide-up text-left">
-                <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
-                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">{user?.name}</p>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
+              <div
+                role="menu"
+                aria-label="Account menu"
+                className="absolute right-0 mt-2 w-56 bg-surface rounded-card border border-border p-1.5 z-50 animate-slide-up text-left"
+              >
+                <div className="px-3 py-2 border-b border-border mb-1">
+                  <p className="text-xs font-semibold text-text truncate">{user?.name}</p>
+                  <p className="text-xs text-muted truncate">{user?.email}</p>
                 </div>
+
+                {menuItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={item.href}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        navigate(item.href);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-card text-xs font-semibold text-text hover:bg-sky-50 dark:hover:bg-ink-800 transition-colors"
+                    >
+                      <Icon size={16} strokeWidth={1.75} className="text-sky-500" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+
+                <div className="my-1 border-t border-border" />
                 <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    navigate('/settings');
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <Settings className="h-4 w-4 text-gray-400" />
-                  <span>{t('nav.settings', 'Settings')}</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setDropdownOpen(false);
-                    navigate('/write');
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <UserIcon className="h-4 w-4 text-gray-400" />
-                  <span>{t('nav.write', 'Write')}</span>
-                </button>
-                <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
-                <button
+                  type="button"
+                  role="menuitem"
                   onClick={() => {
                     setDropdownOpen(false);
                     logout();
                   }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-card text-xs font-semibold text-danger hover:bg-sky-50 dark:hover:bg-ink-800 transition-colors"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span>{t('nav.logout', 'Log Out')}</span>
+                  <LogOut size={16} strokeWidth={1.75} />
+                  <span>{t('nav.logout', 'Log out')}</span>
                 </button>
               </div>
             )}

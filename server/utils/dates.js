@@ -169,9 +169,9 @@ function diffInCalendarDays(keyA, keyB) {
 /**
  * Returns previous YYYY-MM-DD date key.
  */
-function getPreviousDateKey(key) {
+function getPreviousDateKey(key, days = 1) {
   const [y, m, d] = key.split('-').map(Number);
-  const prevDate = new Date(Date.UTC(y, m - 1, d - 1));
+  const prevDate = new Date(Date.UTC(y, m - 1, d - days));
   return prevDate.toISOString().split('T')[0];
 }
 

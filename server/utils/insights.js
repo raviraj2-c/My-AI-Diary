@@ -3,6 +3,8 @@
  * Designed with kind, non-judgmental language. No AI or diagnostic claims.
  */
 
+const { computeMoodDays } = require('./moodScale');
+
 function round1(num) {
   return Math.round(num * 10) / 10;
 }
@@ -22,34 +24,56 @@ function toDayKey(dateInput) {
  * @param {Array} entries - Array of DiaryEntry documents
  * @returns {Object} insights payload
  */
-function computeWellnessInsights(checkIns = [], habits = [], entries = []) {
+function computeWellnessInsights(checkIns = [], habits = [], entries = [], precomputedMoodDays = null, tz = 'UTC') {
+  const moodDays = Array.isArray(precomputedMoodDays)
+    ? precomputedMoodDays
+    : computeMoodDays({ checkIns, entries, tz });
+
   const totalCheckIns = checkIns.length;
-  const hasEnoughData = totalCheckIns >= 7;
+  const totalMoodDays = moodDays.length;
+  const hasEnoughData = totalMoodDays >= 7;
 
   // Build combined map per day
   const daysMap = new Map();
 
-  checkIns.forEach((ci) => {
-    const key = toDayKey(ci.date);
-    daysMap.set(key, {
-      date: ci.date,
-      key,
-      moodScore: ci.moodScore,
-      emotions: ci.emotions || [],
-      sleepHours: ci.sleepHours,
-      energy: ci.energy,
-      stress: ci.stress,
-      anxiety: ci.anxiety,
-      tags: ci.tags || [],
+  moodDays.forEach((md) => {
+    daysMap.set(md.date, {
+      date: md.date,
+      key: md.date,
+      moodScore: md.score,
+      source: md.source,
+      emotions: md.emotions || [],
+      sleepHours: null,
+      energy: null,
+      stress: null,
+      anxiety: null,
+      tags: [],
       waterGlasses: 0,
       exerciseMinutes: 0,
       screenTimeHours: 0,
     });
   });
 
+  checkIns.forEach((ci) => {
+    const key = ci.dateKey || toDayKey(ci.date);
+    const existing = daysMap.get(key) || { date: ci.date, key, waterGlasses: 0, exerciseMinutes: 0, screenTimeHours: 0 };
+    daysMap.set(key, {
+      ...existing,
+      date: ci.date,
+      key,
+      moodScore: ci.moodScore,
+      emotions: ci.emotions || existing.emotions || [],
+      sleepHours: ci.sleepHours,
+      energy: ci.energy,
+      stress: ci.stress,
+      anxiety: ci.anxiety,
+      tags: ci.tags || [],
+    });
+  });
+
   // Enrich with habit logs
   habits.forEach((h) => {
-    const key = toDayKey(h.date);
+    const key = h.dateKey || toDayKey(h.date);
     const existing = daysMap.get(key) || {
       date: h.date,
       key,
@@ -72,27 +96,27 @@ function computeWellnessInsights(checkIns = [], habits = [], entries = []) {
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  const moodList = checkIns.map((c) => c.moodScore).filter((m) => typeof m === 'number');
+  const moodList = moodDays.map((m) => m.score).filter((m) => typeof m === 'number');
   const averageMood = moodList.length > 0 ? round1(moodList.reduce((a, b) => a + b, 0) / moodList.length) : null;
 
   // Best and hardest days
   let bestDay = null;
   let hardestDay = null;
 
-  if (checkIns.length > 0) {
-    const sortedByMood = [...checkIns].sort((a, b) => b.moodScore - a.moodScore);
+  if (moodDays.length > 0) {
+    const sortedByMood = [...moodDays].sort((a, b) => b.score - a.score);
     const best = sortedByMood[0];
     const hardest = sortedByMood[sortedByMood.length - 1];
 
     bestDay = {
       date: best.date,
-      moodScore: best.moodScore,
+      moodScore: best.score,
       emotions: best.emotions || []
     };
 
     hardestDay = {
       date: hardest.date,
-      moodScore: hardest.moodScore,
+      moodScore: hardest.score,
       emotions: hardest.emotions || []
     };
   }

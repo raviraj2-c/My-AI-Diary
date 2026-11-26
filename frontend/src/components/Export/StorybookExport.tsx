@@ -42,6 +42,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
   const [tone, setTone] = useState<'gentle' | 'hopeful' | 'funny' | 'reflective'>('reflective');
   const [selectedEntryIds, setSelectedEntryIds] = useState<string[]>([]);
   const [isEntryPickerOpen, setIsEntryPickerOpen] = useState(false);
+  const [storybookError, setStorybookError] = useState<string | null>(null);
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
@@ -98,6 +99,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
     }
 
     setIsGenerating(true);
+    setStorybookError(null);
     try {
       const generatedStorybook = await AIService.generateStorybook(
         entries,
@@ -123,7 +125,15 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
       if ((error as unknown as { safety?: { level?: string } })?.safety?.level === 'high') {
         setCrisisAlert(true);
       }
-      const msg = error instanceof Error ? error.message : t('common.error');
+      const apiErr = error as { code?: string; message?: string };
+      const msg = apiErr?.code === 'AI_BLOCKED'
+        ? t('ai.blocked')
+        : apiErr?.code === 'AI_TRUNCATED'
+          ? t('ai.truncated')
+          : apiErr?.code === 'AI_EMPTY'
+            ? t('ai.empty')
+            : (error instanceof Error ? error.message : t('common.error'));
+      setStorybookError(msg);
       toast.error(msg);
     } finally {
       setIsGenerating(false);
@@ -164,10 +174,10 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-serif font-bold text-calm-900 dark:text-calm-50">
+              <h2 className="text-xl font-serif font-bold text-ink-900 dark:text-sky-50">
                 {t('export.generatorTitle')}
               </h2>
-              <p className="text-xs text-calm-500 dark:text-calm-400">
+              <p className="text-xs text-muted dark:text-muted">
                 {t('export.generatorSubtitle')}
               </p>
             </div>
@@ -180,11 +190,20 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
           </Link>
         </div>
 
+        {storybookError && (
+          <div className="mb-4 p-3.5 rounded-xl bg-sky-50 dark:bg-danger border border-danger dark:border-danger flex items-center justify-between gap-3">
+            <span className="text-xs text-danger dark:text-danger">{storybookError}</span>
+            <Button variant="outline" size="sm" onClick={handleGenerate} className="shrink-0 text-xs">
+              {t('ai.retry')}
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column: Theme & Tone */}
           <div className="space-y-6">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-3">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-3">
                 {t('export.chooseTone')}
               </label>
               <div className="space-y-2.5">
@@ -196,7 +215,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                       className={`flex items-start gap-3.5 p-3.5 rounded-xl border cursor-pointer transition-all ${
                         isSelected
                           ? 'border-primary-500 bg-primary-50/60 dark:bg-primary-950/30 text-primary-900 dark:text-primary-100 shadow-xs'
-                          : 'border-calm-200 dark:border-calm-800 hover:border-calm-300 dark:hover:border-calm-700 bg-white dark:bg-[#1e293b]'
+                          : 'border-border dark:border-ink-800 hover:border-sky-200 dark:hover:border-text bg-white dark:bg-[#1e293b]'
                       }`}
                     >
                       <input
@@ -208,11 +227,11 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                         className="mt-1 text-primary-600 focus:ring-primary-500"
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm flex items-center gap-1.5 text-calm-900 dark:text-calm-100">
+                        <div className="font-medium text-sm flex items-center gap-1.5 text-ink-900 dark:text-sky-100">
                           <span>{theme.emoji}</span>
                           <span>{theme.label}</span>
                         </div>
-                        <div className="text-xs text-calm-500 dark:text-calm-400 mt-0.5">
+                        <div className="text-xs text-muted dark:text-muted mt-0.5">
                           {theme.description}
                         </div>
                       </div>
@@ -225,14 +244,14 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
             {/* Tone & Length Pickers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
-                  <Smile className="w-3.5 h-3.5 text-calm-500" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
+                  <Smile className="w-3.5 h-3.5 text-muted" />
                   <span>{t('export.toneLabel')}</span>
                 </label>
                 <select
                   value={tone}
                   onChange={(e) => setTone(e.target.value as typeof tone)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
                 >
                   <option value="reflective">{t('export.toneReflective')}</option>
                   <option value="gentle">{t('export.toneGentle')}</option>
@@ -242,14 +261,14 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
               </div>
 
               <div>
-                <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
-                  <Layers className="w-3.5 h-3.5 text-calm-500" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
+                  <Layers className="w-3.5 h-3.5 text-muted" />
                   <span>{t('export.lengthLabel')}</span>
                 </label>
                 <select
                   value={length}
                   onChange={(e) => setLength(e.target.value as typeof length)}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
                 >
                   <option value="short">{t('export.lengthShort')}</option>
                   <option value="medium">{t('export.lengthMedium')}</option>
@@ -259,14 +278,14 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
             </div>
 
             <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-2">
-                <Languages className="w-3.5 h-3.5 text-calm-500" />
+              <label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200 mb-2">
+                <Languages className="w-3.5 h-3.5 text-muted" />
                 <span>{t('export.storyLang')}</span>
               </label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as typeof language)}
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
+                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none"
               >
                 <option value="en">{t('export.langEn')}</option>
                 <option value="hi">{t('export.langHi')}</option>
@@ -278,14 +297,14 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
           {/* Right Column: Time Horizon, Protagonist & Optional Entry Picker */}
           <div className="flex flex-col justify-between space-y-6">
             <div className="space-y-4">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-text dark:text-sky-200">
                 {t('export.step2Title')}
               </label>
 
               <div>
                 <label
                   htmlFor="sb-protagonist"
-                  className="block text-xs text-calm-500 dark:text-calm-400 mb-1 font-medium"
+                  className="block text-xs text-muted dark:text-muted mb-1 font-medium"
                 >
                   {t('export.protagonistNameWithLimit')}
                 </label>
@@ -296,13 +315,13 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                   placeholder={t('export.protagonistPlaceholder')}
                   value={protagonistNickname}
                   onChange={(e) => setProtagonistNickname(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-sm text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none transition-colors"
                 />
               </div>
 
               {/* Date Range Fields */}
-              <div className="p-3.5 rounded-xl border border-calm-200 dark:border-calm-800 bg-calm-50/40 dark:bg-calm-900/20 space-y-3">
-                <div className="text-xs font-semibold text-calm-700 dark:text-calm-300 flex items-center justify-between">
+              <div className="p-3.5 rounded-xl border border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-900 space-y-3">
+                <div className="text-xs font-semibold text-text dark:text-sky-200 flex items-center justify-between">
                   <span>{t('export.dateHorizon')}</span>
                   {selectedEntryIds.length > 0 && (
                     <span className="text-[11px] font-normal text-primary-600 dark:text-primary-400">
@@ -313,7 +332,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="sb-start-date" className="block text-[11px] text-calm-500 mb-1">
+                    <label htmlFor="sb-start-date" className="block text-[11px] text-muted mb-1">
                       {t('export.from')}
                     </label>
                     <input
@@ -322,11 +341,11 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                       disabled={selectedEntryIds.length > 0}
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-lg text-xs text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none disabled:opacity-40"
+                      className="w-full px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-lg text-xs text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none disabled:opacity-40"
                     />
                   </div>
                   <div>
-                    <label htmlFor="sb-end-date" className="block text-[11px] text-calm-500 mb-1">
+                    <label htmlFor="sb-end-date" className="block text-[11px] text-muted mb-1">
                       {t('export.until')}
                     </label>
                     <input
@@ -335,18 +354,18 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                       disabled={selectedEntryIds.length > 0}
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-lg text-xs text-calm-800 dark:text-calm-100 focus:ring-2 focus:ring-primary-400 focus:outline-none disabled:opacity-40"
+                      className="w-full px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-lg text-xs text-ink-800 dark:text-sky-100 focus:ring-2 focus:ring-primary-400 focus:outline-none disabled:opacity-40"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Specific Entry Selection Accordion */}
-              <div className="border border-calm-200 dark:border-calm-800 rounded-xl overflow-hidden">
+              <div className="border border-border dark:border-ink-800 rounded-xl overflow-hidden">
                 <button
                   type="button"
                   onClick={() => setIsEntryPickerOpen(!isEntryPickerOpen)}
-                  className="w-full px-3.5 py-2.5 bg-calm-50/60 dark:bg-calm-900/40 flex items-center justify-between text-xs font-semibold text-calm-700 dark:text-calm-300 hover:bg-calm-100/60 transition-colors"
+                  className="w-full px-3.5 py-2.5 bg-sky-50 dark:bg-ink-900 flex items-center justify-between text-xs font-semibold text-text dark:text-sky-200 hover:bg-sky-100 transition-colors"
                 >
                   <span className="flex items-center gap-1.5">
                     <CheckSquare className="w-4 h-4 text-primary-500" />
@@ -358,8 +377,8 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                 </button>
 
                 {isEntryPickerOpen && (
-                  <div className="p-3 bg-white dark:bg-[#0f172a] border-t border-calm-100 dark:border-calm-800 space-y-2">
-                    <div className="flex items-center justify-between pb-1 border-b border-calm-100 dark:border-calm-800 text-[11px] text-calm-500">
+                  <div className="p-3 bg-white dark:bg-[#0f172a] border-t border-sky-100 dark:border-ink-800 space-y-2">
+                    <div className="flex items-center justify-between pb-1 border-b border-sky-100 dark:border-ink-800 text-[11px] text-muted">
                       <span>{t('export.selectIndividual')}</span>
                       <button
                         type="button"
@@ -372,7 +391,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
 
                     <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
                       {entries.length === 0 ? (
-                        <p className="text-xs text-calm-400 py-2">{t('export.noEntriesFound')}</p>
+                        <p className="text-xs text-muted py-2">{t('export.noEntriesFound')}</p>
                       ) : (
                         entries.map((entry) => {
                           const id = entry.id;
@@ -383,7 +402,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                               className={`flex items-center gap-2.5 p-2 rounded-lg cursor-pointer text-xs transition-colors ${
                                 isChecked
                                   ? 'bg-primary-50 dark:bg-primary-950/30 text-primary-900 dark:text-primary-100'
-                                  : 'hover:bg-calm-50 dark:hover:bg-calm-800/40 text-calm-700 dark:text-calm-300'
+                                  : 'hover:bg-sky-50 dark:hover:bg-ink-800 text-text dark:text-sky-200'
                               }`}
                             >
                               <input
@@ -395,7 +414,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                               <span className="truncate flex-1 font-medium">
                                 {entry.title || t('diary.untitled')}
                               </span>
-                              <span className="text-[10px] text-calm-400 shrink-0">
+                              <span className="text-[10px] text-muted shrink-0">
                                 {new Intl.DateTimeFormat(i18n.language === 'hi' ? 'hi-IN' : 'en-US', {
                                   month: 'short',
                                   day: 'numeric'
@@ -411,9 +430,9 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
               </div>
 
               {!settings.allowAIFeatures && (
-                <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 text-xs text-sky-700 dark:text-sky-200 flex items-center justify-between">
                   <span>{t('export.aiDisabled')}</span>
-                  <Link to="/settings" className="underline font-semibold ml-2 hover:text-amber-950">
+                  <Link to="/settings" className="underline font-semibold ml-2 hover:text-ink-900">
                     {t('export.enableInSettings')}
                   </Link>
                 </div>
@@ -450,28 +469,28 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
 
       {/* Generated Storybook Display */}
       {storybook && (
-        <Card className="p-6 md:p-8 animate-slide-up border-calm-200 dark:border-calm-800 space-y-6">
+        <Card className="p-6 md:p-8 animate-slide-up border-border dark:border-ink-800 space-y-6">
           {/* Gentle crisis notice if any entries were excluded */}
           {((storybook.excludedCount ?? 0) > 0 || storybook.safety?.level === 'high') && (
-            <div className="space-y-3 border-b border-calm-100 dark:border-calm-800 pb-6">
+            <div className="space-y-3 border-b border-sky-100 dark:border-ink-800 pb-6">
               <SafetyBanner
                 level="high"
                 country={settings.country}
                 trustedContact={settings.trustedContact}
               />
-              <p className="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl p-3 font-serif">
+              <p className="text-xs text-sky-700 dark:text-sky-200 bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-sky-700 rounded-xl p-3 font-serif">
                 {t('storybook.excludedEntriesGentleNotice')}
               </p>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-calm-100 dark:border-calm-800">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-sky-100 dark:border-ink-800">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs text-primary-600 dark:text-primary-400 font-medium mb-1">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{t('export.chapterBadge')}</span>
               </div>
-              <h3 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">
+              <h3 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">
                 {storybook.title}
               </h3>
             </div>
@@ -539,7 +558,7 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
             {/* Chapters Text Preview */}
             <div className="md:col-span-2 space-y-6">
               {storybook.protagonist?.name && (
-                <div className="text-sm font-medium text-calm-600 dark:text-calm-400 italic">
+                <div className="text-sm font-medium text-muted dark:text-muted italic">
                   <span>{t('export.protagonistLabel', { name: storybook.protagonist.name })}</span>
                 </div>
               )}
@@ -548,19 +567,19 @@ export const StorybookExport: React.FC<StorybookExportProps> = ({ entries }) => 
                   {storybook.chapters.map((ch, idx) => (
                     <article
                       key={idx}
-                      className="space-y-2 border-b border-calm-100 dark:border-calm-800/60 pb-6 last:border-b-0"
+                      className="space-y-2 border-b border-sky-100 dark:border-ink-800 pb-6 last:border-b-0"
                     >
-                      <h4 className="text-lg font-serif font-bold text-calm-900 dark:text-calm-100">
+                      <h4 className="text-lg font-serif font-bold text-ink-900 dark:text-sky-100">
                         {ch.title}
                       </h4>
-                      <p className="text-sm leading-relaxed text-calm-700 dark:text-calm-300 whitespace-pre-line font-serif">
+                      <p className="text-sm leading-relaxed text-text dark:text-sky-200 whitespace-pre-line font-serif">
                         {ch.content}
                       </p>
                     </article>
                   ))}
                 </div>
               ) : (
-                <div className="text-sm leading-relaxed text-calm-700 dark:text-calm-300 whitespace-pre-line font-serif">
+                <div className="text-sm leading-relaxed text-text dark:text-sky-200 whitespace-pre-line font-serif">
                   {storybook.generatedContent.replace(/[#*]/g, '').trim()}
                 </div>
               )}

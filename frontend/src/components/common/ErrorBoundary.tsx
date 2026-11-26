@@ -35,9 +35,9 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-calm-50/50 dark:bg-slate-950 flex items-center justify-center p-6 text-foreground">
+        <div className="min-h-screen bg-sky-50 dark:bg-slate-950 flex items-center justify-center p-6 text-foreground">
           <div className="max-w-md w-full bg-card p-8 rounded-3xl border border-border shadow-soft-lg text-center space-y-5 animate-fade-in">
-            <div className="w-14 h-14 rounded-2xl bg-calm-100 dark:bg-calm-950/80 text-calm-700 dark:text-calm-300 flex items-center justify-center mx-auto">
+            <div className="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-ink-950 text-text dark:text-sky-200 flex items-center justify-center mx-auto">
               <Sparkles className="w-7 h-7" />
             </div>
 

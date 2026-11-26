@@ -21,7 +21,7 @@ describe('Eleven Reliability, Security & Data Integrity Improvements', () => {
         name: 'Tester Eleven',
         email: 'tester.eleven@example.com',
         password: 'Password123'
-      });
+      , ageConfirmed: true});
     user = res.body.user;
     token = res.body.token;
 

@@ -1,6 +1,6 @@
 /**
  * AI Service for MindDiary.
- * Powered by Anthropic Claude LLM with rigorous clinical safety, input risk screening,
+ * Powered by Google Gemini LLM with rigorous clinical safety, input risk screening,
  * structured JSON validation, and respectful mental wellness boundaries.
  */
 
@@ -36,7 +36,7 @@ function parseAskDiaryJson(rawText) {
 
 class AIService {
   /**
-   * Generates a literary storybook from diary entries using Claude.
+   * Generates a literary storybook from diary entries using Gemini.
    *
    * @param {Array<object>} entries - Array of DiaryEntry documents
    * @param {string} theme - 'romantic' | 'dramatic' | 'adventure' | 'mystery' | 'comedy'
@@ -179,12 +179,14 @@ Remember to return ONLY valid JSON matching the specified schema with a title, p
       messages: [{ role: 'user', content: promptMessage }],
       maxTokens: 2500,
       temperature: 0.7,
-      countUsage: true
+      countUsage: true,
+      responseMimeType: 'application/json',
+      timeoutMs: 60000
     });
 
     let storybookData = parseStorybookJson(response?.text);
 
-    // If Claude's JSON fails validation, retry once with a stricter reminder prompt
+    // If Gemini's JSON fails validation, retry once with a stricter reminder prompt
     if (!storybookData) {
       try {
         const retryPrompt = `${promptMessage}\n\nCRITICAL: Return only valid JSON, nothing before or after.`;
@@ -194,7 +196,9 @@ Remember to return ONLY valid JSON matching the specified schema with a title, p
           messages: [{ role: 'user', content: retryPrompt }],
           maxTokens: 2500,
           temperature: 0.5,
-          countUsage: false // Do not charge additional quota for internal retry
+          countUsage: false, // Do not charge additional quota for internal retry
+          responseMimeType: 'application/json',
+          timeoutMs: 60000
         });
         storybookData = parseStorybookJson(retryResponse?.text);
       } catch {
@@ -311,7 +315,8 @@ Please offer a warm, compassionate reflection of my feelings and at most ONE gen
       messages: [{ role: 'user', content: `Analyze the tone of this journal text:\n"${cleanText}"` }],
       maxTokens: 150,
       temperature: 0.3,
-      countUsage: false
+      countUsage: false,
+      responseMimeType: 'application/json'
     });
 
     try {
@@ -402,7 +407,8 @@ Rules:
 - Return ONLY a JSON array of 3 strings: ["starter 1...", "starter 2...", "starter 3..."]`,
       messages: [{ role: 'user', content: `Writing prompt/topic: "${prompt || 'How I am feeling right now'}"` }],
       maxTokens: 200,
-      temperature: 0.7
+      temperature: 0.7,
+      responseMimeType: 'application/json'
     });
 
     try {
@@ -521,7 +527,8 @@ Rules:
       messages: [{ role: 'user', content: userPrompt }],
       maxTokens: 500,
       temperature: 0.3,
-      countUsage: false
+      countUsage: false,
+      responseMimeType: 'application/json'
     });
 
     let parsed = parseAskDiaryJson(response.text);
@@ -537,7 +544,8 @@ Rules:
         ],
         maxTokens: 500,
         temperature: 0.2,
-        countUsage: false
+        countUsage: false,
+        responseMimeType: 'application/json'
       });
       parsed = parseAskDiaryJson(retryResponse.text);
     }

@@ -120,6 +120,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isStudent: {
+    type: Boolean,
+    default: false
+  },
   aiDailyUsage: {
     count: { type: Number, default: 0 },
     lastReset: { type: Date, default: Date.now }
@@ -137,6 +141,10 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   lastEntryDate: {
+    type: Date,
+    default: null
+  },
+  ageConfirmedAt: {
     type: Date,
     default: null
   }

@@ -16,7 +16,7 @@ Modern digital life places significant cognitive and psychological strain on ind
 MindDiary is developed as a privacy-first, full-stack mental health sanctuary and expressive writing platform designed to:
 - Provide an intuitive, calm digital journal with rich text, media uploads, and voice dictation.
 - Offer daily micro check-ins, habit tracking, and clinical screening questionnaires (PHQ-9 and GAD-7).
-- Deliver compassionate, non-diagnostic AI reflections and CBT thought restructuring via Anthropic Claude with strict deterministic rate limiting (30 requests/day per user) and system guardrails.
+- Deliver compassionate, non-diagnostic AI reflections and CBT thought restructuring via Google Gemini with strict deterministic rate limiting (30 requests/day per user) and system guardrails.
 - Implement an automated, deterministic Crisis Safety Filter scanning for English and Hinglish distress signals, triggering localized emergency helplines (India Tele-MANAS/KIRAN, US 988, UK 111, Canada 988, Australia 13 11 14).
 - Guarantee zero data leakage: user diary text is never used to train foundation models, and clinical exports shared with counselors contain only aggregated numerical metrics, strictly omitting personal journal text.
 
@@ -28,7 +28,7 @@ MindDiary is developed as a privacy-first, full-stack mental health sanctuary an
 | :--- | :--- | :--- | :--- | :--- |
 | **Primary Interaction** | Icon/Micro-tap | Conversational Chatbot | Conversational AI | Expressive Journaling + Holistic Wellness |
 | **Rich Text & Voice** | Basic notes | Text chat only | Text chat only | TipTap Rich Text, Audio Dictation, Media |
-| **AI Reflections** | None (Stats only) | Proprietary scripted AI | Proprietary CBT AI | Anthropic Claude with clinical safety guardrails |
+| **AI Reflections** | None (Stats only) | Proprietary scripted AI | Proprietary CBT AI | Google Gemini with clinical safety guardrails |
 | **Crisis Intervention** | Static FAQ link | Emergency SOS button | Redirect card | Multi-tier Real-time Detector (EN/Hinglish) + Country Helplines |
 | **Standard Screenings** | None | PHQ-9 / GAD-7 (Paid) | Anxiety/Depression tests | Free Built-in PHQ-9 & GAD-7 scoring |
 | **Data Privacy Policy** | Cloud synced | Commercial cloud | Cloud stored | Strict isolation, exportable JSON, zero AI training |
@@ -64,13 +64,13 @@ graph TD
         DiaryController["Diary CRUD & Sanitizer"]
         WellnessController["Check-In & Habits Engine"]
         StudentController["Student & Burnout Monitor"]
-        AIController["AI Controller & Anthropic Claude"]
+        AIController["AI Controller & Google Gemini"]
     end
 
     subgraph Storage["Data & Cloud Services"]
         MongoDB[("MongoDB Database")]
         Cloudinary["Cloudinary CDN (Images, Video, Audio)"]
-        AnthropicAPI["Anthropic Claude API (Bedrock/Direct)"]
+        GeminiAPI["Google Gemini API"]
         SMTP["Nodemailer SMTP / Dev Fallback"]
     end
 
@@ -82,7 +82,7 @@ graph TD
     RiskEngine --> Backend
     Backend --> MongoDB
     DiaryController --> Cloudinary
-    AIController --> AnthropicAPI
+    AIController --> GeminiAPI
     AuthController --> SMTP
 ```
 
@@ -196,7 +196,7 @@ erDiagram
    - High-priority deterministic pattern matcher for self-harm and suicide phrases in English and Hindi/Hinglish.
    - Two-tier banner response: gentle caring card on 'concern'; modal crisis support with one-tap helpline call links and trusted contact SMS routing on 'high'.
 5. **Ethical AI Assistance:**
-   - Powered by Anthropic Claude via a server-side SDK wrapper with token budgets and a 30 calls/day quota.
+   - Powered by Google Gemini via a server-side SDK wrapper with token budgets and a 30 calls/day quota.
    - Strict system prompt forbidding medical diagnoses, drug suggestions, or claiming human sentience.
    - CBT Thought Challenger (Situation $\to$ Automatic Thought $\to$ Evidence For/Against $\to$ Balanced Perspective).
 6. **7-Day Counselor Summary Sharing:**
@@ -215,7 +215,7 @@ erDiagram
 | **Input Sanitization**| Submitting malicious `<script>` tags in diary body | Stripped by `sanitize-html`; safe HTML retained | Passed |
 | **Student Burnout** | 5 high stress days ($\ge 4$) + sleep $< 6.5\text{h}$ | Gentle non-diagnostic reminder surfaced without alarms | Passed |
 | **Counselor Share** | Accessing `/api/wellness/shared/:token` | Summary returned with zero raw diary entry text | Passed |
-| **AI Quota Guard** | Exceeding 30 Claude API calls in 24 hours | 429 Too Many Requests returned with daily reset notice | Passed |
+| **AI Quota Guard** | Exceeding 30 Gemini API calls in 24 hours | 429 Too Many Requests returned with daily reset notice | Passed |
 
 ---
 

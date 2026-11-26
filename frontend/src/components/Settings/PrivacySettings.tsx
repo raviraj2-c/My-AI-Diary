@@ -123,22 +123,22 @@ export const PrivacySettings: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. App Lock & Inactivity Timeout */}
-      <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800 space-y-6">
-        <div className="flex items-center gap-3 pb-4 border-b border-calm-100 dark:border-calm-800">
+      <Card className="p-6 md:p-8 border-border dark:border-ink-800 space-y-6">
+        <div className="flex items-center gap-3 pb-4 border-b border-sky-100 dark:border-ink-800">
           <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-950/60 text-primary-600 dark:text-primary-300 flex items-center justify-center">
             <Lock className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('settings.appLockTitle')}</h2>
-            <p className="text-xs text-calm-500">{t('settings.appLockDesc')}</p>
+            <h2 className="text-xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('settings.appLockTitle')}</h2>
+            <p className="text-xs text-muted">{t('settings.appLockDesc')}</p>
           </div>
         </div>
 
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-calm-800 dark:text-calm-200">{t('settings.passcodeProtection')}</p>
-              <p className="text-xs text-calm-500 dark:text-calm-400">
+              <p className="text-sm font-semibold text-ink-800 dark:text-border">{t('settings.passcodeProtection')}</p>
+              <p className="text-xs text-muted dark:text-muted">
                 {t('settings.passcodeProtectionDesc')}
               </p>
             </div>
@@ -165,10 +165,10 @@ export const PrivacySettings: React.FC = () => {
 
           {/* Auto-Lock Inactivity Timeout */}
           {settings.appLockEnabled && (
-            <div className="pt-3 border-t border-calm-100 dark:border-calm-800 flex items-center justify-between">
+            <div className="pt-3 border-t border-sky-100 dark:border-ink-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-calm-400" />
-                <label htmlFor="autolock-timeout" className="text-xs font-medium text-calm-700 dark:text-calm-300">
+                <Clock className="w-4 h-4 text-muted" />
+                <label htmlFor="autolock-timeout" className="text-xs font-medium text-text dark:text-sky-200">
                   {t('settings.autoLockTimeout')}
                 </label>
               </div>
@@ -180,7 +180,7 @@ export const PrivacySettings: React.FC = () => {
                   updateSettings({ appLockTimeoutMinutes: val });
                   toast.success(`Auto-lock set to ${val} minutes`);
                 }}
-                className="px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-400 outline-none"
+                className="px-3 py-1.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-400 outline-none"
               >
                 <option value={1}>{t('settings.oneMinute')}</option>
                 <option value={5}>{t('settings.fiveMinutes')}</option>
@@ -192,14 +192,14 @@ export const PrivacySettings: React.FC = () => {
 
           {/* PIN Setup Form */}
           {showPinSetup && (
-            <form onSubmit={handleSetupPin} className="p-4 rounded-2xl bg-calm-50/70 dark:bg-calm-950/40 border border-calm-200/80 dark:border-calm-800 space-y-4 animate-fade-in">
-              <h4 className="text-xs font-bold text-calm-800 dark:text-calm-200 uppercase tracking-wider">
+            <form onSubmit={handleSetupPin} className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-950 border border-border dark:border-ink-800 space-y-4 animate-fade-in">
+              <h4 className="text-xs font-bold text-ink-800 dark:text-border uppercase tracking-wider">
                 {t('settings.createPinTitle')}
               </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label htmlFor="setup-pin" className="block text-xs text-calm-600 dark:text-calm-400 mb-1">
+                  <label htmlFor="setup-pin" className="block text-xs text-muted dark:text-muted mb-1">
                     {t('settings.newPin')}
                   </label>
                   <input
@@ -209,13 +209,13 @@ export const PrivacySettings: React.FC = () => {
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                     placeholder="4–6 digits"
-                    className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 font-mono tracking-widest text-center focus:ring-2 focus:ring-primary-400 outline-none"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border font-mono tracking-widest text-center focus:ring-2 focus:ring-primary-400 outline-none"
                     required
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="confirm-pin" className="block text-xs text-calm-600 dark:text-calm-400 mb-1">
+                  <label htmlFor="confirm-pin" className="block text-xs text-muted dark:text-muted mb-1">
                     {t('settings.confirmPin')}
                   </label>
                   <input
@@ -225,7 +225,7 @@ export const PrivacySettings: React.FC = () => {
                     value={confirmPin}
                     onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
                     placeholder="Repeat digits"
-                    className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 font-mono tracking-widest text-center focus:ring-2 focus:ring-primary-400 outline-none"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border font-mono tracking-widest text-center focus:ring-2 focus:ring-primary-400 outline-none"
                     required
                   />
                 </div>
@@ -254,8 +254,8 @@ export const PrivacySettings: React.FC = () => {
 
           {/* Disable Lock Form */}
           {showDisableModal && (
-            <form onSubmit={handleDisableLock} className="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 space-y-3 animate-fade-in">
-              <p className="text-xs text-rose-800 dark:text-rose-200 font-medium">
+            <form onSubmit={handleDisableLock} className="p-4 rounded-2xl bg-sky-50 dark:bg-danger border border-danger dark:border-danger space-y-3 animate-fade-in">
+              <p className="text-xs text-danger dark:text-danger font-medium">
                 {t('settings.disableLockTitle')}
               </p>
               <input
@@ -263,7 +263,7 @@ export const PrivacySettings: React.FC = () => {
                 placeholder="Account password"
                 value={disablePassword}
                 onChange={(e) => setDisablePassword(e.target.value)}
-                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-calm-800 dark:text-calm-200 outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full px-3 py-2 bg-white dark:bg-[#0f172a] border border-danger dark:border-danger rounded-xl text-xs text-ink-800 dark:text-border outline-none focus:ring-2 focus:ring-danger"
                 required
               />
               <div className="flex items-center justify-end gap-2">
@@ -289,23 +289,23 @@ export const PrivacySettings: React.FC = () => {
       </Card>
 
       {/* 2. Data Portability & Complete Backup */}
-      <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800 space-y-4">
-        <div className="flex items-center gap-3 pb-4 border-b border-calm-100 dark:border-calm-800">
-          <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center">
+      <Card className="p-6 md:p-8 border-border dark:border-ink-800 space-y-4">
+        <div className="flex items-center gap-3 pb-4 border-b border-sky-100 dark:border-ink-800">
+          <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-ink-900 text-sky-700 dark:text-sky-200 flex items-center justify-center">
             <Download className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('settings.dataPortability')}</h2>
-            <p className="text-xs text-calm-500">{t('settings.dataPortabilityDesc')}</p>
+            <h2 className="text-xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('settings.dataPortability')}</h2>
+            <p className="text-xs text-muted">{t('settings.dataPortabilityDesc')}</p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-calm-800 dark:text-calm-200">
+            <p className="text-sm font-semibold text-ink-800 dark:text-border">
               {t('settings.dataPortability')}
             </p>
-            <p className="text-xs text-calm-500 dark:text-calm-400 leading-relaxed font-serif max-w-md">
+            <p className="text-xs text-muted dark:text-muted leading-relaxed font-serif max-w-md">
               {t('settings.dataPortabilityDesc')}
             </p>
           </div>
@@ -324,10 +324,10 @@ export const PrivacySettings: React.FC = () => {
       </Card>
 
       {/* 3. Encryption & Transparency Notice */}
-      <Card className="p-6 border-calm-200 dark:border-calm-800 bg-calm-50/40 dark:bg-calm-950/20 space-y-3">
+      <Card className="p-6 border-border dark:border-ink-800 bg-sky-50 dark:bg-ink-950 space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold text-calm-800 dark:text-calm-200 uppercase tracking-wider">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <div className="flex items-center gap-2 text-xs font-bold text-ink-800 dark:text-border uppercase tracking-wider">
+            <ShieldCheck className="w-4 h-4 text-sky-500" />
             <span>{t('privacy.howEncryptedTitle')}</span>
           </div>
           <Link
@@ -338,7 +338,7 @@ export const PrivacySettings: React.FC = () => {
             <ExternalLink className="w-3 h-3" />
           </Link>
         </div>
-        <p className="text-xs text-calm-600 dark:text-calm-400 leading-relaxed font-serif">
+        <p className="text-xs text-muted dark:text-muted leading-relaxed font-serif">
           {t('privacy.encryptedDesc')}
         </p>
       </Card>

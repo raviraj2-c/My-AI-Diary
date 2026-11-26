@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { YearInPixelsPage } from '../pages/YearInPixelsPage';
 import { LettersPage } from '../pages/LettersPage';
 import { CopingPlanSettings } from '../components/Settings/CopingPlanSettings';
@@ -61,10 +62,13 @@ describe('Frontend: Three New Features', () => {
         }
       });
 
+      const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
       render(
-        <MemoryRouter>
-          <YearInPixelsPage />
-        </MemoryRouter>
+        <QueryClientProvider client={qc}>
+          <MemoryRouter>
+            <YearInPixelsPage />
+          </MemoryRouter>
+        </QueryClientProvider>
       );
 
       expect(screen.getByText(/Year in Pixels/i)).toBeInTheDocument();

@@ -24,6 +24,7 @@ export const API_CONFIG = {
     DIARY: {
       ENTRIES: '/diary/entries',
       ENTRY: (id: string) => `/diary/entries/${id}`,
+      CALENDAR: (month: string) => `/diary/calendar?month=${encodeURIComponent(month)}`,
       TAGS: '/diary/tags',
       STATS: '/diary/stats',
     },
@@ -69,6 +70,14 @@ export const API_CONFIG = {
       COUNSELOR_SHARE: '/wellness/counselor-share',
       COUNSELOR_SHARED_VIEW: (token: string) => `/wellness/shared/${encodeURIComponent(token)}`,
       YEAR_PIXELS: (year?: number) => `/wellness/year-pixels${year ? `?year=${year}` : ''}`,
+      MOOD_DAYS: (from?: string, to?: string) => {
+        const params = new URLSearchParams();
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
+        const q = params.toString();
+        return `/wellness/mood-days${q ? `?${q}` : ''}`;
+      },
+      HOME_SUMMARY: '/wellness/home-summary',
       COPING_PLAN: '/wellness/coping-plan',
     },
     LETTERS: {

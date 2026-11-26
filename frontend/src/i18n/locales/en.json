@@ -6,7 +6,7 @@
     "pixels": "Year in Pixels",
     "letters": "Future Letters",
     "insights": "Insights",
-    "calm": "Calm Room",
+    "calm": "Calm",
     "student": "Student",
     "more": "More",
     "settings": "Settings",
@@ -16,7 +16,17 @@
     "logout": "Log Out",
     "sos": "SOS Help",
     "appLock": "App Lock",
-    "accountMenu": "User Account"
+    "accountMenu": "User Account",
+    "journal": "Journal",
+    "mood": "Mood",
+    "talk": "Talk",
+    "entries": "Entries",
+    "favorites": "Favorites",
+    "today": "Today",
+    "trends": "Trends",
+    "year": "Year",
+    "export": "Export",
+    "stories": "Stories"
   },
   "dashboard": {
     "welcome": "Welcome back",
@@ -49,7 +59,13 @@
     "todayCheckInScore": "Today's Check-In: {{score}}/10",
     "viewTrends": "View Trends",
     "youtube": "YouTube",
-    "spotify": "Spotify"
+    "spotify": "Spotify",
+    "gentleRhythmNote": "Take your time. A single word is always enough.",
+    "howAreYou": "How are you?",
+    "addMore": "Add more",
+    "thisWeek": "This week",
+    "writeFirst": "Write your first entry",
+    "quoteLine": "“{{text}}” — {{author}}"
   },
   "checkin": {
     "title": "Daily Wellness Check-In",
@@ -82,7 +98,10 @@
     "outOfFive": "{{score}} / 5",
     "charCount": "{{current}} / {{max}}",
     "moodSliderAria": "Mood score slider",
-    "privateNote": "Private Note"
+    "privateNote": "Private Note",
+    "gratitudeLabel": "Gratitude or note",
+    "stepProgress": "{{step}} / 3",
+    "sleepValue": "{{hours}}h"
   },
   "calm": {
     "title": "Calm & Grounding Space",
@@ -143,7 +162,13 @@
     "wordsReady_one": "{{count}} word ready to release",
     "wordsReady_other": "{{count}} words ready to release",
     "pmrReleasedDesc": "Notice the warmth and lightness throughout your shoulders, jaw, and breath.",
-    "pmrPerZone": "30s per zone"
+    "pmrPerZone": "30s per zone",
+    "tabBreathe": "Breathe",
+    "tabGround": "Ground",
+    "tabRelax": "Relax",
+    "tabSounds": "Sounds",
+    "tabThoughts": "Thoughts",
+    "tabLetGo": "Let go"
   },
   "safety": {
     "concernTitle": "We are here with you",
@@ -252,7 +277,9 @@
     "reqNumber": "At least 1 number",
     "requestReceivedTitle": "Check Your Inbox",
     "requestReceivedDesc": "If an account exists for that email, we sent a password reset link. Please check your inbox and spam folder.",
-    "resetPasswordSubtitle": "Enter your email to receive a password reset link"
+    "resetPasswordSubtitle": "Enter your email to receive a password reset link",
+    "ageConfirmLabel": "I confirm that I am 18 years or older",
+    "ageConfirmRequired": "Please confirm that you are 18 years or older to create an account"
   },
   "settings": {
     "title": "Settings & Privacy",
@@ -277,7 +304,7 @@
     "languageLabel": "Application Language",
     "speechLanguageLabel": "Voice Input Accent",
     "countryLabel": "Country for Helplines",
-    "trustedContactTitle": "Trusted Contact (Safety Net)",
+    "trustedContactTitle": "Trusted Contact",
     "trustedContactDesc": "This person will appear in crisis alerts and your SOS button.",
     "contactName": "Contact Name",
     "contactPhone": "Phone Number",
@@ -310,7 +337,7 @@
     "tabsPrivacy": "Security & Privacy",
     "appearanceTitle": "Appearance",
     "appearanceSubtitle": "Personalize how MindDiary looks and feels",
-    "remindersRegionTitle": "Gentle Reminders & Region",
+    "remindersRegionTitle": "Reminders & Region",
     "remindersRegionSubtitle": "Mindful prompts and localized support resources",
     "dailyReminder": "Daily Mindful Check-In",
     "dailyReminderDesc": "Receive a soft browser notification inviting you to check in with yourself.",
@@ -319,11 +346,11 @@
     "preferredTime": "Preferred Reminder Time",
     "test": "Test",
     "speechLanguageDesc": "The language your browser speech recognition engine will listen for when you dictate entries.",
-    "aiToggleLabel": "Allow AI Features (Gemini)",
+    "aiToggleLabel": "Allow AI",
     "aiToggleDesc": "Enables gentle reflections, Storybook synthesis, and CBT thought assistance.",
-    "diaryAIToggleLabel": "Allow Assistant to Read Diary",
+    "diaryAIToggleLabel": "Diary AI Access",
     "diaryAIToggleDesc": "Let the assistant read short pieces of my diary entries to answer my questions. Only the pieces needed for each question are sent to the AI provider.",
-    "aiPrivacyNote": "Privacy guarantee: Only the specific excerpt you ask the AI to reflect upon is sent. Your diary is never used to train foundation models, and you have a daily limit of 30 AI requests. Default is OFF.",
+    "aiPrivacyNote": "Off by default. Sends selected text only to Google Gemini API (never entries marked 'Hide from AI').",
     "resetDefaults": "Reset Defaults",
     "resetDefaultsDesc": "Restore theme, typography, and dictation settings to initial defaults.",
     "passcodeProtection": "Passcode Protection",
@@ -331,7 +358,7 @@
     "disablePin": "Disable PIN",
     "enablePin": "Enable PIN",
     "autoLockTimeout": "Auto-Lock Timeout",
-    "createPinTitle": "Create 4–6 Digit Passcode",
+    "createPinTitle": "Create PIN",
     "newPin": "Enter New PIN",
     "confirmPin": "Confirm PIN",
     "savePasscode": "Save Passcode",
@@ -360,10 +387,22 @@
     "timezoneLabel": "Timezone",
     "timezoneDesc": "Your entries, streaks, and check-ins align to this timezone.",
     "enterPasswordPlaceholder": "Your account password",
-    "timezonePlaceholder": "e.g. Asia/Kolkata, America/Los_Angeles"
+    "timezonePlaceholder": "e.g. Asia/Kolkata, America/Los_Angeles",
+    "isStudent": "I'm a student",
+    "isStudentDesc": "Show the Student Focus card on Home",
+    "rowLook": "Look",
+    "rowLookDesc": "Theme, font, and text size",
+    "rowLanguage": "Language",
+    "rowLanguageDesc": "App language, voice, and reminders",
+    "rowSafety": "Safety",
+    "rowSafetyDesc": "Coping plan and trusted contacts",
+    "rowPrivacy": "AI & privacy",
+    "rowPrivacyDesc": "AI permissions and data controls",
+    "rowAccount": "Account",
+    "rowAccountDesc": "App lock, export, and account"
   },
   "privacy": {
-    "title": "Privacy & Data Sovereignty",
+    "title": "Privacy & Data",
     "subtitle": "MindDiary is built with deep respect for your inner world. Here is how your reflections are protected.",
     "backToSettings": "Back to Settings",
     "encryptedTitle": "AES-256-GCM Encryption",
@@ -373,7 +412,7 @@
     "deletableTitle": "100% Deletable & Portable",
     "deletableDesc": "You own every word. Download a complete JSON archive anytime, or trigger immediate deletion.",
     "dataStoredTitle": "What Data is Stored?",
-    "howEncryptedTitle": "How Your Data is Encrypted",
+    "howEncryptedTitle": "Data Encryption",
     "aiServicesTitle": "Artificial Intelligence & External APIs",
     "dataControlTitle": "Exporting & Deleting Your Data",
     "exportAllButton": "Download Complete Data Archive",
@@ -398,7 +437,7 @@
     "tableFields": "Fields & Data Stored",
     "tableProtection": "Protection Level",
     "encryptedAtRest": "Encrypted at rest",
-    "encryptedAtRestDesc": "Diary entry bodies, media captions, check-in notes, gratitude items, AI chat messages, thought records (CBT), storybook content & chapters, PHQ-9/GAD-7 answer scores, exam notes, small-win tasks, future letter content, and personal safety coping plans.",
+    "encryptedAtRestDesc": "Diary entries, check-in notes, gratitude lists, AI chat messages, CBT thought records, coping plans, future letters, and storybooks.",
     "notEncrypted": "Not Encrypted",
     "notEncryptedDesc": "Entry & letter titles, delivery dates, tags, mood labels (e.g. peaceful/happy), calendar dates, habit counts (water, sleep hours), and user preferences (theme, font, country).",
     "plaintextNote": "Plaintext (enables fast indexing & stats)",
@@ -407,13 +446,13 @@
     "irreversibleHash": "Irreversible hash",
     "securityNote": "Honest security note: Encryption at rest protects backups and database leaks. If the server runtime hosting the encryption key is compromised, encryption at rest cannot replace holistic server hardening.",
     "aiTitle": "Artificial Intelligence & External APIs",
-    "aiUsageDesc": "MindDiary utilizes AI exclusively to assist you with empathetic reflections, emotional tone checks, creative storytelling, and prompt suggestions:",
+    "aiUsageDesc": "AI features are OFF by default and only run when you enable them. When enabled, selected text is sent to the Google Gemini API. Entries marked 'Hide from AI' are never sent. Features: Reflect/Mood Analysis (current entry text), Ask My Diary (question + top matching non-excluded excerpts), Storybooks (selected range/entries), Companion Chat (recent chat + optional today's check-in numbers), Thought Challenger & Writing Starters (prompt text). On the Gemini free tier, Google may use submitted content to improve products; on the paid tier (billing enabled), Google does not use submitted content for training.",
     "onDemandOnlyTitle": "On-Demand Only:",
     "onDemandOnlyDesc": "AI is never called silently in the background. Only explicit user actions (such as clicking \"Reflect with AI\", \"Check my mood\", generating a storybook, or asking a question in \"Ask My Diary\") trigger an AI request.",
     "askDiaryConsentTitle": "Ask My Diary Separate Consent & Safe Retrieval:",
     "askDiaryConsentDesc": "Reading your diary requires a dedicated, separate consent toggle (\"Allow Assistant to Read Diary\"), which is OFF by default. When you ask a question, only matching excerpts (up to 500 characters around the best-matching sentence, top 6 entries maximum) are retrieved in memory and sent to Google Gemini. Excerpts are wrapped in explicit XML data delimiters and scanned locally for crisis indicators; any high-distress entries are dropped. Entries marked as excluded from AI are never read. Conversational context (last 6 messages) is stored encrypted at rest with AES-256-GCM, any high-distress messages are omitted from future model context, and chat history can be erased instantly at any time via \"Forget this chat\".",
-    "providerNoTrainingTitle": "Provider & No Model Training:",
-    "providerNoTrainingDesc": "AI features are powered by Google's Gemini API. Under Google's paid/API commercial terms, inputs and outputs submitted via the Gemini API are not used to train Google's foundation models when billing is enabled.",
+    "providerNoTrainingTitle": "Google Gemini API Terms & 18+ Policy:",
+    "providerNoTrainingDesc": "MindDiary is for adults 18+ only (confirmed at sign-up). Free tier vs paid tier data handling follows Google's Gemini API Terms of Service.",
     "mediaNoticeTitle": "Media Delivery Notice:",
     "mediaNoticeDesc": "Uploaded images, videos, and voice recordings are hosted on Cloudinary inside a user-isolated folder. Media URLs are unguessable but not access-controlled. Uploaded media is permanently deleted from Cloudinary when you delete the entry or delete your account.",
     "exportDeleteTitle": "Exporting & Deleting Your Data",
@@ -427,7 +466,9 @@
     "neverStoreKeywords": "We NEVER store or log the matched distress keywords.",
     "neverContactPolice": "We NEVER automatically contact the police, emergency services, or family members.",
     "compassionateAccess": "We only offer you compassionate immediate access to verified helplines and your saved trusted contact.",
-    "aesProtocol": "AES-256-GCM (enc:v1:)"
+    "aesProtocol": "AES-256-GCM (enc:v1:)",
+    "geminiTermsLink": "Google Gemini API Terms",
+    "readMore": "Read more"
   },
   "chat": {
     "title": "Support Companion",
@@ -521,7 +562,7 @@
     "editTitle": "Edit Reflection",
     "titlePlaceholder": "Give your reflection a gentle title...",
     "contentPlaceholder": "Write freely. Your words are private and encrypted...",
-    "moodLabel": "How does this moment feel?",
+    "moodLabel": "Your mood",
     "emotionsLabel": "Specific emotions",
     "pickPrompt": "Need inspiration? Choose a prompt",
     "aiHelper": "AI Reflection Assistant",
@@ -541,7 +582,12 @@
     "noEntriesFound": "No entries match your search.",
     "hideFromAI": "Hide this entry from AI",
     "hideFromAIDesc": "Excluded from Ask My Diary and AI Storybooks",
-    "hiddenFromAIBadge": "Hidden from AI"
+    "hiddenFromAIBadge": "Hidden from AI",
+    "addMedia": "Add photo",
+    "tags": "Tags",
+    "hiddenFromAI": "Hidden from AI",
+    "exitFocus": "Exit focus",
+    "focusMode": "Focus mode"
   },
   "diary": {
     "hideFromAI": "Hide this entry from AI",
@@ -570,7 +616,10 @@
     "editorEmoji": "✍️",
     "checkMood": "Check my mood",
     "checkingTone": "Checking tone...",
-    "checkMoodTitle": "Analyze emotional tone of current writing"
+    "checkMoodTitle": "Analyze emotional tone of current writing",
+    "moodDiscrepancyShort": "Your words sound heavier than your mood.",
+    "feelingsWheel": "Feelings wheel",
+    "getStarted": "Get started"
   },
   "gratitude": {
     "title": "Three Good Things",
@@ -591,7 +640,7 @@
     "emptyJar": "Your gratitude jar is waiting for your first entries."
   },
   "happybox": {
-    "title": "Happy Box (Uplifting Vault)",
+    "title": "Happy Box",
     "subtitle": "A collection of comforting memories, encouraging notes, and peaceful photos for hard days.",
     "addItem": "Add Comfort Memory",
     "emptyState": "Your Happy Box is currently quiet. Add comforting memories, quotes, or photos to open when days feel heavy.",
@@ -681,7 +730,7 @@
     "langEn": "English (English Prose)",
     "langHi": "Hindi (हिंदी - Devanagari)",
     "langHinglish": "Hinglish (Conversational)",
-    "step2Title": "2. Protagonist & Reflections",
+    "step2Title": "2. Story details",
     "protagonistNameWithLimit": "Protagonist Preferred Name (Optional, max 30 chars)",
     "dateHorizon": "Date Horizon",
     "bypassedByPicker": "(Bypassed by specific entry picker)",
@@ -792,7 +841,10 @@
     "copied": "Copied!",
     "copyLink": "Copy Link",
     "understood": "Understood",
-    "untitled": "Untitled Entry"
+    "untitled": "Untitled Entry",
+    "more": "More",
+    "open": "Open",
+    "export": "Export"
   },
   "applock": {
     "title": "MindDiary Locked",
@@ -953,7 +1005,7 @@
     "mindfulSpaceDesc": "Take your time. A sentence or a breath is always enough for today."
   },
   "errorBoundary": {
-    "title": "Take a gentle breath",
+    "title": "Take a breath",
     "subtitle": "Something unexpected paused this page. Please don't worry—your journal entries and check-in history remain safe in your account.",
     "reload": "Reload Page",
     "goHome": "Return to Safe Home"
@@ -1014,11 +1066,11 @@
     "voicePrivacy": "Voice Privacy",
     "voicePrivacyDesc": "Voice is processed by your browser/OS speech service. Audio is never stored or recorded on our servers during dictation.",
     "languageIndicator": "Language: {{lang}} (Change in Settings)",
-    "unsupportedTitle": "Your current browser does not support the Web Speech Recognition API.",
+    "unsupportedTitle": "Browser unsupported",
     "unsupportedDesc": "To use live voice dictation, please open MindDiary in Google Chrome, Microsoft Edge, or Apple Safari. You can still record voice notes on any browser!",
     "clickToDictate": "Click to dictate (Web Speech API)",
     "unsupportedShort": "Voice dictation not supported on this browser",
-    "unsupportedModalTitle": "Voice Dictation Not Supported",
+    "unsupportedModalTitle": "Voice Unavailable",
     "notSupported": "Voice dictation not supported on this browser",
     "stopDictation": "Stop voice dictation",
     "startDictation": "Start voice dictation",
@@ -1162,5 +1214,22 @@
     "recent": "Recent",
     "deleteRecord": "Delete record",
     "intensityShift": "{{emotion}} ({{initial}}% → {{final}}%)"
+  },
+  "ai": {
+    "blocked": "I couldn't generate a response for that right now. Please try rephrasing or reach out to support.",
+    "empty": "The AI didn't return a response. Please try again.",
+    "truncated": "The AI response was cut short. Please try again.",
+    "retry": "Try again",
+    "demoBanner": "Demo AI: do not enter real personal details"
+  },
+  "talk": {
+    "tabChat": "Chat",
+    "tabMyDiary": "My diary"
+  },
+  "journal": {
+    "noEntries": "No entries yet",
+    "writeFirst": "Write entry",
+    "untitled": "Untitled",
+    "hasMedia": "Media attached"
   }
 }

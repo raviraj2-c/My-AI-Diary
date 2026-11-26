@@ -172,7 +172,7 @@ export const BreathingCircle: React.FC<BreathingCircleProps> = ({ onSessionCompl
       </p>
 
       {/* Main Animated Circle Container */}
-      <Card className="p-8 sm:p-12 border-calm-200/80 dark:border-gray-800 flex flex-col items-center justify-center min-h-[360px] relative overflow-hidden bg-gradient-to-b from-calm-50/30 to-white dark:from-[#131d31] dark:to-[#0f172a]">
+      <Card className="p-8 sm:p-12 border-border dark:border-gray-800 flex flex-col items-center justify-center min-h-[360px] relative overflow-hidden bg-surface  to-white dark:from-[#131d31] dark:to-[#0f172a]">
         {/* Animated Expanding Rings */}
         <div className="relative flex items-center justify-center w-64 h-64">
           <div
@@ -207,7 +207,7 @@ export const BreathingCircle: React.FC<BreathingCircleProps> = ({ onSessionCompl
 
         {/* Completion Message */}
         {completed && (
-          <div className="mt-4 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium animate-fade-in">
+          <div className="mt-4 flex items-center gap-1.5 text-xs text-sky-700 dark:text-sky-400 font-medium animate-fade-in">
             <CheckCircle2 className="w-4 h-4" />
             <span>{t('calm.breathingLogged')}</span>
           </div>

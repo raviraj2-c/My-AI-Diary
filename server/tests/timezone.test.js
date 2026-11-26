@@ -69,7 +69,7 @@ describe('Timezone, Local Date Keys, and Calendar Boundary Hardening', () => {
           email: 'kolkata@student.edu',
           password: 'Password123!',
           timezone: 'Asia/Kolkata'
-        });
+        , ageConfirmed: true});
 
       expect(res.status).toBe(201);
       expect(res.body.user.settings.timezone).toBe('Asia/Kolkata');

@@ -17,7 +17,7 @@ The core tenets of MindDiary are:
 ### 1.2 Technology Stack
 - **Frontend SPA:** React 18, TypeScript, Vite, Tailwind CSS, TipTap Rich Text Editor, Lucide Icons, Recharts, jsPDF, react-i18next.
 - **Backend API:** Node.js 18+, Express.js 4, Mongoose 7, MongoDB, JWT (JSON Web Tokens), bcryptjs, Helmet CSP headers, Express Rate Limit, DOMPurify / sanitize-html.
-- **External Services:** Anthropic Claude (via `@anthropic-ai/sdk`), Cloudinary CDN (media delivery), Nodemailer SMTP.
+- **External Services:** Google Gemini API, Cloudinary CDN (media delivery), Nodemailer SMTP.
 
 ### 1.3 How to Read This Document
 - **Sections 1–3:** Architectural overview, design philosophy, and complete feature catalog.
@@ -54,14 +54,14 @@ MindDiary implements a decoupled client-server architecture with defense-in-dept
 │                    Application Server                       │
 │  - Deterministic Crisis Risk Engine (regex / multi-lingual) │
 │  - Field-Level AES-256-GCM Cryptographic Service (enc:v1:)  │
-│  - Claude LLM Wrapper with 30 calls/day usage metering      │
+│  - Gemini LLM Wrapper with 30 calls/day usage metering      │
 │  - sanitize-html server-side XSS filter                     │
 └──────────────┬──────────────────────────────┬───────────────┘
                │                              │
                ▼                              ▼
 ┌──────────────────────────────┐ ┌────────────────────────────┐
 │      Database Storage        │ │    Third-Party Services    │
-│  MongoDB Atlas (16 models)   │ │  Anthropic Claude API      │
+│  MongoDB Atlas (16 models)   │ │  Google Gemini API      │
 │  Encrypted document fields   │ │  Cloudinary Media Storage  │
 │  Strict user-scoped queries  │ │  SMTP Mail Server          │
 └──────────────────────────────┘ └────────────────────────────┘
@@ -103,7 +103,7 @@ MindDiary includes a rich suite of 14 integrated wellness tools:
 
 7. **Ask My Diary (`/ask`):**
    - AI assistant that answers questions using ONLY the user's authentic journal entries.
-   - Scans the user's last 500 entries, ranks relevance via Unicode-aware tokenization and recency weighting, and sends only the top 5–8 excerpts to Claude.
+   - Scans the user's last 500 entries, ranks relevance via Unicode-aware tokenization and recency weighting, and sends only the top 5–8 excerpts to Gemini.
    - Transparent citations showing which entries were referenced; refuses to answer if information is not found.
 
 8. **Storybook Library & Reader (`/stories`):**
@@ -112,7 +112,7 @@ MindDiary includes a rich suite of 14 integrated wellness tools:
    - All chapter contents and generated narratives are fully encrypted at rest with AES-256-GCM.
 
 9. **AI Companion Sanctuary (`/chat`):**
-   - Conversational wellness companion powered by Claude with empathetic reflective listening.
+   - Conversational wellness companion powered by Gemini with empathetic reflective listening.
    - Attached daily check-in context for personalized continuity.
    - Quota tracking (30 calls/day) and pre-flight crisis intercept.
 
@@ -187,13 +187,13 @@ The risk engine (`server/utils/riskCheck.js`) executes before any external AI ca
 
 ## 9. AI Architecture, Safety Guardrails & Quota System
 
-### 9.1 Claude Wrapper & Usage Metering
+### 9.1 Gemini Wrapper & Usage Metering
 - SDK client initialized with 25-second timeouts, single retry, and strict daily quota of 30 interactions per user.
 - System prompts strictly prohibit diagnosing, prescribing medication, or claiming human consciousness.
 
 ### 9.2 Demo AI & Production Availability
-- In development/test environments without an Anthropic API key, deterministic simulated responses are returned for testing.
-- In production (`NODE_ENV === 'production'`) without `ANTHROPIC_API_KEY`, all AI endpoints return a clean HTTP 503 (`{ "success": false, "message": "AI service is temporarily unavailable." }`).
+- In development/test environments without an Gemini API key, deterministic simulated responses are returned for testing.
+- In production (`NODE_ENV === 'production'`) without `GEMINI_API_KEY`, all AI endpoints return a clean HTTP 503 (`{ "success": false, "message": "AI service is temporarily unavailable." }`).
 
 ### 9.3 Storybook Engine & Closed Gaps Analysis
 The storybook generator compiles journal entries into thematic multi-chapter narratives.
@@ -279,7 +279,7 @@ All previously identified storybook gaps have been resolved:
 - `GET /api/diary/stats` - Entry counts, streaks, and mood breakdown
 
 ### AI Sanctuary & Storybooks (`/api/ai` & `/api/chat`)
-- `POST /api/chat/messages` - Send message to Claude AI companion
+- `POST /api/chat/messages` - Send message to Gemini AI companion
 - `GET /api/chat/messages` - Conversation history
 - `DELETE /api/chat/messages` - Clear chat history
 - `POST /api/ai/reflect` - Gentle reflection on journal entry

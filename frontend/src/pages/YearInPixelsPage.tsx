@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { WellnessService } from '../services/wellnessService';
-import { YearPixelsData, YearPixelsDay } from '../types';
+import { useYearPixels } from '../hooks/useQueries';
+import { YearPixelsDay } from '../types';
 import { Card } from '../components/common/Card';
 import { Button } from '../components/common/Button';
 import { Spinner } from '../components/common/Spinner';
@@ -33,8 +33,7 @@ export const YearInPixelsPage: React.FC = () => {
   const { showToast } = useToast();
 
   const [year, setYear] = useState<number>(() => new Date().getFullYear());
-  const [data, setData] = useState<YearPixelsData | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { data = null, isLoading: loading, isError, refetch } = useYearPixels(year);
   const [selectedDay, setSelectedDay] = useState<{ dateStr: string; pixel: YearPixelsDay | null } | null>(null);
 
   const monthNames = [
@@ -48,27 +47,14 @@ export const YearInPixelsPage: React.FC = () => {
     return new Date(y, mIndex + 1, 0).getDate();
   };
 
-  useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    WellnessService.getYearPixels(year)
-      .then((res) => {
-        if (mounted) {
-          setData(res);
-          setLoading(false);
-        }
-      })
-      .catch((err) => {
-        if (mounted) {
-          showToast(err.message || 'Failed to load pixels', 'error');
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [year, showToast]);
+  if (isError && !data) {
+    return (
+      <div className="max-w-xl mx-auto px-4 py-12 text-center space-y-3">
+        <p className="text-sm text-danger dark:text-danger">{t('common.error')}</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>{t('common.retry')}</Button>
+      </div>
+    );
+  }
 
   const getColorForScore = (score?: number): string => {
     if (typeof score !== 'number' || score < 1) return EMPTY_COLOR_LIGHT;
@@ -222,40 +208,40 @@ export const YearInPixelsPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-6xl mx-auto py-2 animate-fade-in">
       {/* Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-calm-200 dark:border-calm-800 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border dark:border-ink-800 pb-5">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-50 dark:bg-primary-950/40 text-primary-700 dark:text-primary-300 text-xs font-semibold mb-1">
             <Calendar className="w-3.5 h-3.5" />
             <span>{t('pixels.badge', 'Visual Tapestry')}</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-calm-900 dark:text-calm-50">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-ink-900 dark:text-sky-50">
             {t('pixels.title', 'Year in Pixels')}
           </h1>
-          <p className="text-xs sm:text-sm text-calm-600 dark:text-calm-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-muted dark:text-muted mt-0.5">
             {t('pixels.subtitle', 'A colorful tapestry of your emotional journey throughout the year.')}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Year selector */}
-          <div className="flex items-center bg-white dark:bg-slate-900 border border-calm-200 dark:border-calm-800 rounded-xl shadow-soft-sm p-1">
+          <div className="flex items-center bg-white dark:bg-slate-900 border border-border dark:border-ink-800 rounded-xl shadow-soft-sm p-1">
             <button
               type="button"
               onClick={() => setYear((y) => Math.max(2000, y - 1))}
               disabled={year <= 2000}
-              className="p-1.5 rounded-lg hover:bg-calm-100 dark:hover:bg-slate-800 text-calm-600 dark:text-calm-300 disabled:opacity-30"
+              className="p-1.5 rounded-lg hover:bg-sky-100 dark:hover:bg-slate-800 text-muted dark:text-sky-200 disabled:opacity-30"
               aria-label="Previous Year"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="font-serif font-bold text-sm px-3 text-calm-900 dark:text-calm-100">
+            <span className="font-serif font-bold text-sm px-3 text-ink-900 dark:text-sky-100">
               {year}
             </span>
             <button
               type="button"
               onClick={() => setYear((y) => Math.min(2100, y + 1))}
               disabled={year >= 2100}
-              className="p-1.5 rounded-lg hover:bg-calm-100 dark:hover:bg-slate-800 text-calm-600 dark:text-calm-300 disabled:opacity-30"
+              className="p-1.5 rounded-lg hover:bg-sky-100 dark:hover:bg-slate-800 text-muted dark:text-sky-200 disabled:opacity-30"
               aria-label="Next Year"
             >
               <ChevronRight className="w-4 h-4" />
@@ -278,21 +264,21 @@ export const YearInPixelsPage: React.FC = () => {
       {/* Palette Legend */}
       <Card className="p-4 bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-          <span className="font-semibold text-calm-800 dark:text-calm-200">
+          <span className="font-semibold text-ink-800 dark:text-border">
             {t('pixels.legendTitle', 'Mood Score Legend:')}
           </span>
           <div className="flex flex-wrap items-center gap-3">
             {PALETTE.map((item) => (
               <div key={item.color} className="flex items-center gap-1.5">
                 <span className="w-3.5 h-3.5 rounded shadow-soft-xs" style={{ backgroundColor: item.color }} />
-                <span className="text-calm-600 dark:text-calm-400 text-[11px]">
+                <span className="text-muted dark:text-muted text-[11px]">
                   {t(item.labelKey, item.defaultLabel)}
                 </span>
               </div>
             ))}
             <div className="flex items-center gap-1.5">
               <span className="w-3.5 h-3.5 rounded bg-gray-200 dark:bg-slate-700 shadow-soft-xs" />
-              <span className="text-calm-500 dark:text-calm-400 text-[11px]">
+              <span className="text-muted dark:text-muted text-[11px]">
                 {t('pixels.noEntry', 'No reflection recorded')}
               </span>
             </div>
@@ -309,8 +295,8 @@ export const YearInPixelsPage: React.FC = () => {
         <Card className="p-4 sm:p-6 overflow-x-auto bg-white/80 dark:bg-slate-900/80">
           <div className="min-w-[680px]">
             {/* Month Column Headers */}
-            <div className="grid grid-cols-[40px_repeat(12,1fr)] gap-1 mb-2 text-center text-xs font-semibold text-calm-600 dark:text-calm-300">
-              <div className="text-[10px] text-calm-400 uppercase tracking-wider py-1">{t('pixels.dayLabel', 'Day')}</div>
+            <div className="grid grid-cols-[40px_repeat(12,1fr)] gap-1 mb-2 text-center text-xs font-semibold text-muted dark:text-sky-200">
+              <div className="text-[10px] text-muted uppercase tracking-wider py-1">{t('pixels.dayLabel', 'Day')}</div>
               {monthNames.map((name) => (
                 <div key={name} className="py-1">
                   {name}
@@ -325,7 +311,7 @@ export const YearInPixelsPage: React.FC = () => {
                 return (
                   <div key={dayNum} className="grid grid-cols-[40px_repeat(12,1fr)] gap-1 items-center">
                     {/* Row label */}
-                    <div className="text-[11px] font-mono text-calm-400 dark:text-calm-500 text-right pr-2">
+                    <div className="text-[11px] font-mono text-muted dark:text-muted text-right pr-2">
                       {dayNum}
                     </div>
 
@@ -338,7 +324,7 @@ export const YearInPixelsPage: React.FC = () => {
                         return (
                           <div
                             key={mIdx}
-                            className="h-6 rounded bg-calm-50/50 dark:bg-slate-900/30 opacity-20 pointer-events-none"
+                            className="h-6 rounded bg-sky-50 dark:bg-slate-900/30 opacity-20 pointer-events-none"
                           />
                         );
                       }
@@ -359,7 +345,7 @@ export const YearInPixelsPage: React.FC = () => {
                           style={bgColor ? { backgroundColor: bgColor } : undefined}
                           className={`h-6 rounded transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-500 shadow-soft-xs ${
                             !hasData
-                              ? 'bg-calm-100 hover:bg-calm-200 dark:bg-slate-800 dark:hover:bg-slate-700'
+                              ? 'bg-sky-100 hover:bg-border dark:bg-slate-800 dark:hover:bg-slate-700'
                               : 'hover:brightness-110'
                           }`}
                         />
@@ -382,13 +368,13 @@ export const YearInPixelsPage: React.FC = () => {
           onClick={() => setSelectedDay(null)}
         >
           <div
-            className="w-full max-w-sm bg-white dark:bg-[#131d31] rounded-2xl shadow-soft-2xl border border-calm-200 dark:border-calm-800 p-5 space-y-4"
+            className="w-full max-w-sm bg-white dark:bg-[#131d31] rounded-2xl shadow-soft-2xl border border-border dark:border-ink-800 p-5 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between pb-3 border-b border-calm-100 dark:border-calm-800">
+            <div className="flex items-center justify-between pb-3 border-b border-sky-100 dark:border-ink-800">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                <h3 className="font-serif font-bold text-base text-calm-900 dark:text-calm-100">
+                <h3 className="font-serif font-bold text-base text-ink-900 dark:text-sky-100">
                   {new Date(selectedDay.dateStr + 'T00:00:00').toLocaleDateString(i18n.language, {
                     weekday: 'short',
                     year: 'numeric',
@@ -400,7 +386,7 @@ export const YearInPixelsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedDay(null)}
-                className="p-1 rounded-lg text-calm-400 hover:text-calm-700 dark:hover:text-calm-200"
+                className="p-1 rounded-lg text-muted hover:text-text dark:hover:text-border"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -408,7 +394,7 @@ export const YearInPixelsPage: React.FC = () => {
 
             {selectedDay.pixel ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-xl bg-calm-50 dark:bg-slate-800/60 border border-calm-100 dark:border-slate-800">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-sky-50 dark:bg-slate-800/60 border border-sky-100 dark:border-slate-800">
                   <div
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-soft-sm shrink-0"
                     style={{ backgroundColor: getColorForScore(selectedDay.pixel.score) }}
@@ -416,19 +402,19 @@ export const YearInPixelsPage: React.FC = () => {
                     {selectedDay.pixel.score}
                   </div>
                   <div>
-                    <div className="text-xs text-calm-500 dark:text-calm-400">
+                    <div className="text-xs text-muted dark:text-muted">
                       {selectedDay.pixel.source === 'checkin'
                         ? t('pixels.sourceCheckIn', 'Recorded via Daily Check-In')
                         : t('pixels.sourceDiary', 'Recorded via Journal Entry')}
                     </div>
-                    <div className="text-sm font-semibold capitalize text-calm-900 dark:text-calm-100">
+                    <div className="text-sm font-semibold capitalize text-ink-900 dark:text-sky-100">
                       {selectedDay.pixel.mood}
                     </div>
                   </div>
                 </div>
 
                 {selectedDay.pixel.title && (
-                  <div className="text-xs text-calm-600 dark:text-calm-300 italic">
+                  <div className="text-xs text-muted dark:text-sky-200 italic">
                     "{selectedDay.pixel.title}"
                   </div>
                 )}
@@ -450,7 +436,7 @@ export const YearInPixelsPage: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs text-calm-500 dark:text-calm-400 leading-relaxed">
+                <p className="text-xs text-muted dark:text-muted leading-relaxed">
                   {t('pixels.noEntryDesc', 'No reflection was recorded for this day. You can add a journal entry or check-in anytime.')}
                 </p>
                 <Button

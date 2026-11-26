@@ -49,7 +49,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 w-full md:pl-64 min-h-[calc(100vh-4rem)] p-4 sm:p-6 md:p-8 pb-24 md:pb-12 max-w-7xl mx-auto animate-fade-in flex flex-col justify-between"
+          className="flex-1 w-full md:pl-20 min-h-[calc(100vh-4rem)] p-4 sm:p-6 md:p-8 pb-28 md:pb-12 max-w-7xl mx-auto animate-fade-in flex flex-col justify-between overflow-x-hidden"
         >
           <div>{children}</div>
           

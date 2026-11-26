@@ -12,14 +12,14 @@ describe('Resource Ownership Enforcement (User B cannot access User A data)', ()
     // Register User A
     const resA = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'User A', email: 'userA@test.com', password: 'Password123' });
+      .send({ name: 'User A', email: 'userA@test.com', password: 'Password123' , ageConfirmed: true});
     userA = resA.body.user;
     tokenA = resA.body.token;
 
     // Register User B
     const resB = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'User B', email: 'userB@test.com', password: 'Password123' });
+      .send({ name: 'User B', email: 'userB@test.com', password: 'Password123' , ageConfirmed: true});
     tokenB = resB.body.token;
   });
 

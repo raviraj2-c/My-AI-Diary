@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { QueryClientContext } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../../hooks/useSettings';
 import { getHelplinesForCountry, isHelplineVerificationStale } from '../../data/helplines';
@@ -29,17 +30,31 @@ export const SOSButton: React.FC = () => {
 
   // Safe check whether user is logged in (works inside and outside AuthProvider)
   const isAuth = Boolean(AuthService.getAuthToken());
+  const queryClient = useContext(QueryClientContext);
 
   useEffect(() => {
-    // Only fetch coping plan when authenticated; never let a failed or unauthenticated call block helplines
-    if (isOpen && isAuth) {
-      WellnessService.getCopingPlan()
-        .then((plan) => setCopingPlan(plan))
-        .catch(() => setCopingPlan(null));
-    } else {
-      setCopingPlan(null);
+    const onOpenSos = () => setIsOpen(true);
+    window.addEventListener('minddiary_open_sos', onOpenSos);
+    return () => window.removeEventListener('minddiary_open_sos', onOpenSos);
+  }, []);
+
+  useEffect(() => {
+    // Only fetch coping plan when sheet opens and user is authenticated, then cache it
+    if (!isOpen || !isAuth) return;
+
+    const cached = queryClient?.getQueryData<CopingPlanData>(['copingPlan']);
+    if (cached) {
+      setCopingPlan(cached);
+      return;
     }
-  }, [isOpen, isAuth]);
+
+    WellnessService.getCopingPlan()
+      .then((plan) => {
+        setCopingPlan(plan);
+        queryClient?.setQueryData(['copingPlan'], plan);
+      })
+      .catch(() => setCopingPlan(null));
+  }, [isOpen, isAuth, queryClient]);
 
   const hasPlanItems = Boolean(
     copingPlan &&
@@ -65,7 +80,7 @@ export const SOSButton: React.FC = () => {
         type="button"
         onClick={() => setIsOpen(true)}
         aria-label={t('sos.openAria', 'Open emergency help and crisis lines')}
-        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 inline-flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-soft-lg hover:shadow-soft-xl transition-all duration-200 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 inline-flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-danger hover:bg-danger text-white font-semibold text-xs shadow-soft-lg hover:shadow-soft-xl transition-all duration-200 active:scale-95 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger focus-visible:ring-offset-2"
       >
         <HeartHandshake className="w-4 h-4 animate-pulse" />
         <span className="tracking-wide">{t('sos.button', 'SOS / Helplines')}</span>
@@ -88,7 +103,7 @@ export const SOSButton: React.FC = () => {
               {/* Sheet Header */}
               <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2">
-                  <span className="p-2 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400">
+                  <span className="p-2 rounded-xl bg-sky-50 dark:bg-danger text-danger dark:text-danger">
                     <HeartHandshake className="w-5 h-5" />
                   </span>
                   <div>
@@ -110,16 +125,16 @@ export const SOSButton: React.FC = () => {
 
               {/* Personal Safety Coping Plan (Shown First if available) */}
               {hasPlanItems && copingPlan ? (
-                <div className="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 space-y-3">
+                <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-sky-700 space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-900 dark:text-amber-200 uppercase tracking-wider">
-                      <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-ink-900 dark:text-sky-200 uppercase tracking-wider">
+                      <Sparkles className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
                       <span>{t('copingPlan.myPlanTitle', 'My Personal Coping Plan')}</span>
                     </div>
                     <Link
                       to="/settings#coping-plan"
                       onClick={() => setIsOpen(false)}
-                      className="text-[11px] text-amber-700 dark:text-amber-400 font-medium hover:underline"
+                      className="text-[11px] text-sky-700 dark:text-sky-400 font-medium hover:underline"
                     >
                       {t('common.edit', 'Edit')}
                     </Link>
@@ -127,14 +142,14 @@ export const SOSButton: React.FC = () => {
 
                   {copingPlan.copingStrategies && copingPlan.copingStrategies.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-calm-700 dark:text-calm-300">
+                      <span className="text-[11px] font-semibold text-text dark:text-sky-200">
                         {t('copingPlan.strategiesLabel', 'What helps me:')}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {copingPlan.copingStrategies.map((s: unknown, idx: number) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-calm-800 dark:text-calm-200 border border-amber-200/50 dark:border-amber-900/40"
+                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-ink-800 dark:text-border border border-sky-200 dark:border-ink-900"
                           >
                             {typeof s === 'string' ? s : ''}
                           </span>
@@ -145,14 +160,14 @@ export const SOSButton: React.FC = () => {
 
                   {copingPlan.safePlaces && copingPlan.safePlaces.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-calm-700 dark:text-calm-300">
+                      <span className="text-[11px] font-semibold text-text dark:text-sky-200">
                         {t('copingPlan.safePlacesLabel', 'My safe places:')}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {copingPlan.safePlaces.map((p: unknown, idx: number) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-calm-800 dark:text-calm-200 border border-amber-200/50 dark:border-amber-900/40"
+                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-ink-800 dark:text-border border border-sky-200 dark:border-ink-900"
                           >
                             {typeof p === 'string' ? p : ''}
                           </span>
@@ -163,14 +178,14 @@ export const SOSButton: React.FC = () => {
 
                   {copingPlan.reasonsToKeepGoing && copingPlan.reasonsToKeepGoing.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[11px] font-semibold text-calm-700 dark:text-calm-300">
+                      <span className="text-[11px] font-semibold text-text dark:text-sky-200">
                         {t('copingPlan.reasonsLabel', 'Reasons to hold on:')}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {copingPlan.reasonsToKeepGoing.map((r: unknown, idx: number) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-calm-800 dark:text-calm-200 border border-amber-200/50 dark:border-amber-900/40"
+                            className="px-2 py-0.5 rounded-lg bg-white/80 dark:bg-slate-800 text-[11px] text-ink-800 dark:text-border border border-sky-200 dark:border-ink-900"
                           >
                             {typeof r === 'string' ? r : ''}
                           </span>
@@ -180,12 +195,12 @@ export const SOSButton: React.FC = () => {
                   )}
                 </div>
               ) : isAuth ? (
-                <div className="p-3.5 rounded-2xl bg-calm-50/70 dark:bg-slate-800/40 border border-calm-200/70 dark:border-slate-700 flex items-center justify-between gap-3 text-xs">
+                <div className="p-3.5 rounded-2xl bg-sky-50 dark:bg-slate-800/40 border border-border dark:border-slate-700 flex items-center justify-between gap-3 text-xs">
                   <div>
-                    <div className="font-semibold text-calm-900 dark:text-calm-100">
+                    <div className="font-semibold text-ink-900 dark:text-sky-100">
                       {t('copingPlan.gentlePromptTitle', 'Personal Coping Plan')}
                     </div>
-                    <div className="text-[11px] text-calm-500 dark:text-calm-400">
+                    <div className="text-[11px] text-muted dark:text-muted">
                       {t('copingPlan.gentlePromptDesc', 'Have your own calming anchors ready.')}
                     </div>
                   </div>
@@ -201,9 +216,9 @@ export const SOSButton: React.FC = () => {
 
               {/* Trusted Contact Card (Only when authenticated) */}
               {isAuth && (
-                <div className="p-4 rounded-2xl bg-calm-50/70 dark:bg-calm-950/30 border border-calm-200/80 dark:border-calm-800 space-y-2">
+                <div className="p-4 rounded-2xl bg-sky-50 dark:bg-ink-950 border border-border dark:border-ink-800 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-calm-800 dark:text-calm-200 uppercase tracking-wider">
+                    <span className="text-xs font-semibold text-ink-800 dark:text-border uppercase tracking-wider">
                       {t('sos.trustedContact', 'Trusted Contact')}
                     </span>
                     <Link
@@ -236,7 +251,7 @@ export const SOSButton: React.FC = () => {
                         </a>
                         <a
                           href={`sms:${trustedContact.phone}`}
-                          className="p-2 rounded-xl bg-calm-200 dark:bg-calm-700 text-calm-800 dark:text-calm-200 hover:bg-calm-300 transition-colors"
+                          className="p-2 rounded-xl bg-border dark:bg-text text-ink-800 dark:text-border hover:bg-sky-200 transition-colors"
                           title={t('sos.messageContact', 'Message trusted contact')}
                         >
                           <MessageSquare className="w-4 h-4" />
@@ -264,7 +279,7 @@ export const SOSButton: React.FC = () => {
                         {t('sos.lastVerified', 'Numbers last verified: {{date}}', { date: countryData.helplines[0].lastVerified })}
                       </div>
                     ) : (
-                      <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                      <div className="text-[10px] text-sky-700 dark:text-sky-400 font-medium">
                         {t('sos.verifyNumber', 'Please verify this number')}
                       </div>
                     )}
@@ -281,7 +296,7 @@ export const SOSButton: React.FC = () => {
                         <div className="font-bold text-gray-900 dark:text-gray-100">{h.name}</div>
                         <div className="text-[11px] text-gray-500">{h.description}</div>
                         {(!h.lastVerified || isHelplineVerificationStale(h.lastVerified)) && (
-                          <div className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5">
+                          <div className="text-[10px] text-sky-700 dark:text-sky-400 font-medium mt-0.5">
                             {t('sos.verifyNumber', 'Please verify this number')}
                           </div>
                         )}
@@ -289,7 +304,7 @@ export const SOSButton: React.FC = () => {
                       <div className="flex items-center gap-1.5 shrink-0">
                         <a
                           href={h.callUrl}
-                          className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition-colors inline-flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-xl bg-danger hover:bg-danger text-white font-bold transition-colors inline-flex items-center gap-1"
                         >
                           <Phone className="w-3 h-3" />
                           <span>{h.number}</span>

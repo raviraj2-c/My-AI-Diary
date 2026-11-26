@@ -170,6 +170,16 @@ export class DiaryService {
     }
   }
 
+  static async getCalendarMonth(month: string): Promise<Array<{ date: string; count: number; mood: string; hasMedia: boolean }>> {
+    const data = await apiRequest<Array<{ date: string; count: number; mood: string; hasMedia: boolean }>>(
+      API_CONFIG.ENDPOINTS.DIARY.CALENDAR(month)
+    );
+    if (!data.success || !Array.isArray(data.data)) {
+      throw new Error(data.message || 'Failed to fetch calendar month');
+    }
+    return data.data;
+  }
+
   static async getStatsAsync(): Promise<Record<string, unknown>> {
     try {
       const data = await apiRequest<Record<string, unknown>>(API_CONFIG.ENDPOINTS.DIARY.STATS);

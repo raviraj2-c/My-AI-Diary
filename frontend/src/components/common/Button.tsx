@@ -28,11 +28,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   const variantStyles = {
     primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-soft-sm hover:shadow-soft-md',
-    calm: 'bg-calm-600 hover:bg-calm-700 text-white shadow-soft-sm hover:shadow-soft-md',
-    secondary: 'bg-calm-100 dark:bg-calm-800 text-calm-800 dark:text-calm-100 hover:bg-calm-200 dark:hover:bg-calm-700',
+    calm: 'bg-muted hover:bg-text text-white shadow-soft-sm hover:shadow-soft-md',
+    secondary: 'bg-sky-100 dark:bg-ink-800 text-ink-800 dark:text-sky-100 hover:bg-border dark:hover:bg-text',
     danger: 'bg-danger-soft-500 hover:bg-danger-soft-600 text-white shadow-soft-sm',
-    ghost: 'text-calm-600 dark:text-calm-300 hover:bg-calm-100 dark:hover:bg-calm-800',
-    outline: 'border border-calm-300 dark:border-calm-700 text-calm-700 dark:text-calm-200 hover:bg-calm-50 dark:hover:bg-calm-800/60'
+    ghost: 'text-muted dark:text-sky-200 hover:bg-sky-100 dark:hover:bg-ink-800',
+    outline: 'border border-sky-200 dark:border-text text-text dark:text-border hover:bg-sky-50 dark:hover:bg-ink-800'
   };
 
   const renderIcon = () => {

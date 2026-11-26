@@ -25,7 +25,7 @@ describe('Security Hardening Tests', () => {
         email: testEmail,
         password: testPassword,
         name: 'Security User'
-      });
+      , ageConfirmed: true});
     userToken = res.body.token;
     userId = res.body.user.id;
 
@@ -297,7 +297,7 @@ describe('Security Hardening Tests', () => {
           email: 'del_user@example.com',
           password: 'Password123!',
           name: 'Delete User'
-        });
+        , ageConfirmed: true});
       const delToken = delRes.body.token;
       const delUserId = delRes.body.user.id;
 

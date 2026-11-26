@@ -52,16 +52,16 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, [showToast]);
 
   const icons = {
-    success: <CheckCircle2 className="h-5 w-5 text-calm-600 dark:text-calm-400 shrink-0" />,
-    error: <AlertCircle className="h-5 w-5 text-rose-600 dark:text-rose-400 shrink-0" />,
-    warning: <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />,
+    success: <CheckCircle2 className="h-5 w-5 text-muted dark:text-muted shrink-0" />,
+    error: <AlertCircle className="h-5 w-5 text-danger dark:text-danger shrink-0" />,
+    warning: <AlertTriangle className="h-5 w-5 text-sky-700 dark:text-sky-400 shrink-0" />,
     info: <Info className="h-5 w-5 text-primary-600 dark:text-primary-400 shrink-0" />
   };
 
   const bgStyles = {
-    success: 'bg-calm-50 border-calm-200 text-calm-900 dark:bg-calm-950/80 dark:border-calm-800 dark:text-calm-100',
-    error: 'bg-rose-50 border-rose-200 text-rose-900 dark:bg-rose-950/80 dark:border-rose-800 dark:text-rose-100',
-    warning: 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-950/80 dark:border-amber-800 dark:text-amber-100',
+    success: 'bg-sky-50 border-border text-ink-900 dark:bg-ink-950 dark:border-ink-800 dark:text-sky-100',
+    error: 'bg-sky-50 border-danger text-danger dark:bg-danger dark:border-danger dark:text-danger',
+    warning: 'bg-sky-50 border-sky-200 text-ink-900 dark:bg-ink-900 dark:border-sky-700 dark:text-sky-100',
     info: 'bg-primary-50 border-primary-200 text-primary-900 dark:bg-primary-950/80 dark:border-primary-800 dark:text-primary-100'
   };
 

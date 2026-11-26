@@ -51,7 +51,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://telemanas.mohfw.gov.in',
         source: 'https://telemanas.mohfw.gov.in',
-        lastVerified: '2026-11-26'
+        lastVerified: null
       },
       {
         name: 'Tele-MANAS Toll Free Alternative',
@@ -60,7 +60,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         description: 'Alternative national toll-free support line',
         is24x7: true,
         source: 'https://telemanas.mohfw.gov.in',
-        lastVerified: '2026-11-26'
+        lastVerified: null
       },
       {
         name: 'KIRAN (Dept of Empowerment of PwDs)',
@@ -80,7 +80,7 @@ export const HELPLINES_BY_COUNTRY: Record<string, CountryHelplines> = {
         is24x7: true,
         website: 'https://www.vandrevalafoundation.com',
         source: 'https://www.vandrevalafoundation.com',
-        lastVerified: '2026-11-26'
+        lastVerified: null
       }
     ]
   },
@@ -234,7 +234,7 @@ export const INTERNATIONAL_FALLBACK: CountryHelplines = {
       is24x7: true,
       website: 'https://findahelpline.com',
       source: 'https://findahelpline.com',
-      lastVerified: '2026-11-20'
+      lastVerified: null
     },
     {
       name: 'Befrienders Worldwide',
@@ -244,7 +244,7 @@ export const INTERNATIONAL_FALLBACK: CountryHelplines = {
       is24x7: true,
       website: 'https://www.befrienders.org',
       source: 'https://www.befrienders.org',
-      lastVerified: '2026-11-20'
+      lastVerified: null
     }
   ]
 };

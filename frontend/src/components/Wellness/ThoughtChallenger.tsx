@@ -7,7 +7,6 @@ import { useSettings } from '../../hooks/useSettings';
 import { AIService } from '../../services/aiService';
 import { ThoughtRecord } from '../../types';
 import {
-  BrainCircuit,
   ArrowRight,
   ArrowLeft,
   Sparkles,
@@ -134,18 +133,9 @@ export const ThoughtChallenger: React.FC = () => {
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-1">
-            <BrainCircuit className="w-3.5 h-3.5" />
-            {t('calm.thoughtChallengerTitle')}
-          </div>
-          <h2 className="text-xl font-serif font-bold text-calm-900 dark:text-calm-50">
-            {t('calm.thoughtChallengerTitle')}
-          </h2>
-          <p className="text-xs text-calm-500 dark:text-calm-400">
-            {t('calm.thoughtChallengerDesc')}
-          </p>
-        </div>
+        <h2 className="text-xl font-serif font-bold text-ink-900 dark:text-sky-50">
+          {t('calm.thoughtChallengerTitle')}
+        </h2>
 
         <Button
           variant="outline"
@@ -160,24 +150,24 @@ export const ThoughtChallenger: React.FC = () => {
         /* History View */
         <div className="space-y-4 animate-fade-in">
           {history.length === 0 ? (
-            <Card className="p-8 text-center text-xs text-calm-400">
+            <Card className="p-8 text-center text-xs text-muted">
               {t('thought.noRecords')}
             </Card>
           ) : (
             history.map((record) => (
               <Card key={record.id || record._id} className="p-5 space-y-3">
-                <div className="flex items-start justify-between gap-2 border-b border-calm-100 dark:border-calm-800 pb-2">
+                <div className="flex items-start justify-between gap-2 border-b border-sky-100 dark:border-ink-800 pb-2">
                   <div>
-                    <span className="text-xs font-semibold text-calm-800 dark:text-calm-200">
+                    <span className="text-xs font-semibold text-ink-800 dark:text-border">
                       {t('thought.intensityShift', { emotion: record.emotion, initial: record.initialIntensity, final: record.finalIntensity })}
                     </span>
-                    <div className="flex items-center gap-1 text-[11px] text-calm-400 mt-0.5">
+                    <div className="flex items-center gap-1 text-[11px] text-muted mt-0.5">
                       <Calendar className="w-3 h-3" />
                       {record.createdAt
                         ? new Intl.DateTimeFormat(i18n.language === 'hi' ? 'hi-IN' : 'en-US').format(new Date(record.createdAt))
                         : t('thought.recent')}
                       {record.aiAssisted && (
-                        <span className="ml-1 px-1.5 py-0.2 bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-300 rounded text-[10px]">
+                        <span className="ml-1 px-1.5 py-0.2 bg-sky-50 dark:bg-ink-900 text-sky-700 dark:text-sky-200 rounded text-[10px]">
                           {t('thought.aiAssisted')}
                         </span>
                       )}
@@ -192,11 +182,11 @@ export const ThoughtChallenger: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="text-xs space-y-2 text-calm-700 dark:text-calm-300">
+                <div className="text-xs space-y-2 text-text dark:text-sky-200">
                   <p><strong>{t('thought.situationLabel')}</strong> {record.situation}</p>
-                  <p className="text-amber-800 dark:text-amber-400"><strong>{t('thought.automaticThoughtLabel')}</strong> {`"${record.thought}"`}</p>
+                  <p className="text-sky-700 dark:text-sky-400"><strong>{t('thought.automaticThoughtLabel')}</strong> {`"${record.thought}"`}</p>
                   {record.balancedThought && (
-                    <div className="p-2.5 bg-emerald-50/70 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/40 rounded-xl text-emerald-900 dark:text-emerald-300">
+                    <div className="p-2.5 bg-sky-50 dark:bg-ink-900 border border-sky-200 dark:border-ink-900 rounded-xl text-ink-900 dark:text-sky-200">
                       <strong>{t('thought.balancedPerspectiveLabel')}</strong> {record.balancedThought}
                     </div>
                   )}
@@ -210,7 +200,7 @@ export const ThoughtChallenger: React.FC = () => {
         <Card className="p-6 sm:p-8 animate-fade-in space-y-6">
           {/* Progress bar */}
           <div className="space-y-1">
-            <div className="flex justify-between text-[11px] font-semibold text-calm-500 dark:text-calm-400">
+            <div className="flex justify-between text-[11px] font-semibold text-muted dark:text-muted">
               <span>{t('thought.stepCount', { current: step })}</span>
               <span>{step === 1 ? t('thought.step1Name') : step === 2 ? t('thought.step2Name') : step === 3 ? t('thought.step3Name') : step === 4 ? t('thought.step4Name') : t('thought.step5Name')}</span>
             </div>
@@ -226,10 +216,10 @@ export const ThoughtChallenger: React.FC = () => {
           {step === 1 && (
             <div className="space-y-4 animate-fade-in">
               <div>
-                <h3 className="text-base font-semibold text-calm-900 dark:text-calm-100">
+                <h3 className="text-base font-semibold text-ink-900 dark:text-sky-100">
                   {t('thought.step1Question')}
                 </h3>
-                <p className="text-xs text-calm-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   {t('thought.step1Hint')}
                 </p>
               </div>
@@ -238,7 +228,7 @@ export const ThoughtChallenger: React.FC = () => {
                 value={situation}
                 onChange={(e) => setSituation(e.target.value)}
                 placeholder={t('thought.step1Placeholder')}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-500 outline-none"
               />
             </div>
           )}
@@ -247,10 +237,10 @@ export const ThoughtChallenger: React.FC = () => {
           {step === 2 && (
             <div className="space-y-4 animate-fade-in">
               <div>
-                <h3 className="text-base font-semibold text-calm-900 dark:text-calm-100">
+                <h3 className="text-base font-semibold text-ink-900 dark:text-sky-100">
                   {t('thought.step2Question')}
                 </h3>
-                <p className="text-xs text-calm-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   {t('thought.step2Hint')}
                 </p>
               </div>
@@ -259,11 +249,11 @@ export const ThoughtChallenger: React.FC = () => {
                 value={thought}
                 onChange={(e) => setThought(e.target.value)}
                 placeholder={t('thought.step2Placeholder')}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-500 outline-none"
               />
 
               <div className="space-y-2 pt-2">
-                <label className="block text-xs font-medium text-calm-700 dark:text-calm-300">
+                <label className="block text-xs font-medium text-text dark:text-sky-200">
                   {t('thought.primaryEmotion')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -275,7 +265,7 @@ export const ThoughtChallenger: React.FC = () => {
                       className={`px-3 py-1 rounded-xl text-xs transition-colors ${
                         emotion === emo
                           ? 'bg-primary-600 text-white font-medium'
-                          : 'bg-gray-100 dark:bg-gray-800 text-calm-600 dark:text-calm-300 hover:bg-gray-200'
+                          : 'bg-gray-100 dark:bg-gray-800 text-muted dark:text-sky-200 hover:bg-gray-200'
                       }`}
                     >
                       {emo}
@@ -285,7 +275,7 @@ export const ThoughtChallenger: React.FC = () => {
               </div>
 
               <div className="pt-2">
-                <div className="flex justify-between text-xs text-calm-600 dark:text-calm-400 mb-1">
+                <div className="flex justify-between text-xs text-muted dark:text-muted mb-1">
                   <span>{t('thought.howIntense')}</span>
                   <span className="font-semibold text-primary-600">{initialIntensity}%</span>
                 </div>
@@ -305,16 +295,16 @@ export const ThoughtChallenger: React.FC = () => {
           {step === 3 && (
             <div className="space-y-4 animate-fade-in">
               <div>
-                <h3 className="text-base font-semibold text-calm-900 dark:text-calm-100">
+                <h3 className="text-base font-semibold text-ink-900 dark:text-sky-100">
                   {t('thought.step3Question')}
                 </h3>
-                <p className="text-xs text-calm-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   {t('thought.step3Hint')}
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-calm-700 dark:text-calm-300 mb-1">
+                <label className="block text-xs font-semibold text-text dark:text-sky-200 mb-1">
                   {t('thought.evidenceForLabel')}
                 </label>
                 <textarea
@@ -322,12 +312,12 @@ export const ThoughtChallenger: React.FC = () => {
                   value={evidenceFor}
                   onChange={(e) => setEvidenceFor(e.target.value)}
                   placeholder={t('thought.evidenceForPlaceholder')}
-                  className="w-full px-3.5 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-3.5 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-500 outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-calm-700 dark:text-calm-300 mb-1">
+                <label className="block text-xs font-semibold text-text dark:text-sky-200 mb-1">
                   {t('thought.evidenceAgainstLabel')}
                 </label>
                 <textarea
@@ -335,7 +325,7 @@ export const ThoughtChallenger: React.FC = () => {
                   value={evidenceAgainst}
                   onChange={(e) => setEvidenceAgainst(e.target.value)}
                   placeholder={t('thought.evidenceAgainstPlaceholder')}
-                  className="w-full px-3.5 py-2 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                  className="w-full px-3.5 py-2 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-500 outline-none"
                 />
               </div>
             </div>
@@ -346,10 +336,10 @@ export const ThoughtChallenger: React.FC = () => {
             <div className="space-y-4 animate-fade-in">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-base font-semibold text-calm-900 dark:text-calm-100">
+                  <h3 className="text-base font-semibold text-ink-900 dark:text-sky-100">
                     {t('thought.step4Question')}
                   </h3>
-                  <p className="text-xs text-calm-500 mt-1">
+                  <p className="text-xs text-muted mt-1">
                     {t('thought.step4Hint')}
                   </p>
                 </div>
@@ -359,7 +349,7 @@ export const ThoughtChallenger: React.FC = () => {
                   size="sm"
                   loading={isAiLoading}
                   onClick={handleAiReframing}
-                  icon={<Sparkles className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />}
+                  icon={<Sparkles className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />}
                 >
                   {t('thought.aiSuggestion')}
                 </Button>
@@ -370,11 +360,11 @@ export const ThoughtChallenger: React.FC = () => {
                 value={balancedThought}
                 onChange={(e) => setBalancedThought(e.target.value)}
                 placeholder={t('thought.step4Placeholder')}
-                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-xs text-calm-800 dark:text-calm-200 focus:ring-2 focus:ring-primary-500 outline-none"
+                className="w-full px-3.5 py-2.5 bg-white dark:bg-[#0f172a] border border-border dark:border-text rounded-xl text-xs text-ink-800 dark:text-border focus:ring-2 focus:ring-primary-500 outline-none"
               />
 
               {!settings.allowAIFeatures && (
-                <p className="text-[11px] text-calm-400">
+                <p className="text-[11px] text-muted">
                   {t('thought.aiTip')}
                 </p>
               )}
@@ -385,27 +375,27 @@ export const ThoughtChallenger: React.FC = () => {
           {step === 5 && (
             <div className="space-y-5 animate-fade-in">
               <div>
-                <h3 className="text-base font-semibold text-calm-900 dark:text-calm-100">
+                <h3 className="text-base font-semibold text-ink-900 dark:text-sky-100">
                   {t('thought.step5Question')}
                 </h3>
-                <p className="text-xs text-calm-500 mt-1">
+                <p className="text-xs text-muted mt-1">
                   {t('thought.step5Hint')}
                 </p>
               </div>
 
-              <div className="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/40 rounded-2xl text-xs space-y-2">
-                <span className="font-semibold text-emerald-900 dark:text-emerald-300 block">
+              <div className="p-4 bg-sky-50 dark:bg-ink-900 border border-sky-100 dark:border-ink-900 rounded-2xl text-xs space-y-2">
+                <span className="font-semibold text-ink-900 dark:text-sky-200 block">
                   {t('thought.yourBalancedThought')}
                 </span>
-                <p className="text-emerald-800 dark:text-emerald-200 italic leading-relaxed">
+                <p className="text-sky-700 dark:text-sky-200 italic leading-relaxed">
                   {`"${balancedThought || t('thought.defaultBalancedThought')}"`}
                 </p>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs text-calm-600 dark:text-calm-400 mb-1">
+                <div className="flex justify-between text-xs text-muted dark:text-muted mb-1">
                   <span>{t('thought.currentIntensity', { emotion })}</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">{finalIntensity}%</span>
+                  <span className="font-semibold text-sky-700 dark:text-sky-400">{finalIntensity}%</span>
                 </div>
                 <input
                   type="range"
@@ -413,9 +403,9 @@ export const ThoughtChallenger: React.FC = () => {
                   max="100"
                   value={finalIntensity}
                   onChange={(e) => setFinalIntensity(Number(e.target.value))}
-                  className="w-full accent-emerald-600"
+                  className="w-full accent-sky-700"
                 />
-                <div className="flex justify-between text-[10px] text-calm-400 mt-1">
+                <div className="flex justify-between text-[10px] text-muted mt-1">
                   <span>{t('thought.startedAt', { intensity: initialIntensity })}</span>
                   <span>{initialIntensity > finalIntensity ? t('thought.reducedBy', { diff: initialIntensity - finalIntensity }) : t('thought.mindfulObservation')}</span>
                 </div>
@@ -424,7 +414,7 @@ export const ThoughtChallenger: React.FC = () => {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-calm-100 dark:border-calm-800">
+          <div className="flex items-center justify-between pt-4 border-t border-sky-100 dark:border-ink-800">
             {step > 1 ? (
               <Button
                 variant="ghost"

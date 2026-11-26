@@ -1,23 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Home,
-  PenTool,
-  Calendar,
-  Settings,
-  Sparkles,
-  HeartHandshake,
-  TrendingUp,
-  Wind,
-  ShieldCheck,
-  Bot,
-  GraduationCap,
-  BookOpen,
-  MessageSquareQuote,
-  LayoutGrid,
-  Mail
-} from 'lucide-react';
+import { Home, BookOpen, Smile, Wind, MessageCircle, Plus } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -25,58 +9,52 @@ export const Sidebar: React.FC = () => {
 
   const navigation = [
     { nameKey: 'nav.home', defaultName: 'Home', href: '/', icon: Home },
-    { nameKey: 'nav.write', defaultName: 'Write', href: '/write', icon: PenTool },
-    { nameKey: 'checkin.title', defaultName: 'Daily Check-In', href: '/checkin', icon: HeartHandshake },
-    { nameKey: 'nav.pixels', defaultName: 'Year in Pixels', href: '/pixels', icon: LayoutGrid },
-    { nameKey: 'nav.letters', defaultName: 'Future Letters', href: '/letters', icon: Mail },
-    { nameKey: 'nav.student', defaultName: 'Student Focus', href: '/student', icon: GraduationCap },
-    { nameKey: 'nav.chat', defaultName: 'AI Companion', href: '/chat', icon: Bot },
-    { nameKey: 'nav.ask', defaultName: 'Ask My Diary', href: '/ask', icon: MessageSquareQuote },
-    { nameKey: 'nav.stories', defaultName: 'Storybooks', href: '/stories', icon: BookOpen },
-    { nameKey: 'nav.calm', defaultName: 'Calm Space', href: '/calm', icon: Wind },
-    { nameKey: 'nav.insights', defaultName: 'Wellness Insights', href: '/insights', icon: TrendingUp },
-    { nameKey: 'nav.calendar', defaultName: 'Calendar', href: '/calendar', icon: Calendar },
-    { nameKey: 'privacy.title', defaultName: 'Privacy Policy', href: '/privacy', icon: ShieldCheck },
-    { nameKey: 'nav.settings', defaultName: 'Settings', href: '/settings', icon: Settings },
+    { nameKey: 'nav.journal', defaultName: 'Journal', href: '/journal', icon: BookOpen },
+    { nameKey: 'nav.mood', defaultName: 'Mood', href: '/mood', icon: Smile },
+    { nameKey: 'nav.calm', defaultName: 'Calm', href: '/calm', icon: Wind },
+    { nameKey: 'nav.talk', defaultName: 'Talk', href: '/talk', icon: MessageCircle },
   ];
 
   return (
     <aside
       aria-label="Desktop sidebar navigation"
-      className="hidden md:flex flex-col w-64 fixed top-16 left-0 bottom-0 bg-white dark:bg-[#131d31] border-r border-gray-200/80 dark:border-gray-800/80 p-4 transition-colors z-30 overflow-y-auto"
+      className="hidden md:flex flex-col items-center w-20 fixed top-16 left-0 bottom-0 bg-surface border-r border-border py-4 px-2 gap-3 transition-colors z-30"
     >
-      <div className="flex-1 space-y-1">
+      <Link
+        to="/write"
+        aria-label={t('nav.write', 'Write')}
+        title={t('nav.write', 'Write')}
+        className="w-12 h-12 rounded-full bg-sky-700 text-white flex items-center justify-center hover:bg-sky-700/90 transition-colors shrink-0"
+      >
+        <Plus size={24} strokeWidth={1.75} />
+      </Link>
+
+      <nav aria-label="Primary navigation" className="flex-1 flex flex-col items-center gap-2 w-full mt-2">
         {navigation.map((item) => {
-          const isActive = location.pathname === item.href;
+          const isActive =
+            item.href === '/'
+              ? location.pathname === '/'
+              : location.pathname.startsWith(item.href);
           const Icon = item.icon;
           const label = t(item.nameKey, item.defaultName);
           return (
             <Link
               key={item.href}
               to={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${
+              aria-label={label}
+              aria-current={isActive ? 'page' : undefined}
+              className={`w-full flex flex-col items-center justify-center py-2 px-1 rounded-card text-xs transition-colors ${
                 isActive
-                  ? 'bg-calm-100 text-calm-900 dark:bg-calm-950/70 dark:text-calm-200 shadow-soft-sm font-semibold'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100/70 dark:hover:bg-gray-800/60'
+                  ? 'bg-sky-100 text-sky-700 dark:bg-ink-900 dark:text-sky-400 font-semibold'
+                  : 'text-muted hover:text-text hover:bg-sky-50 dark:hover:bg-ink-800'
               }`}
             >
-              <Icon className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-calm-700 dark:text-calm-400' : 'text-gray-400 dark:text-gray-500'}`} />
-              <span className="truncate">{label}</span>
+              <Icon size={20} strokeWidth={1.75} />
+              <span className="mt-1 truncate max-w-full">{label}</span>
             </Link>
           );
         })}
-      </div>
-
-      {/* Gentle encouragement prompt box */}
-      <div className="mt-3 p-3.5 rounded-2xl bg-calm-50 dark:bg-calm-950/40 border border-calm-200/50 dark:border-calm-900/60 text-left shrink-0">
-        <div className="flex items-center gap-2 mb-1 text-calm-700 dark:text-calm-300">
-          <Sparkles className="h-4 w-4 shrink-0" />
-          <span className="text-xs font-semibold">{t('sidebar.mindfulSpace')}</span>
-        </div>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-          {t('sidebar.mindfulSpaceDesc')}
-        </p>
-      </div>
+      </nav>
     </aside>
   );
 };

@@ -20,7 +20,7 @@
 | **7** | **Crisis Intercept & Safety Banner** | 1. Enter crisis phrase (*"I want to kill myself"*) in chat or check-in.<br>2. Check network tab and UI response. | Desktop & Mobile<br>(Light & Dark) | **External LLM is NEVER called**; immediate caring response returned; `SafetyBanner` and `SOSButton` display with direct-dial links (Tele-MANAS `14416` / `988`). Escape key dismisses banner. | **PASS** |
 | **8** | **Wellness Insights** (`/insights`) | 1. Review account with $<7$ check-ins.<br>2. Review account with 30 check-ins (demo).<br>3. Verify sleep-mood correlation and best/hardest day calculations. | Desktop & Mobile<br>(Light & Dark) | "$<7$ data points" notice displays when data is scarce; 30-day demo displays sleep lift percentage and day-of-week breakdown cleanly. | **PASS** |
 | **9** | **Calm Breathing Sanctuary** (`/calm`) | 1. Start 4-7-8 breathing exercise.<br>2. Switch to Box breathing.<br>3. Toggle ambient nature audio. | Desktop & Mobile<br>(Light & Dark) | SVG breathing circle smoothly pulses with CSS transitions; audio plays gently without distortion; haptic vibrations trigger on supported mobile devices. | **PASS** |
-| **10**| **AI Companion Chat** (`/chat`) | 1. Send reflection message.<br>2. Verify response tone against `safetyPrompt.js`.<br>3. Verify quota counter (decrements from 30). | Desktop & Mobile<br>(Light & Dark) | Claude responds warmly in 2-3s; never claims to be human or clinician; quota indicator updates accurately. | **PASS** |
+| **10**| **AI Companion Chat** (`/chat`) | 1. Send reflection message.<br>2. Verify response tone against `safetyPrompt.js`.<br>3. Verify quota counter (decrements from 30). | Desktop & Mobile<br>(Light & Dark) | Gemini responds warmly in 2-3s; never claims to be human or clinician; quota indicator updates accurately. | **PASS** |
 | **11**| **Student Mode** (`/student`) | 1. Add upcoming exam date.<br>2. Start 25/5 Pomodoro focus timer.<br>3. Complete 3 Small Wins for today.<br>4. Test burnout early notice rule. | Desktop & Mobile<br>(Light & Dark) | Exam countdown updates in real-time; Pomodoro timer triggers gentle bell on completion; Small Wins persist in database; burnout evaluator fires when stress $\ge 4$ on 5+ days + low sleep. | **PASS** |
 | **12**| **Multi-Language (English ↔ Hindi)** | 1. Go to Settings/Sidebar.<br>2. Switch language to **हिन्दी**.<br>3. Inspect Dashboard, Check-in, Calm, and Safety buttons. | Desktop & Mobile<br>(Light & Dark) | All navigation items, check-in options, calm cues, and crisis buttons switch to natural Hindi without broken layout; Noto Sans Devanagari renders clearly. | **PASS** |
 | **13**| **Counselor Report Sharing** (`/privacy`) | 1. Generate 7-day counselor share link.<br>2. Open link in incognito browser tab.<br>3. Revoke share link from settings. | Desktop & Mobile | Incognito window displays aggregated statistical scores only; **zero raw diary entries are visible**; revoking immediately turns link into 404. | **PASS** |
@@ -50,11 +50,54 @@
   - Execution time: ~3.2s
 * **Backend Test Suite (Jest + Supertest + In-Memory MongoDB):**
   - **19 Test Suites Passed** (19 total, 0 failed)
-  - **238 Tests Passed** (238 total, 0 failures, 0 flaky)
-  - Includes: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (24), `auth` (16), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (9), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (27), `modules` (36), `boot` (3), `insights` (4).
-  - Execution time: ~82.7s
-* **Total Automated Tests:** **283 tests passed with 100% success rate**.
+  - **249 Tests Passed** (249 total, 0 failures, 0 flaky)
+  - Includes: `securityHardening` (19), `ownership` (12), `threeFeatures` (9), `ai` (34), `auth` (18), `passwordAndAppLock` (5), `aiHardening` (13), `askDiary` (13), `elevenFixes` (12), `encryption` (10), `timezone` (12), `partL` (9), `entries` (7), `upload` (6), `accountExport` (2), `riskCheck` (27), `modules` (36), `boot` (3), `insights` (4).
+  - Execution time: ~95s
+* **Total Automated Tests:** **294 tests passed with 100% success rate**.
 * **Linting & Compilation Quality:**
   - `server`: ESLint reported **0 errors**, **9 warnings** (0 warnings in test files).
   - `frontend`: ESLint reported **0 errors**, **0 warnings**.
   - `TypeScript`: `tsc -b && vite build` completed with **0 type errors**.
+
+
+---
+
+## 4. Part U5 Redesign, Accessibility, Performance & Test Update (November 26, 2026)
+
+### Text Diet & Localization (`npm run i18n:check`)
+- Audited all `t()` keys in `frontend/src` against `en.json` and `hi.json`.
+- Shortened non-safety UI labels exceeding 3 words in both `en.json` and `hi.json`; preserved full safety/helpline and 18+ confirmation text.
+- `npm run i18n:check` passed: **1143** identical keys in `en.json` and `hi.json`, **868** `t()` calls resolved.
+- Native Hindi review notes recorded in `docs/HINDI_REVIEW.md`.
+
+### Accessibility & Contrast Audit
+- **Touch targets:** `Button` and `IconButton` in `frontend/src/components/ui/Button.tsx` enforce `min-h-[44px]` (and `min-w-[44px]` on `IconButton`).
+- **Keyboard focus & reduced motion:** `frontend/src/index.css` defines `:focus-visible` outlines and `@media (prefers-reduced-motion: reduce)` animation/transition overrides.
+- **Icon button labels & heading order:** All icon-only buttons carry `aria-label`; pages use sequential `h1` -> `h2`/`h3` hierarchy.
+- **Screen-reader notes:** Landmarks (`header`, `nav`, `main`), `aria-current="page"` on active nav tabs, `role="dialog"` on `Modal`/`BottomSheet`, and `role="alert"` on crisis `SafetyBanner` verified via React Testing Library accessibility queries.
+- **Measured WCAG Contrast Ratios (U2 Sky-Blue & Ink Palette):**
+  - `#0A0A0A` on `#F8FAFC` (text on bg, light): **18.92:1** (PASS)
+  - `#0A0A0A` on `#FFFFFF` (text on surface, light): **19.80:1** (PASS)
+  - `#6B7280` on `#FFFFFF` (muted on surface, light): **4.83:1** (PASS)
+  - `#FFFFFF` on `#0369A1` (white on `sky-700`): **5.93:1** (PASS)
+  - `#FFFFFF` on `#DC2626` (white on safety red): **4.83:1** (PASS)
+  - `#F8FAFC` on `#0A0A0A` (text on bg, dark): **18.92:1** (PASS)
+  - `#F8FAFC` on `#171717` (text on surface, dark): **17.13:1** (PASS)
+  - `#9CA3AF` on `#171717` (muted on dark surface): **7.06:1** (PASS)
+  - `#38BDF8` on `#171717` (`sky-400` on dark surface): **8.37:1** (PASS)
+
+### Performance & Production Bundle Chunks (`vite build`)
+- All secondary routes are lazy-loaded in `frontend/src/App.tsx`; `MoodChart` (`recharts`) is lazy-loaded in `InsightsPage.tsx`; `jspdf` and `html2canvas` are dynamically imported on demand inside `frontend/src/services/exportService.ts`.
+- **Largest Production Chunks (measured from `npm run build`):**
+  - `LineChart-v_jQxPIs.js` (lazy `recharts`): **413.39 kB** (`114.03 kB` gzip)
+  - `jspdf.es.min-CamfLzam.js` (dynamic PDF export): **386.63 kB** (`124.22 kB` gzip)
+  - `ui-DBHv9wW5.js`: **331.00 kB** (`99.28 kB` gzip)
+  - `index-DavvN12T.js` (app entry): **295.77 kB** (`99.67 kB` gzip)
+  - `html2canvas.esm-BTH0Ap93.js` (dynamic PDF canvas): **199.17 kB** (`46.50 kB` gzip)
+  - `router-Ce_kz1j3.js`: **179.49 kB** (`58.68 kB` gzip)
+- **Lighthouse (Home & Journal):** Not measured in this run because Chrome DevTools remote debugging was unavailable (`DevToolsActivePort` not found).
+
+### Automated Test Summary (U5)
+- **Frontend (`npx vitest run`):** 18 test files, 56 tests.
+- **Server (`npm test`):** 20 test suites, 258 tests passed (`u1DataFlow.test.js` covers `/api/wellness/mood-days`, `/api/diary/calendar`, and `/api/wellness/home-summary`).
+- **Lint & Build:** `eslint .` (0 errors) and `tsc -b && vite build` passed.

@@ -113,17 +113,10 @@ export const CalmPage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-calm-100 dark:bg-calm-950/60 text-calm-700 dark:text-calm-300 text-xs font-semibold">
-          <Wind className="w-3.5 h-3.5" />
-          <span>{t('calm.title')}</span>
-        </div>
-        <h1 className="text-3xl font-serif font-bold text-gray-900 dark:text-gray-100">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-serif font-bold text-text dark:text-sky-50">
           {t('calm.title')}
         </h1>
-        <p className="text-sm text-gray-500 font-serif max-w-md mx-auto">
-          {t('calm.subtitle')}
-        </p>
       </div>
 
       {/* Tabs */}
@@ -172,7 +165,7 @@ export const CalmPage: React.FC = () => {
         {/* 2. 5-4-3-2-1 Sensory Grounding */}
         {activeTab === 'grounding' && (
           <div className="max-w-xl mx-auto space-y-6">
-            <Card className="p-6 sm:p-8 border-calm-200/80 dark:border-gray-800 space-y-6">
+            <Card className="p-6 sm:p-8 border-border dark:border-gray-800 space-y-6">
               {!groundingDone ? (
                 <>
                   <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
@@ -256,7 +249,7 @@ export const CalmPage: React.FC = () => {
         {/* 3. Progressive Muscle Relaxation */}
         {activeTab === 'relaxation' && (
           <div className="max-w-xl mx-auto space-y-6">
-            <Card className="p-6 sm:p-8 border-calm-200/80 dark:border-gray-800 space-y-6 text-center">
+            <Card className="p-6 sm:p-8 border-border dark:border-gray-800 space-y-6 text-center">
               {!pmrDone ? (
                 <>
                   <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800 text-xs">
@@ -309,7 +302,7 @@ export const CalmPage: React.FC = () => {
                 </>
               ) : (
                 <div className="py-8 space-y-4 animate-fade-in">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 mx-auto flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-sky-50 dark:bg-ink-900 text-sky-700 mx-auto flex items-center justify-center">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
                   <h3 className="text-lg font-serif font-bold text-gray-900 dark:text-gray-100">
@@ -345,15 +338,15 @@ export const CalmPage: React.FC = () => {
         {/* 5. Vent & Let Go */}
         {activeTab === 'vent' && (
           <div className="max-w-xl mx-auto space-y-6">
-            <Card className="p-6 sm:p-8 border-calm-200/80 dark:border-gray-800 space-y-5">
+            <Card className="p-6 sm:p-8 border-border dark:border-gray-800 space-y-5">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-danger dark:text-danger">
                     <Flame className="w-3.5 h-3.5" />
                     <span>{t('calm.ventLetGo')}</span>
                   </div>
                   <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                    <Shield className="w-3 h-3 text-emerald-500" />
+                    <Shield className="w-3 h-3 text-sky-500" />
                     <span>{t('calm.neverSaved')}</span>
                   </span>
                 </div>
@@ -375,7 +368,7 @@ export const CalmPage: React.FC = () => {
                   }}
                   disabled={isBurning}
                   placeholder={t('calm.ventPlaceholder')}
-                  className={`w-full p-4 bg-gray-50 dark:bg-[#0f172a] border border-gray-200 dark:border-gray-700 rounded-2xl text-xs sm:text-sm font-serif leading-relaxed text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-rose-500 outline-none transition-all duration-1000 ${
+                  className={`w-full p-4 bg-gray-50 dark:bg-[#0f172a] border border-gray-200 dark:border-gray-700 rounded-2xl text-xs sm:text-sm font-serif leading-relaxed text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-danger outline-none transition-all duration-1000 ${
                     isBurning ? 'opacity-0 blur-sm scale-95' : 'opacity-100'
                   }`}
                 />
@@ -399,8 +392,8 @@ export const CalmPage: React.FC = () => {
               </div>
 
               {hasBurned && (
-                <div className="p-3 rounded-xl bg-calm-50 dark:bg-calm-950/40 text-center text-xs text-calm-700 dark:text-calm-300 animate-fade-in flex items-center justify-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-calm-500" />
+                <div className="p-3 rounded-xl bg-sky-50 dark:bg-ink-950 text-center text-xs text-text dark:text-sky-200 animate-fade-in flex items-center justify-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-muted" />
                   <span>{t('calm.ventReleasedNotice')}</span>
                 </div>
               )}
@@ -416,7 +409,7 @@ export const CalmPage: React.FC = () => {
 
       {/* Safety & Grounding Reminder */}
       <div className="text-center text-xs text-gray-400 dark:text-gray-500 flex items-center justify-center gap-1.5 pt-4">
-        <Heart className="w-3.5 h-3.5 text-rose-400" />
+        <Heart className="w-3.5 h-3.5 text-danger" />
         <span>{t('calm.disclaimerFooter')}</span>
       </div>
     </div>

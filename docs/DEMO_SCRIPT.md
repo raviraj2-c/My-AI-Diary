@@ -90,5 +90,5 @@
    *A:* GCM is an authenticated encryption mode. It provides both confidentiality and data integrity verification via a 128-bit authentication tag, preventing tampering and padding oracle attacks.
 2. **Q: Can the server read the user's data?**  
    *A:* Yes, this is server-side encryption with key in environment variables (like standard database-at-rest encryption). The user is protected against database dumps, log leaks, and unauthorized multi-tenant queries. We document this honestly in `PRIVACY_AND_ETHICS.md`.
-3. **Q: Why don't you send crisis queries to Claude/GPT?**  
+3. **Q: Why don't you send crisis queries to Gemini/GPT?**  
    *A:* Relying on third-party LLMs for active suicidal ideation introduces latency, hallucinations, potential refusal errors, and privacy leakage. Deterministic local safety intercept ensures immediate, reliable helpline guidance.

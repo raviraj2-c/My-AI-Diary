@@ -76,7 +76,7 @@ export const ResetPasswordPage: React.FC = () => {
 
         {success ? (
           <div className="text-center py-6 space-y-3">
-            <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto" />
+            <CheckCircle className="w-12 h-12 text-sky-500 mx-auto" />
             <h3 className="font-semibold text-foreground text-base">{t('auth.resetSuccessTitle')}</h3>
             <p className="text-xs text-muted-foreground">
               {t('auth.redirectingNotice')}
