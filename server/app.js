@@ -165,8 +165,8 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/student', studentRoutes);
 app.use('/api/letters', letterRoutes);
 
-// Health Check
-app.get('/api/health', (req, res) => {
+// Health Check (both /api/health and /health for platform probes)
+const healthHandler = (req, res) => {
   const { getModel, isAIConfigured, getGeminiTier, isDemoFreeTierAI } = require('./config/ai');
   const dbConnected = mongoose.connection.readyState === 1;
   res.status(dbConnected ? 200 : 503).json({
@@ -183,7 +183,9 @@ app.get('/api/health', (req, res) => {
     demoAiBanner: isDemoFreeTierAI(),
     uptime: process.uptime(),
   });
-});
+};
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
 
 // API Root
 app.get('/api', (req, res) => {

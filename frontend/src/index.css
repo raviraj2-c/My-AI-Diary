@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    --bg: #F8FAFC;
+    --bg: #F9FAFB;
     --surface: #FFFFFF;
     --border: #E5E7EB;
     --text: #0A0A0A;
-    --muted: #6B7280;
-    --primary: #0369A1;
+    --muted: #52525B;
+    --primary: #87CEEB;
     --danger: #DC2626;
   }
 
@@ -18,8 +18,8 @@
     --surface: #171717;
     --border: #262626;
     --text: #FFFFFF;
-    --muted: #9CA3AF;
-    --primary: #38BDF8;
+    --muted: #A1A1AA;
+    --primary: #87CEEB;
     --danger: #DC2626;
   }
 
@@ -42,7 +42,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid #0EA5E9;
+    outline: 2px solid #87CEEB;
     outline-offset: 2px;
   }
 }

@@ -10,6 +10,15 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Malformed JSON or oversized payload
+  if (err.type === 'entity.parse.failed') {
+    error = { message: 'Invalid JSON request body', statusCode: 400 };
+  }
+
+  if (err.type === 'entity.too.large') {
+    error = { message: 'Request payload is too large', statusCode: 413 };
+  }
+
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
     const message = 'Invalid resource identifier';

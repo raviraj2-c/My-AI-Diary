@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, BookOpen } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button, Card } from '../common';
 
@@ -46,11 +46,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPass
   return (
     <Card className="p-8 shadow-xl border-border dark:border-ink-800">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 dark:bg-primary-950/60 rounded-2xl mb-3 text-primary-600 dark:text-primary-300">
-          <Sparkles className="w-7 h-7" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-sky-300 text-ink-950 rounded-2xl mb-3">
+          <BookOpen className="w-6 h-6" />
         </div>
         <h2 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('auth.loginTitle')}</h2>
-        <p className="text-sm text-muted dark:text-muted mt-1">{t('auth.loginSubtitle')}</p>
       </div>
 
       {error && (

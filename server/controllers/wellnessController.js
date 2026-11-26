@@ -868,12 +868,16 @@ const getMoodDaysEndpoint = async (req, res, next) => {
     const defaultTo = todayKey(tz);
     const defaultFrom = getPreviousDateKey(defaultTo, 29);
 
-    const fromKey = typeof req.query.from === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.from)
-      ? req.query.from
-      : defaultFrom;
-    const toKey = typeof req.query.to === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.to)
-      ? req.query.to
-      : defaultTo;
+    const isValidKey = (k) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k) && !Number.isNaN(Date.parse(`${k}T00:00:00Z`));
+    if (req.query.from !== undefined && !isValidKey(req.query.from)) {
+      return res.status(400).json({ success: false, message: 'Invalid from date (expected YYYY-MM-DD)' });
+    }
+    if (req.query.to !== undefined && !isValidKey(req.query.to)) {
+      return res.status(400).json({ success: false, message: 'Invalid to date (expected YYYY-MM-DD)' });
+    }
+
+    const fromKey = isValidKey(req.query.from) ? req.query.from : defaultFrom;
+    const toKey = isValidKey(req.query.to) ? req.query.to : defaultTo;
 
     if (fromKey > toKey) {
       return res.status(400).json({ success: false, message: 'from date must not be after to date' });

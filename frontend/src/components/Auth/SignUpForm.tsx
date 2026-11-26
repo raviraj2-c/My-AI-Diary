@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, BookOpen, CheckCircle2 } from 'lucide-react';
 import { Button, Card } from '../common';
 
 interface SignUpFormProps {
@@ -72,8 +72,8 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onToggleForm }) => {
   return (
     <Card className="p-8 shadow-xl border-border dark:border-ink-800">
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-14 h-14 bg-sky-100 dark:bg-ink-800 rounded-2xl mb-3 text-text dark:text-border">
-          <Sparkles className="w-7 h-7 text-primary-500" />
+        <div className="inline-flex items-center justify-center w-12 h-12 bg-sky-300 text-ink-950 rounded-2xl mb-3">
+          <BookOpen className="w-6 h-6" />
         </div>
         <h2 className="text-2xl font-serif font-bold text-ink-900 dark:text-sky-50">{t('auth.registerTitle')}</h2>
       </div>

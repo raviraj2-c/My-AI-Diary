@@ -94,7 +94,15 @@ const deleteMedia = async (req, res, next) => {
   try {
     // publicId may contain slashes (e.g., mydiary/user_123/asset_abc)
     // Route handles wildcard or encoded parameter
-    const publicId = req.params[0] || req.params.publicId;
+    const rawId = req.params[0] || req.params.publicId;
+    let publicId = rawId;
+    if (typeof rawId === 'string') {
+      try {
+        publicId = decodeURIComponent(rawId);
+      } catch {
+        publicId = rawId;
+      }
+    }
 
     if (!publicId) {
       return res.status(400).json({
