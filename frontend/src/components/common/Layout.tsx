@@ -1,6 +1,8 @@
-import React, { ReactNode, useState, useCallback } from 'react';
+import React, { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
+import { MobileBottomBar } from './MobileBottomBar';
 import { useSettings } from '../../hooks/useSettings';
 
 interface LayoutProps {
@@ -9,15 +11,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { settings } = useSettings();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  const openSidebar = useCallback(() => setIsSidebarOpen(true), []);
-  const closeSidebar = useCallback(() => setIsSidebarOpen(false), []);
-
-  const themeClasses = {
-    light: 'bg-gray-50 text-gray-900',
-    dark: 'bg-gray-900 text-gray-100'
-  };
+  const { t } = useTranslation();
 
   const fontSizeClasses = {
     small: 'text-sm',
@@ -33,27 +27,40 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <div
-      className={`min-h-screen ${themeClasses[settings.theme]} ${fontSizeClasses[settings.fontSize]} ${fontFamilyClasses[settings.fontFamily]}`}
+      className={`min-h-screen bg-gray-50 dark:bg-[#0b1120] text-gray-900 dark:text-gray-100 transition-colors duration-200 ${
+        fontSizeClasses[settings.fontSize] || 'text-base'
+      } ${
+        fontFamilyClasses[settings.fontFamily] || 'font-sans'
+      }`}
     >
-      
-      <Header onMenuClick={openSidebar} />
+      {/* Skip to Main Content Link for Keyboard Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary-600 focus:text-white focus:rounded-xl focus:shadow-lg focus:outline-none"
+      >
+        {t('common.skipToMain')}
+      </a>
+
+      <Header />
 
       <div className="flex pt-16">
-        <div className="hidden lg:block lg:w-64 fixed top-16 left-0 h-[calc(100vh-4rem)] border-r border-gray-200 dark:border-gray-700">
-          <Sidebar isOpen={true} onClose={closeSidebar} />
-        </div>
-
-      
-        <div className="lg:hidden">
-          <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
-        </div>
+        <Sidebar />
 
         <main
-          className={`flex-1 p-4 sm:p-6 md:p-8 w-full ${'lg:ml-64'}`}
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 w-full md:pl-64 min-h-[calc(100vh-4rem)] p-4 sm:p-6 md:p-8 pb-24 md:pb-12 max-w-7xl mx-auto animate-fade-in flex flex-col justify-between"
         >
-          {children}
+          <div>{children}</div>
+          
+          {/* Subtle Universal Healthcare Disclaimer */}
+          <footer className="mt-12 pt-6 border-t border-gray-200/60 dark:border-gray-800/60 text-center text-xs text-gray-400 dark:text-gray-500">
+            <p>{t('sos.disclaimer')}</p>
+          </footer>
         </main>
       </div>
+
+      <MobileBottomBar />
     </div>
   );
 };

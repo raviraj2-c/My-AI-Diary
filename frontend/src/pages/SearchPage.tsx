@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { useDiary } from '../hooks/useDiary';
 import { SearchBar } from '../components/Search/SearchBar';
 import { FilterPanel } from '../components/Search/FilterPanel';
 import { DiaryList } from '../components/Diary/DiaryList';
 import { SearchFilters, DiaryEntry } from '../types';
+import { ConfirmDialog } from '../components/common';
+import { useToast } from '../components/common/Toast';
+import { Sparkles, X } from 'lucide-react';
 
 export const SearchPage: React.FC = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
-  const { entries, searchEntries, getAllTags, updateEntry, deleteEntry } = useDiary(user?.id || '');
+  const { entries, searchEntries, getAllTags, deleteEntry } = useDiary(user?.id || '');
+  const navigate = useNavigate();
+  const toast = useToast();
+
   const [searchResults, setSearchResults] = useState<DiaryEntry[]>(entries);
   const [filters, setFilters] = useState<SearchFilters>({});
   const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     setSearchResults(entries);
@@ -23,7 +33,7 @@ export const SearchPage: React.FC = () => {
         setAvailableTags([]);
       }
     })();
-  }, [entries]);
+  }, [entries, getAllTags]);
 
   const handleSearch = async (query: string) => {
     const newFilters = { ...filters, query };
@@ -39,30 +49,44 @@ export const SearchPage: React.FC = () => {
   };
 
   const handleEdit = (entry: DiaryEntry) => {
-     
+    navigate('/write', { state: { entry } });
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this entry?')) {
-      try {
-        await deleteEntry(id);
-  const results = await searchEntries(filters);
-        setSearchResults(results);
-      } catch (error) {
-        console.error('Error deleting entry:', error);
-      }
+  const handleDeleteRequest = (id: string) => {
+    setDeletingId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      await deleteEntry(deletingId);
+      const results = await searchEntries(filters);
+      setSearchResults(results);
+      toast.info('Entry deleted.');
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+      toast.error('Failed to delete entry.');
+    } finally {
+      setDeletingId(null);
     }
+  };
+
+  const handleClearFilters = async () => {
+    setFilters({});
+    setSearchResults(entries);
   };
 
   const hasActiveFilters = !!(filters.query || filters.mood || filters.tags?.length || filters.dateRange);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Search & Filter</h1>
-        <p className="text-gray-600">
-          {searchResults.length} of {entries.length} entries
-        </p>
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('search.title', 'Search & Filter')}</h1>
+          <p className="text-sm text-calm-500 dark:text-calm-400 mt-0.5">
+            {t('search.subtitle', 'Search your private encrypted entries by keywords, moods, or tags.')}
+          </p>
+        </div>
       </div>
 
       <SearchBar onSearch={handleSearch} />
@@ -74,28 +98,37 @@ export const SearchPage: React.FC = () => {
       />
 
       {hasActiveFilters && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-blue-800">
-              {searchResults.length} entries match your search criteria
-            </p>
-            <button
-              onClick={() => {
-                setFilters({});
-                setSearchResults(entries);
-              }}
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Clear All
-            </button>
+        <div className="flex items-center justify-between p-3.5 bg-primary-50/70 dark:bg-primary-950/40 border border-primary-200/60 dark:border-primary-900 rounded-xl text-xs text-primary-900 dark:text-primary-200 animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
+            <span>
+              {t('search.foundCount', { count: searchResults.length })}
+            </span>
           </div>
+          <button
+            onClick={handleClearFilters}
+            className="inline-flex items-center gap-1 font-semibold text-primary-700 dark:text-primary-300 hover:underline cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+            {t('search.clearFilters')}
+          </button>
         </div>
       )}
 
       <DiaryList
         entries={searchResults}
         onEdit={handleEdit}
-        onDelete={handleDelete}
+        onDelete={handleDeleteRequest}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deletingId}
+        onClose={() => setDeletingId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete this entry?"
+        message="This entry will be permanently removed from your diary."
+        confirmText="Delete Entry"
+        variant="danger"
       />
     </div>
   );

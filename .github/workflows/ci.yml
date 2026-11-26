@@ -1,0 +1,50 @@
+name: MindDiary CI Quality Gates
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x, 22.x]
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm --prefix server ci
+          npm --prefix frontend ci
+
+      - name: Lint Server Code
+        run: npm --prefix server run lint
+
+      - name: Lint Frontend Code
+        run: npm --prefix frontend run lint
+
+      - name: Run Frontend Tests (Vitest)
+        run: npm --prefix frontend test -- --run
+
+      - name: Run Backend Tests (Jest & Memory Server)
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci_test_secret_must_be_at_least_40_characters_long_for_startup
+          ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+        run: npm --prefix server test
+
+      - name: Type-Check & Build Frontend
+        run: npm --prefix frontend run build

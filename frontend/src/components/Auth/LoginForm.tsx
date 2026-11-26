@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { Button, Card } from '../common';
 
 interface LoginFormProps {
   onToggleForm: () => void;
@@ -8,11 +10,22 @@ interface LoginFormProps {
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPassword }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [slowNotice, setSlowNotice] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setSlowNotice(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlowNotice(true), 3500);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   const { login } = useAuth();
 
@@ -24,131 +37,116 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm, onForgotPass
     try {
       await login(email, password);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-            <LogIn className="w-8 h-8 text-indigo-600" />
+    <Card className="p-8 shadow-xl border-calm-200/80 dark:border-calm-800">
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center justify-center w-14 h-14 bg-primary-100 dark:bg-primary-950/60 rounded-2xl mb-3 text-primary-600 dark:text-primary-300">
+          <Sparkles className="w-7 h-7" />
+        </div>
+        <h2 className="text-2xl font-serif font-bold text-calm-900 dark:text-calm-50">{t('auth.loginTitle')}</h2>
+        <p className="text-sm text-calm-500 dark:text-calm-400 mt-1">{t('auth.loginSubtitle')}</p>
+      </div>
+
+      {error && (
+        <div className="mb-5 p-3.5 bg-danger-soft/10 border border-danger-soft/30 rounded-xl text-sm text-danger-soft dark:text-red-300">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="login-email" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300 mb-1.5">
+            {t('auth.emailLabel')}
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+              <Mail className="h-4 w-4" />
+            </div>
+            <input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              placeholder="you@example.com"
+              required
+              autoComplete="email"
+            />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-          <p className="text-gray-600">Sign in to your diary account</p>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <label htmlFor="login-password" className="block text-xs font-semibold uppercase tracking-wider text-calm-700 dark:text-calm-300">
+              {t('auth.passwordLabel')}
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Mail className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                ) : (
-                  <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                Remember me
-              </label>
-            </div>
-
             <button
               type="button"
               onClick={onForgotPassword}
-              className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+              className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:underline"
             >
-              Forgot password?
+              {t('auth.forgotPassword')}
             </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Signing in...
-              </div>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
-            Don't have an account?{' '}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-calm-400">
+              <Lock className="h-4 w-4" />
+            </div>
+            <input
+              id="login-password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="block w-full pl-10 pr-11 py-2.5 bg-white dark:bg-[#0f172a] border border-calm-200 dark:border-calm-700 rounded-xl text-sm text-calm-900 dark:text-calm-100 placeholder-calm-400 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent transition-colors"
+              placeholder="••••••••"
+              required
+              autoComplete="current-password"
+            />
             <button
-              onClick={onToggleForm}
-              className="font-medium text-indigo-600 hover:text-indigo-500"
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-calm-400 hover:text-calm-600 dark:hover:text-calm-200"
             >
-              Sign up here
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
-          </p>
+          </div>
         </div>
+
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          loading={isLoading}
+          className="w-full mt-2"
+        >
+          {isLoading ? t('auth.loggingIn') : t('auth.loginButton')}
+        </Button>
+
+        {slowNotice && (
+          <p className="text-xs text-center text-calm-500 dark:text-calm-400 animate-fade-in bg-calm-50 dark:bg-calm-900/40 p-2 rounded-lg border border-calm-200 dark:border-calm-800">
+            {t('auth.serverWakeNotice')}
+          </p>
+        )}
+      </form>
+
+      <div className="mt-6 pt-5 border-t border-calm-100 dark:border-calm-800 text-center">
+        <p className="text-xs text-calm-600 dark:text-calm-400">
+          {t('auth.noAccountPrompt')}{' '}
+          <button
+            onClick={onToggleForm}
+            className="font-semibold text-primary-600 dark:text-primary-400 hover:underline"
+          >
+            {t('auth.createOneHere')}
+          </button>
+        </p>
       </div>
-    </div>
+    </Card>
   );
 };

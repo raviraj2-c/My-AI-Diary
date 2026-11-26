@@ -1,348 +1,599 @@
-const { v4: uuidv4 } = require('uuid');
+/**
+ * AI Service for MindDiary.
+ * Powered by Anthropic Claude LLM with rigorous clinical safety, input risk screening,
+ * structured JSON validation, and respectful mental wellness boundaries.
+ */
 
-class AIService {
-  static async generateStorybook(entries, theme, timeframe) {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const protagonist = this.createAdvancedProtagonist(entries);
+const llmClient = require('./llmClient');
+const {
+  WELLNESS_SYSTEM_PROMPT,
+  STORYBOOK_SYSTEM_PROMPT,
+  MOOD_ANALYZER_SYSTEM_PROMPT,
+  CBT_CHALLENGER_SYSTEM_PROMPT,
+  ASK_DIARY_SYSTEM_PROMPT
+} = require('./safetyPrompt');
+const { checkRisk } = require('../utils/riskCheck');
+const { ChatMessage } = require('../config/models');
+const { retrieveDiaryExcerpts } = require('./diaryRetriever');
 
-    const storybook = {
-      id: uuidv4(),
-      title: this.generateTitle(theme, timeframe),
-      theme,
-      timeframe,
-      entries,
-      generatedContent: this.generateAdvancedStoryContent(entries, theme),
-      protagonist,
-      chapters: this.createLiteraryChapters(entries, theme, protagonist),
-      createdAt: new Date()
-    };
-    
-    return storybook;
-  }
-
-  static generateTitle(theme, timeframe) {
-    const startMonth = timeframe.start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    const endMonth = timeframe.end.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
-    const themes = {
-      romantic: [
-        'Whispers of the Heart', 'The Language of Love', 'Seasons of Affection', 
-        'Dancing with Destiny', 'The Art of Loving', 'Hearts in Harmony',
-        'Love\'s Gentle Revolution', 'The Poetry of Connection'
-      ],
-      dramatic: [
-        'The Weight of Dreams', 'Shadows and Illumination', 'The Human Tapestry', 
-        'Echoes of Transformation', 'The Crucible of Life', 'Between Light and Dark',
-        'The Architecture of Change', 'Fragments of Truth'
-      ],
-      adventure: [
-        'Beyond the Horizon', 'The Cartographer\'s Dream', 'Uncharted Territories', 
-        'The Explorer\'s Heart', 'Paths Less Traveled', 'The Great Discovery',
-        'Adventures in Living', 'The Journey Within'
-      ],
-      mystery: [
-        'The Enigma of Being', 'Secrets in Plain Sight', 'The Hidden Pattern', 
-        'Mysteries of the Ordinary', 'The Puzzle of Existence', 'Veiled Truths',
-        'The Detective of Life', 'Clues in the Everyday'
-      ],
-      comedy: [
-        'The Comedy of Errors', 'Life\'s Delightful Chaos', 'The Art of Laughter', 
-        'Humor in the Mundane', 'The Lighter Side of Being', 'Joy\'s Little Victories',
-        'The Absurdist\'s Guide to Life', 'Laughter as Medicine'
-      ]
-    };
-    
-    const titleOptions = themes[theme] || themes.dramatic;
-    const randomTitle = titleOptions[Math.floor(Math.random() * titleOptions.length)];
-    
-    return `${randomTitle}${startMonth !== endMonth ? `: A Story from ${startMonth} to ${endMonth}` : `: A ${startMonth} Story`}`;
-  }
-
-  static generateAdvancedStoryContent(entries, theme) {
-    if (entries.length === 0) {
-      return "The pages remained blank, waiting for a story to unfold...";
-    }
-
-    const sortedEntries = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    const protagonist = this.createAdvancedProtagonist(sortedEntries);
-    
-    let storyContent = this.createLiteraryOpening(theme, protagonist);
-    
-    const chapters = this.createLiteraryChapters(sortedEntries, theme, protagonist);
-    
-    chapters.forEach((chapter, index) => {
-      storyContent += `\n\n---\n\n## ${chapter.title}\n\n`;
-      storyContent += chapter.content;
-    });
-    
-    storyContent += this.createLiteraryEnding(theme, protagonist, sortedEntries);
-    
-    return storyContent;
-  }
-
-  static createAdvancedProtagonist(entries) {
-    const moods = entries.map(e => e.mood);
-    const moodCounts = moods.reduce((acc, mood) => {
-      acc[mood] = (acc[mood] || 0) + 1;
-      return acc;
-    }, {});
-    
-    const dominantMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'neutral';
-    
-    const personalityTraits = this.generatePersonalityTraits(dominantMood, entries);
-    
-    return {
-      name: this.selectProtagonistName(personalityTraits),
-      personality: personalityTraits,
-      journey: this.identifyJourneyType(dominantMood, entries),
-      growth: this.identifyGrowthPattern(moods)
-    };
-  }
-
-  static generatePersonalityTraits(dominantMood, entries) {
-    const traits = [];
-    
-    const moodTraits = {
-      happy: ['optimistic', 'warm-hearted', 'resilient', 'inspiring'],
-      sad: ['introspective', 'sensitive', 'empathetic', 'deep-thinking'],
-      neutral: ['balanced', 'observant', 'steady', 'pragmatic'],
-      excited: ['enthusiastic', 'adventurous', 'energetic', 'spontaneous'],
-      anxious: ['caring', 'thoughtful', 'perceptive', 'conscientious'],
-      angry: ['passionate', 'determined', 'strong-willed', 'justice-seeking'],
-      peaceful: ['serene', 'wise', 'contemplative', 'harmonious']
-    };
-    
-    traits.push(...(moodTraits[dominantMood] || ['thoughtful']));
-    
-    const allTags = entries.flatMap(e => e.tags || []);
-    if (allTags.includes('work')) traits.push('ambitious');
-    if (allTags.includes('family')) traits.push('family-oriented');
-    if (allTags.includes('travel')) traits.push('adventurous');
-    
-    return [...new Set(traits)].slice(0, 4);
-  }
-
-  static selectProtagonistName(traits) {
-    const names = {
-      creative: ['Aurora', 'River', 'Sage', 'Phoenix'],
-      thoughtful: ['Elena', 'Marcus', 'Sophia', 'Adrian'],
-      adventurous: ['Zara', 'Atlas', 'Nova', 'Orion'],
-      gentle: ['Luna', 'Gabriel', 'Iris', 'Kai'],
-      strong: ['Vera', 'Leo', 'Maya', 'Dante']
-    };
-    
-    let nameCategory = 'thoughtful';
-    
-    if (traits.includes('creative') || traits.includes('imaginative')) nameCategory = 'creative';
-    else if (traits.includes('adventurous') || traits.includes('energetic')) nameCategory = 'adventurous';
-    else if (traits.includes('serene') || traits.includes('peaceful')) nameCategory = 'gentle';
-    else if (traits.includes('determined') || traits.includes('strong-willed')) nameCategory = 'strong';
-    
-    const nameOptions = names[nameCategory];
-    return nameOptions[Math.floor(Math.random() * nameOptions.length)];
-  }
-
-  static identifyJourneyType(dominantMood, entries) {
-    const allTags = entries.flatMap(e => e.tags || []);
-    
-    if (allTags.includes('growth') || allTags.includes('learning')) return 'self-discovery';
-    if (allTags.includes('relationship') || allTags.includes('love')) return 'connection and love';
-    if (allTags.includes('challenge') || allTags.includes('difficult')) return 'overcoming obstacles';
-    if (allTags.includes('creative') || allTags.includes('art')) return 'creative awakening';
-    if (dominantMood === 'happy') return 'transformation and growth';
-    return 'finding meaning in everyday moments';
-  }
-
-  static identifyGrowthPattern(moods) {
-    const firstHalf = moods.slice(0, Math.floor(moods.length / 2));
-    const secondHalf = moods.slice(Math.floor(moods.length / 2));
-    
-    const firstPositive = firstHalf.filter(m => ['happy', 'excited', 'peaceful'].includes(m)).length;
-    const secondPositive = secondHalf.filter(m => ['happy', 'excited', 'peaceful'].includes(m)).length;
-    
-    if (secondPositive > firstPositive) return 'learning to embrace joy and possibility';
-    if (firstPositive > secondPositive) return 'healing and finding inner strength';
-    return 'discovering the beauty in life\'s ordinary moments';
-  }
-
-  static createLiteraryOpening(theme, protagonist) {
-    const openings = {
-      romantic: `In the tapestry of human experience, some stories are woven with threads of gold—stories of connection, tenderness, and the profound courage it takes to open one's heart. This is the story of ${protagonist.name}, a ${protagonist.personality[0]} soul whose journey through ${protagonist.journey} would reveal the many faces of love.`,
-      
-      dramatic: `Every life contains within it the seeds of great drama—moments of triumph and despair, revelation and mystery, transformation and redemption. ${protagonist.name}'s story is one such tale, marked by their ${protagonist.personality[0]} spirit and ${protagonist.personality[1]} approach to life's inevitable challenges.`,
-      
-      adventure: `The greatest adventures are not always found in distant lands or exotic locales—sometimes they unfold in the landscape of a single human heart. ${protagonist.name}, with their ${protagonist.personality[0]} nature and ${protagonist.personality[1]} spirit, was about to embark on such an adventure.`,
-      
-      mystery: `Life's greatest mysteries are often hidden in plain sight, woven into the fabric of our daily existence like secret messages waiting to be decoded. ${protagonist.name}, a ${protagonist.personality[0]} observer of life's subtle patterns, was about to become the detective of their own story.`,
-      
-      comedy: `Life, ${protagonist.name} had discovered, was far too important to be taken entirely seriously. With their ${protagonist.personality[0]} outlook and ${protagonist.personality[1]} approach to daily chaos, they had learned to find humor in the most unexpected places.`
-    };
-    
-    return openings[theme] || `This is the story of ${protagonist.name}, whose journey through ${protagonist.journey} would change everything.`;
-  }
-
-  static createLiteraryChapters(entries, theme, protagonist) {
-    const chapters = [];
-    
-    const chapterSize = Math.max(1, Math.floor(entries.length / 5));
-    
-    for (let i = 0; i < entries.length; i += chapterSize) {
-      const chapterEntries = entries.slice(i, i + chapterSize);
-      const chapterTitle = this.generateChapterTitle(chapterEntries, theme, chapters.length + 1);
-      const chapterContent = this.createChapterContent(chapterEntries, theme, protagonist);
-      
-      chapters.push({
-        title: chapterTitle,
-        content: chapterContent,
-        entryIds: chapterEntries.map(e => e._id || e.id)
-      });
-    }
-    
-    return chapters;
-  }
-
-  static generateChapterTitle(entries, theme, chapterNumber) {
-    const firstEntry = entries[0];
-    const mood = firstEntry.mood;
-    const date = new Date(firstEntry.date);
-    const month = date.toLocaleDateString('en-US', { month: 'long' });
-    
-    const titleTemplates = {
-      romantic: ['The Heart\'s Awakening', 'Whispers of Connection', 'Love\'s Gentle Revelation'],
-      dramatic: ['The Turning Tide', 'Shadows and Revelations', 'The Weight of Truth'],
-      adventure: ['The Call to Adventure', 'Into Uncharted Territory', 'New Horizons'],
-      mystery: ['The First Clue', 'Deeper Into the Enigma', 'Hidden Patterns'],
-      comedy: ['The Comedy Begins', 'Delightful Chaos', 'Laughter in Unexpected Places']
-    };
-    
-    const templates = titleTemplates[theme] || titleTemplates.dramatic;
-    const baseTitle = templates[(chapterNumber - 1) % templates.length];
-    
-    return `${baseTitle}: ${month} Reflections`;
-  }
-
-  static createChapterContent(entries, theme, protagonist) {
-    let content = '';
-    
-    entries.forEach((entry, index) => {
-      const narrative = this.transformEntryToNarrative(entry, theme, protagonist);
-      content += narrative;
-      
-      if (index < entries.length - 1) {
-        content += '\n\n';
-      }
-    });
-    
-    return content;
-  }
-
-  static transformEntryToNarrative(entry, theme, protagonist) {
-    const cleanContent = this.cleanHtmlContent(entry.content);
-    const date = new Date(entry.date);
-    const timeContext = this.createTimeContext(date);
-    
-    let narrative = `${timeContext}, ${protagonist.name} found themselves reflecting on the day's experiences. `;
-    
-    if (cleanContent && cleanContent.length > 10) {
-      const transformedContent = cleanContent
-        .replace(/\bI\b/g, protagonist.name)
-        .replace(/\bmy\b/g, `${protagonist.name}'s`)
-        .replace(/\bme\b/g, protagonist.name);
-      
-      narrative += transformedContent;
-    } else {
-      narrative += this.generateFallbackNarrative(entry.mood, theme, protagonist);
-    }
-    
-    narrative += this.addThematicEnhancement(entry, theme);
-    
-    return narrative;
-  }
-
-  static cleanHtmlContent(htmlContent) {
-    return htmlContent
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&/g, '&')
-      .replace(/</g, '<')
-      .replace(/>/g, '')
-      .replace(/"/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\s+/g, ' ')
+function parseAskDiaryJson(rawText) {
+  if (!rawText || typeof rawText !== 'string') return null;
+  try {
+    const cleanJson = rawText
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```\s*$/i, '')
       .trim();
-  }
-
-  static createTimeContext(date) {
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const timeOfDay = this.getTimeOfDay(date);
-    
-    const contexts = [
-      `On a ${dayOfWeek} ${timeOfDay}`,
-      `During the ${timeOfDay} hours of ${dayOfWeek}`,
-      `As ${dayOfWeek}'s ${timeOfDay} unfolded`
-    ];
-    
-    return contexts[Math.floor(Math.random() * contexts.length)];
-  }
-
-  static getTimeOfDay(date) {
-    const hour = date.getHours();
-    if (hour < 6) return 'early morning';
-    if (hour < 12) return 'morning';
-    if (hour < 17) return 'afternoon';
-    if (hour < 21) return 'evening';
-    return 'night';
-  }
-
-  static generateFallbackNarrative(mood, theme, protagonist) {
-    const fallbacks = {
-      romantic: {
-        happy: `${protagonist.name} felt their heart expand with joy, as if love itself had whispered a secret only they could hear.`,
-        sad: `A tender melancholy settled over ${protagonist.name}, beautiful in its depth and meaning.`
-      },
-      dramatic: {
-        happy: `Joy erupted in ${protagonist.name}'s soul like the first light of dawn after a storm.`,
-        sad: `${protagonist.name} stood face to face with sorrow, recognizing it as a teacher of profound lessons.`
-      }
-    };
-    
-    const themeFallbacks = fallbacks[theme] || fallbacks.dramatic;
-    return themeFallbacks[mood] || `${protagonist.name} experienced a moment of profound recognition.`;
-  }
-
-  static addThematicEnhancement(entry, theme) {
-    const enhancements = {
-      romantic: ' This moment became another thread in the tapestry of connection they were learning to weave.',
-      dramatic: ' The experience carved itself into their understanding, becoming part of their growth.',
-      adventure: ' Each experience added another layer to their expanding map of the world.',
-      mystery: ' They sensed this moment contained clues to larger questions life was revealing.',
-      comedy: ' The absurd beauty of the moment brought a smile, finding joy in life\'s contradictions.'
-    };
-    
-    return enhancements[theme] || '';
-  }
-
-  static createLiteraryEnding(theme, protagonist, entries) {
-    const timeSpan = entries.length > 1 ? 
-      `from ${new Date(entries[0].date).toLocaleDateString()} to ${new Date(entries[entries.length - 1].date).toLocaleDateString()}` :
-      `on ${new Date(entries[0].date).toLocaleDateString()}`;
-    
-    const endings = {
-      romantic: `\n\n---\n\n## Epilogue: The Continuing Story\n\nAs we close this chapter of ${protagonist.name}'s journey ${timeSpan}, we see how love had woven itself through every moment. Their story continues, for love stories never truly end—they simply evolve and find new ways to surprise us.`,
-      
-      dramatic: `\n\n---\n\n## Epilogue: The Transformed Soul\n\nThe curtain falls on this act of ${protagonist.name}'s life ${timeSpan}, but the drama continues. Through their journey, they had been forged in the crucible of experience, emerging not unscathed, but undaunted.`,
-      
-      adventure: `\n\n---\n\n## Epilogue: The Endless Journey\n\nAs this chapter of ${protagonist.name}'s adventure ${timeSpan} draws to a close, the greatest discovery was not a destination, but a way of being in the world. The adventure continues for those bold enough to take the next step.`,
-      
-      mystery: `\n\n---\n\n## Epilogue: The Beautiful Enigma\n\nThe mysteries revealed to ${protagonist.name} ${timeSpan} were glimpses into the greater enigma of existence. The mystery deepens and continues, for those wise enough to know that some questions are more beautiful than their answers.`,
-      
-      comedy: `\n\n---\n\n## Epilogue: The Last Laugh\n\nAs the laughter from ${protagonist.name}'s journey ${timeSpan} echoes into memory, we're reminded that joy is not just an emotion—it's a choice. The comedy continues for those wise enough to find humor in the human condition.`
-    };
-    
-    return endings[theme] || `\n\n---\n\n## Epilogue\n\nAnd so ${protagonist.name}'s story continues, one moment at a time, building the beautiful narrative of a life fully lived.`;
+    const data = JSON.parse(cleanJson);
+    if (!data || typeof data.answer !== 'string' || !Array.isArray(data.usedEntryIds)) {
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
   }
 }
 
-module.exports = { generateStorybook: AIService.generateStorybook.bind(AIService) };
+class AIService {
+  /**
+   * Generates a literary storybook from diary entries using Claude.
+   *
+   * @param {Array<object>} entries - Array of DiaryEntry documents
+   * @param {string} theme - 'romantic' | 'dramatic' | 'adventure' | 'mystery' | 'comedy'
+   * @param {{ start: Date, end: Date }} timeframe
+   * @param {string|object} [optionsOrNickname]
+   * @param {string} userId - User ID for quota tracking
+   */
+  static async generateStorybook(entries, theme, timeframe, optionsOrNickname, userId) {
+    if (!entries || entries.length === 0) {
+      throw new Error('At least one diary entry is required to synthesize a storybook.');
+    }
+
+    let protagonistNickname = '';
+    let length = 'medium';
+    let language = 'en';
+    let tone = 'reflective';
+
+    if (typeof optionsOrNickname === 'string') {
+      protagonistNickname = optionsOrNickname;
+    } else if (optionsOrNickname && typeof optionsOrNickname === 'object') {
+      protagonistNickname = optionsOrNickname.protagonistNickname || '';
+      length = optionsOrNickname.length || 'medium';
+      language = optionsOrNickname.language || 'en';
+      tone = optionsOrNickname.tone || 'reflective';
+    }
+
+    // 1. Sanitize entries and check for crisis signals
+    const preparedEntries = entries.map((entry, idx) => {
+      const rawContent = entry.content || '';
+      const cleanText = rawContent
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 1000); // Send only necessary excerpt per entry
+
+      return {
+        index: idx + 1,
+        title: (entry.title || `Entry ${idx + 1}`).slice(0, 100),
+        date: entry.entryDate ? new Date(entry.entryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Unknown date',
+        mood: entry.mood || 'reflective',
+        text: cleanText
+      };
+    });
+
+    // Check EACH prepared entry individually for crisis signals
+    const safeEntries = [];
+    let excludedCount = 0;
+    for (const entry of preparedEntries) {
+      const risk = checkRisk(entry.text);
+      if (risk.level === 'high') {
+        excludedCount++;
+      } else {
+        safeEntries.push(entry);
+      }
+    }
+
+    if (safeEntries.length === 0) {
+      const err = new Error('All entries in this time range reflect moments of severe distress. For your safety, storybook generation is paused. Please connect with our support resources.');
+      err.statusCode = 400;
+      err.safety = { level: 'high' };
+      err.excludedCount = excludedCount;
+      throw err;
+    }
+
+    const entriesForPrompt = safeEntries.map((e, idx) => ({
+      ...e,
+      index: idx + 1
+    }));
+
+    const protagonistName = protagonistNickname && protagonistNickname.trim().length > 0
+      ? protagonistNickname.trim().slice(0, 30)
+      : 'The Traveler';
+
+    const lengthGuide = length === 'short'
+      ? 'Generate exactly 3 chapters.'
+      : length === 'long'
+        ? 'Generate exactly 6 chapters.'
+        : 'Generate 4 to 5 chapters.';
+
+    const languageGuide = language === 'hi'
+      ? 'Write the entire story (title, protagonist summary, and chapter contents) in pure Hindi using the Devanagari script.'
+      : language === 'hinglish'
+        ? 'Write in warm, conversational Hinglish (Hindi words mixed with English in Roman/Latin script, easy for Indian youth to relate to).'
+        : 'Write in natural, evocative English.';
+
+    const toneGuide = tone === 'gentle'
+      ? 'Tone: Soft, warm, nurturing, compassionate, and reassuring.'
+      : tone === 'hopeful'
+        ? 'Tone: Uplifting, inspiring, forward-looking, and courageous.'
+        : tone === 'funny'
+          ? 'Tone: Lighthearted, cheerful, playful, and subtly witty.'
+          : 'Tone: Thoughtful, introspective, mindful, and deeply reflective.';
+
+    const promptMessage = `Please write a heartwarming, uplifting storybook based on the following real diary events:
+Selected Theme: ${theme}
+Desired Tone: ${tone} (${toneGuide})
+Target Length: ${length} (${lengthGuide})
+Language: ${language} (${languageGuide})
+Timeframe: ${timeframe.start.toISOString().slice(0, 10)} to ${timeframe.end.toISOString().slice(0, 10)}
+Protagonist Preferred Name: ${protagonistName}
+
+STRICT SAFETY & ETHICAL RULES:
+- stay faithful to the real events; never invent harm; never name illnesses or medicines.
+- Do not fabricate traumatic events, violence, self-harm, or clinical labels.
+
+Diary Entries to weave into the story:
+${JSON.stringify(entriesForPrompt, null, 2)}
+
+Remember to return ONLY valid JSON matching the specified schema with a title, protagonist, and the requested chapters.`;
+
+    const parseStorybookJson = (rawText) => {
+      if (!rawText || typeof rawText !== 'string') return null;
+      try {
+        const cleanJson = rawText
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+        const parsed = JSON.parse(cleanJson);
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          parsed.title &&
+          typeof parsed.title === 'string' &&
+          Array.isArray(parsed.chapters) &&
+          parsed.chapters.length > 0
+        ) {
+          return parsed;
+        }
+      } catch {
+        return null;
+      }
+      return null;
+    };
+
+    // Attempt 1: Call LLM with daily quota tracking
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: STORYBOOK_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: promptMessage }],
+      maxTokens: 2500,
+      temperature: 0.7,
+      countUsage: true
+    });
+
+    let storybookData = parseStorybookJson(response?.text);
+
+    // If Claude's JSON fails validation, retry once with a stricter reminder prompt
+    if (!storybookData) {
+      try {
+        const retryPrompt = `${promptMessage}\n\nCRITICAL: Return only valid JSON, nothing before or after.`;
+        const retryResponse = await llmClient.callLLM({
+          userId,
+          systemPrompt: STORYBOOK_SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: retryPrompt }],
+          maxTokens: 2500,
+          temperature: 0.5,
+          countUsage: false // Do not charge additional quota for internal retry
+        });
+        storybookData = parseStorybookJson(retryResponse?.text);
+      } catch {
+        // If retry call fails, storybookData remains null
+      }
+    }
+
+    // If it fails again, refund daily usage, throw 503, and never save a storybook
+    if (!storybookData) {
+      await llmClient.refundDailyUsage(userId, 1);
+      const failError = new Error("We couldn't make your story this time. Please try again.");
+      failError.statusCode = 503;
+      throw failError;
+    }
+
+    // Ensure title and chapters format
+    const title = storybookData.title;
+    const chapters = storybookData.chapters.map((ch, idx) => ({
+      chapterNumber: ch.chapterNumber || idx + 1,
+      title: ch.title || `Chapter ${idx + 1}`,
+      content: ch.content || ''
+    }));
+
+    // Compile generatedContent in markdown format compatible with exportService jsPDF generator
+    let generatedContent = `# ${title}\n\n`;
+    if (storybookData.protagonist?.name) {
+      generatedContent += `**Protagonist:** ${storybookData.protagonist.name}\n\n`;
+    }
+
+    chapters.forEach((chapter) => {
+      generatedContent += `---\n\n## ${chapter.title}\n\n${chapter.content}\n\n`;
+    });
+
+    return {
+      title,
+      theme,
+      timeframe,
+      protagonist: storybookData.protagonist || { name: protagonistName },
+      chapters,
+      generatedContent: generatedContent.trim(),
+      safety: excludedCount > 0 ? { level: 'high' } : { level: 'none' },
+      excludedCount
+    };
+  }
+
+  /**
+   * Generates a gentle reflective response to a journal entry.
+   */
+  static async generateReflection(content, mood, userId) {
+    if (!content || typeof content !== 'string') {
+      throw new Error('Entry content is required for reflection.');
+    }
+
+    const cleanContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1500);
+
+    // Run risk check first
+    const risk = checkRisk(cleanContent);
+    if (risk.level === 'high') {
+      return {
+        safety: { level: 'high' },
+        reflection: "I hear how heavy things feel right now. You matter, and you do not have to carry this alone. Please reach out to someone who cares about you or connect with a free, confidential helpline.",
+        question: "Would you be willing to take one deep breath and reach out to someone you trust right now?"
+      };
+    }
+
+    const userPrompt = `Here is a reflection from my journal today (Mood: ${mood || 'unspecified'}):
+<diary_entry>
+${cleanContent}
+</diary_entry>
+
+Please offer a warm, compassionate reflection of my feelings and at most ONE gentle question to help me ponder this softly. Keep it under 100 words.`;
+
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: WELLNESS_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userPrompt }],
+      maxTokens: 300,
+      temperature: 0.6
+    });
+
+    const hasCrisisSignal = response.text.includes('[CRISIS_SIGNAL_DETECTED]');
+    const cleanText = response.text.replace('[CRISIS_SIGNAL_DETECTED]', '').trim();
+
+    return {
+      safety: { level: hasCrisisSignal ? 'high' : risk.level },
+      reflection: cleanText,
+      quotaRemaining: response.quotaRemaining
+    };
+  }
+
+  /**
+   * Analyzes emotional tone of text.
+   */
+  static async analyzeMood(text, userId) {
+    if (!text || typeof text !== 'string') {
+      return { suggestedEmotions: ['neutral'], suggestedScore: 5, confidence: 0.5 };
+    }
+
+    const cleanText = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1000);
+    const risk = checkRisk(cleanText);
+
+    if (risk.level === 'high') {
+      return {
+        safety: { level: 'high' },
+        suggestedEmotions: ['overwhelmed', 'deep distress'],
+        suggestedScore: 1,
+        confidence: 0.95
+      };
+    }
+
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: MOOD_ANALYZER_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: `Analyze the tone of this journal text:\n"${cleanText}"` }],
+      maxTokens: 150,
+      temperature: 0.3,
+      countUsage: false
+    });
+
+    try {
+      const cleanJson = response.text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const parsed = JSON.parse(cleanJson);
+      return {
+        safety: { level: risk.level },
+        suggestedEmotions: Array.isArray(parsed.suggestedEmotions) ? parsed.suggestedEmotions.slice(0, 4) : ['reflective'],
+        suggestedScore: Math.max(1, Math.min(10, Math.round(Number(parsed.suggestedScore) || 5))),
+        confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0.7)),
+        quotaRemaining: response.quotaRemaining
+      };
+    } catch {
+      return {
+        safety: { level: risk.level },
+        suggestedEmotions: ['reflective'],
+        suggestedScore: 6,
+        confidence: 0.6,
+        quotaRemaining: response.quotaRemaining
+      };
+    }
+  }
+
+  /**
+   * Reframes cognitive distortions (CBT thought challenger helper).
+   */
+  static async challengeThought({ situation, thought, evidenceFor, evidenceAgainst }, userId) {
+    const rawCheck = `${situation || ''} ${thought || ''} ${evidenceFor || ''} ${evidenceAgainst || ''}`;
+    const risk = checkRisk(rawCheck);
+
+    if (risk.level === 'high') {
+      return {
+        safety: { level: 'high' },
+        balancedThought: "Right now you are in acute distress. Please pause this exercise and reach out to someone you trust or a helpline."
+      };
+    }
+
+    const prompt = `I am doing a thought reframing exercise:
+Situation: ${situation || 'Unspecified'}
+Automatic thought: "${thought || ''}"
+Evidence supporting it: "${evidenceFor || 'None listed'}"
+Evidence against it: "${evidenceAgainst || 'None listed'}"
+
+Please suggest 1-2 balanced, compassionate ways to see this situation without toxic positivity. Keep it under 90 words.`;
+
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: CBT_CHALLENGER_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: prompt }],
+      maxTokens: 250,
+      temperature: 0.6
+    });
+
+    return {
+      safety: { level: risk.level },
+      balancedThought: response.text.trim(),
+      quotaRemaining: response.quotaRemaining
+    };
+  }
+
+  /**
+   * Generates 3 gentle sentence starters from a prompt or feeling.
+   */
+  static async generateWritingStarters(prompt, userId) {
+    const risk = checkRisk(prompt || '');
+    if (risk.level === 'high') {
+      return {
+        safety: { level: 'high' },
+        starters: [
+          "Right now, the most caring thing I can do for myself is...",
+          "Someone I feel safe reaching out to is...",
+          "A gentle reminder I need to hear right now is..."
+        ]
+      };
+    }
+
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: `You are a gentle writing assistant for a personal wellness journal.
+Give exactly 3 distinct, thoughtful opening sentence starters based on the user's focus prompt.
+Rules:
+- Warm, non-intrusive, open-ended.
+- Never write the whole entry, only the beginning of a sentence.
+- Return ONLY a JSON array of 3 strings: ["starter 1...", "starter 2...", "starter 3..."]`,
+      messages: [{ role: 'user', content: `Writing prompt/topic: "${prompt || 'How I am feeling right now'}"` }],
+      maxTokens: 200,
+      temperature: 0.7
+    });
+
+    try {
+      const cleanJson = response.text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
+      const starters = JSON.parse(cleanJson);
+      return {
+        safety: { level: risk.level },
+        starters: Array.isArray(starters) ? starters.slice(0, 3) : [
+          "Right now, the thought that is staying with me is...",
+          "If I'm completely honest about today, I felt...",
+          "One thing my body has been trying to tell me is..."
+        ]
+      };
+    } catch {
+      return {
+        safety: { level: risk.level },
+        starters: [
+          "Right now, the thought that is staying with me is...",
+          "If I'm completely honest about today, I felt...",
+          "One thing my body has been trying to tell me is..."
+        ]
+      };
+    }
+  }
+
+  /**
+   * Answers questions using ONLY the user's own journal entries and identifies used sources.
+   *
+   * @param {string} question - User question
+   * @param {object} [filters={}] - Optional filters { startDate, endDate, mood }
+   * @param {string} userId - Authenticated user ID
+   */
+  static async askDiary(question, filters = {}, userId) {
+    if (!question || typeof question !== 'string' || !question.trim()) {
+      const err = new Error('Question is required');
+      err.statusCode = 400;
+      throw err;
+    }
+
+    // 1. In-memory retrieval of excerpts with mood/date detection, scoring & safety screening
+    const retrieval = await retrieveDiaryExcerpts({
+      userId,
+      question,
+      filters
+    });
+
+    // If nothing matched or all matches were dropped
+    if (retrieval.noMatch || retrieval.excerpts.length === 0) {
+      await llmClient.refundDailyUsage(userId, 1);
+      if (retrieval.droppedCrisisCount > 0) {
+        return {
+          safety: { level: 'high' },
+          data: {
+            answer: "I hear how painful things feel right now. Your reflections during this time contained deep pain, so they were kept completely private. Caring support is available for you.",
+            usedEntryIds: [],
+            usedEntries: []
+          }
+        };
+      }
+      return {
+        safety: { level: 'none' },
+        data: {
+          answer: "I could not find that in your diary.",
+          usedEntryIds: [],
+          usedEntries: []
+        }
+      };
+    }
+
+    const sentEntries = retrieval.excerpts;
+    const sentIdSet = new Set(sentEntries.map(e => e.id));
+    const sentEntriesMap = new Map(sentEntries.map(e => [e.id, e]));
+
+    // 2. Construct excerpts payload for LLM with explicit XML delimiters
+    const xmlExcerpts = sentEntries.map(e => {
+      const dateStr = new Date(e.entryDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<diary_entry id="${e.id}" date="${dateStr}" mood="${e.mood || 'neutral'}">\n<title>${e.title || 'Untitled'}</title>\n<content>\n${e.excerpt}\n</content>\n</diary_entry>`;
+    }).join('\n\n');
+
+    // 3. Short memory: retrieve last 6 messages of conversation with mode: 'diary', excluding high-risk crisis exchanges
+    const history = await ChatMessage.find({
+      user: userId,
+      mode: 'diary',
+      safetyLevel: { $ne: 'high' }
+    })
+      .sort({ createdAt: -1 })
+      .limit(6);
+    history.reverse();
+
+    const recentHistoryText = history.length > 0
+      ? history.map(m => `${(m.role || m.sender) === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n')
+      : '';
+
+    const droppedNote = retrieval.droppedCrisisCount > 0
+      ? 'Some entries were not included because they were very painful. Do not ask about them; respond with care and mention that support is available.'
+      : '';
+
+    let userPrompt = `Available Diary Entry Excerpts:\n<diary_data>\n${xmlExcerpts}\n</diary_data>\n\n`;
+    if (droppedNote) {
+      userPrompt += `${droppedNote}\n\n`;
+    }
+    if (recentHistoryText) {
+      userPrompt += `Recent Conversation History:\n${recentHistoryText}\n\n`;
+    }
+    userPrompt += `Current User Question: "${question.trim()}"\n\n`;
+    userPrompt += `Please answer the user's question using ONLY the provided diary excerpts. Return valid JSON:\n{"answer": "...", "usedEntryIds": [...]}`;
+
+    // 4. Call LLM (quota was already checked/deducted at Gate 3)
+    const response = await llmClient.callLLM({
+      userId,
+      systemPrompt: ASK_DIARY_SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: userPrompt }],
+      maxTokens: 500,
+      temperature: 0.3,
+      countUsage: false
+    });
+
+    let parsed = parseAskDiaryJson(response.text);
+    if (!parsed) {
+      // Retry once on invalid JSON
+      const retryResponse = await llmClient.callLLM({
+        userId,
+        systemPrompt: ASK_DIARY_SYSTEM_PROMPT,
+        messages: [
+          { role: 'user', content: userPrompt },
+          { role: 'assistant', content: response.text },
+          { role: 'user', content: 'Your response was not valid JSON. Please respond with ONLY the JSON object: {"answer": "...", "usedEntryIds": [...]}.' }
+        ],
+        maxTokens: 500,
+        temperature: 0.2,
+        countUsage: false
+      });
+      parsed = parseAskDiaryJson(retryResponse.text);
+    }
+
+    if (!parsed) {
+      const err = new Error("Could not process diary answer. Please try again.");
+      err.statusCode = 503;
+      throw err;
+    }
+
+    // 5. Enforce that every usedEntryId must be in the sent set; reject any outside
+    const validUsedIds = (parsed.usedEntryIds || []).filter(id => sentIdSet.has(String(id)));
+
+    const usedEntries = validUsedIds.map(id => {
+      const entry = sentEntriesMap.get(String(id));
+      return {
+        id: entry.id,
+        title: entry.title,
+        date: entry.entryDate,
+        snippet: entry.snippet
+      };
+    });
+
+    // 6. Crisis marker handling
+    const hasCrisisSignal = parsed.answer.includes('[CRISIS_SIGNAL_DETECTED]');
+    const cleanAnswer = parsed.answer.replace('[CRISIS_SIGNAL_DETECTED]', '').trim();
+
+    // 7. Persist messages with mode: 'diary' and sources (encrypted at rest by schema)
+    try {
+      await ChatMessage.create({
+        user: userId,
+        role: 'user',
+        content: question.trim(),
+        mode: 'diary'
+      });
+      await ChatMessage.create({
+        user: userId,
+        role: 'assistant',
+        content: cleanAnswer,
+        mode: 'diary',
+        sources: validUsedIds
+      });
+    } catch (saveErr) {
+      console.error('Failed to persist Ask Diary chat turn:', saveErr.message);
+    }
+
+    return {
+      safety: { level: hasCrisisSignal ? 'high' : 'none' },
+      data: {
+        answer: cleanAnswer,
+        usedEntryIds: validUsedIds,
+        usedEntries,
+        quotaRemaining: response.quotaRemaining
+      }
+    };
+  }
+}
+
+module.exports = AIService;

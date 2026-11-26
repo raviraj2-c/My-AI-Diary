@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Calendar from 'react-calendar';
 import { DiaryEntry } from '../../types';
-import { format, isSameDay } from 'date-fns';
+import { isSameDay } from 'date-fns';
+import { stripHtml } from '../../utils/sanitize';
+import { getMoodMeta } from '../../utils/moods';
+import { Card, Button, Badge } from '../common';
+import { Calendar as CalendarIcon, PenTool, Sparkles } from 'lucide-react';
 import 'react-calendar/dist/Calendar.css';
 
 import { CalendarProps } from 'react-calendar';
 type Value = CalendarProps['value'];
-
-
 
 interface CalendarViewProps {
   entries: DiaryEntry[];
@@ -16,14 +19,15 @@ interface CalendarViewProps {
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelect, onEntrySelect }) => {
+  const { t, i18n } = useTranslation();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const getEntriesForDate = (date: Date): DiaryEntry[] => {
-    return entries.filter(entry => isSameDay(entry.date, date));
+    return entries.filter(entry => isSameDay(new Date(entry.entryDate || entry.date || Date.now()), date));
   };
 
   const hasEntryOnDate = (date: Date): boolean => {
-    return entries.some(entry => isSameDay(entry.date, date));
+    return entries.some(entry => isSameDay(new Date(entry.entryDate || entry.date || Date.now()), date));
   };
 
   const handleDateChange = (value: Value) => {
@@ -36,68 +40,171 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ entries, onDateSelec
   const selectedDateEntries = getEntriesForDate(selectedDate);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <Card className="p-6 md:p-8 border-calm-200 dark:border-calm-800">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h3 className="text-lg font-semibold mb-4">Calendar</h3>
-          <Calendar
-            onChange={handleDateChange}
-            value={selectedDate}
-            tileClassName={({ date, view }) => {
-              if (view === 'month' && hasEntryOnDate(date)) {
-                return 'has-entry';
-              }
-              return '';
-            }}
-            className="w-full"
-          />
+          <div className="flex items-center gap-2 mb-4">
+            <CalendarIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <h3 className="text-base font-semibold text-calm-900 dark:text-calm-50">{t('calendar.selectDate')}</h3>
+          </div>
+
+          <div className="calendar-wrapper rounded-2xl overflow-hidden p-2 bg-calm-50/50 dark:bg-calm-900/30 border border-calm-200/80 dark:border-calm-800">
+            <Calendar
+              onChange={handleDateChange}
+              value={selectedDate}
+              tileClassName={({ date, view }) => {
+                if (view === 'month' && hasEntryOnDate(date)) {
+                  return 'calm-has-entry';
+                }
+                return '';
+              }}
+              className="w-full border-none font-sans"
+            />
+          </div>
         </div>
 
-        <div>
-          <h3 className="text-lg font-semibold mb-4">
-            Entries for {format(selectedDate, 'MMMM d, yyyy')}
-          </h3>
-          
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-semibold text-calm-900 dark:text-calm-50">
+                {selectedDate.toLocaleDateString(i18n.language === 'hi' ? 'hi-IN' : 'en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </h3>
+              <p className="text-xs text-calm-500">
+                {selectedDateEntries.length} {t('dashboard.recentEntries', 'reflections')}
+              </p>
+            </div>
+            <Button
+              onClick={() => onDateSelect(selectedDate)}
+              variant="outline"
+              size="sm"
+              icon={<PenTool className="w-3.5 h-3.5" />}
+            >
+              {t('dashboard.writeEntry', 'Write for this day')}
+            </Button>
+          </div>
+
           {selectedDateEntries.length > 0 ? (
-            <div className="space-y-4">
-              {selectedDateEntries.map(entry => (
-                <div
-                  key={entry.id}
-                  onClick={() => onEntrySelect(entry)}
-                  className="p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                >
-                  <h4 className="font-medium text-gray-900">{entry.title}</h4>
-                  <p className="text-sm text-gray-500 mt-1 capitalize">{entry.mood}</p>
-                  <div className="text-sm text-gray-700 mt-2 line-clamp-3">
-                    <div dangerouslySetInnerHTML={{ __html: entry.content.slice(0, 100) + '...' }} />
+            <div className="space-y-3 overflow-y-auto max-h-[380px] pr-1">
+              {selectedDateEntries.map(entry => {
+                const plainPreview = stripHtml(entry.content);
+                const moodMeta = getMoodMeta(entry.mood);
+                return (
+                  <div
+                    key={entry.id}
+                    onClick={() => onEntrySelect(entry)}
+                    className="p-4 rounded-xl border border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b] hover:border-primary-400 dark:hover:border-primary-600 hover:shadow-xs transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                      <h4 className="font-serif font-semibold text-calm-900 dark:text-calm-100 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
+                        {entry.title || 'Untitled reflection'}
+                      </h4>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${moodMeta.badgeClass}`}>
+                        <span>{moodMeta.emoji}</span>
+                        <span>{moodMeta.label}</span>
+                      </span>
+                    </div>
+                    <p className="text-xs text-calm-600 dark:text-calm-400 line-clamp-2 leading-relaxed">
+                      {plainPreview || 'No text content.'}
+                    </p>
+                    {entry.tags.length > 0 && (
+                      <div className="flex gap-1 mt-2.5 flex-wrap">
+                        {entry.tags.slice(0, 3).map(tag => (
+                          <Badge key={tag} size="sm">#{tag}</Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No entries for this date.</p>
-              <button
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-calm-200 dark:border-calm-800 bg-white dark:bg-[#1e293b]">
+              <Sparkles className="w-8 h-8 text-calm-300 dark:text-calm-600 mb-2" />
+              <p className="text-sm text-calm-600 dark:text-calm-300 font-medium">{t('calendar.noEntry')}</p>
+              <p className="text-xs text-calm-400 max-w-xs mt-1">
+                {t('calendar.noEntryPrompt')}
+              </p>
+              <Button
                 onClick={() => onDateSelect(selectedDate)}
-                className="mt-2 text-blue-600 hover:text-blue-700 font-medium"
+                variant="primary"
+                size="sm"
+                className="mt-4"
               >
-                Write an entry
-              </button>
+                {t('calendar.createEntry')}
+              </Button>
             </div>
           )}
         </div>
       </div>
 
       <style>{`
-        .has-entry {
-          background-color: #3b82f6 !important;
-          color: white !important;
-          border-radius: 50%;
+        /* React-Calendar styling for calm & dark mode */
+        .react-calendar {
+          background: transparent !important;
+          border: none !important;
+          font-family: inherit !important;
+          width: 100% !important;
         }
-        .has-entry:hover {
-          background-color: #2563eb !important;
+        .react-calendar__navigation button {
+          font-weight: 600;
+          border-radius: 8px;
+          color: inherit;
+        }
+        .react-calendar__navigation button:hover,
+        .react-calendar__navigation button:focus {
+          background-color: rgba(99, 102, 241, 0.1) !important;
+        }
+        .react-calendar__month-view__weekdays {
+          text-transform: uppercase;
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: #94a3b8;
+        }
+        .react-calendar__tile {
+          border-radius: 10px !important;
+          padding: 10px 6px !important;
+          font-size: 0.85rem !important;
+          color: inherit;
+          transition: all 0.15s ease;
+        }
+        .react-calendar__tile:hover {
+          background-color: rgba(99, 102, 241, 0.08) !important;
+        }
+        .react-calendar__tile--now {
+          background-color: transparent !important;
+          font-weight: bold;
+          text-decoration: underline;
+          text-decoration-color: #6366f1;
+        }
+        .react-calendar__tile--active {
+          background: #6366f1 !important;
+          color: white !important;
+          font-weight: 600 !important;
+        }
+        .calm-has-entry {
+          position: relative;
+        }
+        .calm-has-entry::after {
+          content: '';
+          position: absolute;
+          bottom: 3px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background-color: #10b981;
+        }
+        .react-calendar__tile--active.calm-has-entry::after {
+          background-color: white;
+        }
+        .dark .react-calendar__tile {
+          color: #e2e8f0;
+        }
+        .dark .react-calendar__navigation button {
+          color: #e2e8f0;
         }
       `}</style>
-    </div>
+    </Card>
   );
 };

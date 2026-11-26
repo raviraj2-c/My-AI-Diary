@@ -2,12 +2,18 @@ const errorHandler = (err, req, res, next) => {
   let error = { ...err };
   error.message = err.message;
 
-  console.error('Error:', err);
-  
+  // CORS error
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({
+      success: false,
+      message: 'Not allowed by CORS'
+    });
+  }
+
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
-    const message = 'Resource not found';
-    error = { message, statusCode: 404 };
+    const message = 'Invalid resource identifier';
+    error = { message, statusCode: 400 };
   }
 
   // Mongoose duplicate key
@@ -33,7 +39,9 @@ const errorHandler = (err, req, res, next) => {
     error = { message, statusCode: 401 };
   }
 
-  res.status(error.statusCode || 500).json({
+  const statusCode = err.status || err.statusCode || error.statusCode || 500;
+
+  res.status(statusCode).json({
     success: false,
     message: error.message || 'Server Error',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack })

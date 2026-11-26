@@ -1,35 +1,184 @@
-import { StorybookExport } from '../types';
-import jsPDF from 'jspdf';
+import type jsPDF from 'jspdf';
+import { StorybookExport, DiaryEntry, WellnessInsights } from '../types';
 
 export class ExportService {
   static async exportToPDF(storybook: StorybookExport): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: html2canvas } = await import('html2canvas');
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.width;
     const pageHeight = pdf.internal.pageSize.height;
-    const margin = 30;
-    const textWidth = pageWidth - margin * 2;
-    const lineHeight = 7;
 
-    let yPosition = margin;
-    let pageNumber = 1;
- 
-    this.createProfessionalTitlePage(pdf, storybook, pageWidth, pageHeight);
+    const textToCheck = (storybook.title || '') + ' ' + (storybook.generatedContent || '');
+    const hasDevanagari = /[\u0900-\u097F]/.test(textToCheck);
 
-   
+    if (hasDevanagari) {
+      await this.exportViaCanvas(pdf, storybook, pageWidth, pageHeight, html2canvas);
+    } else {
+      await this.exportStandardWithCover(pdf, storybook, pageWidth, pageHeight, html2canvas);
+    }
+
+    const safeTitle = storybook.title
+      .replace(/[^\p{L}\p{M}\p{N}\s]/gu, '')
+      .trim()
+      .replace(/\s+/g, '_') || 'Storybook';
+    pdf.save(`${safeTitle}_Memoir.pdf`);
+  }
+
+  private static async exportViaCanvas(
+    pdf: jsPDF,
+    storybook: StorybookExport,
+    pageWidth: number,
+    pageHeight: number,
+    html2canvas: (element: HTMLElement, options?: object) => Promise<HTMLCanvasElement>
+  ): Promise<void> {
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '650px';
+    container.style.minHeight = '900px';
+    container.style.zIndex = '-100';
+    document.body.appendChild(container);
+
+    const themeGradients: Record<string, string> = {
+      romantic: 'linear-gradient(135deg, #4c0519 0%, #831843 50%, #500724 100%)',
+      dramatic: 'linear-gradient(135deg, #020617 0%, #1e1b4b 50%, #0f172a 100%)',
+      adventure: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #451a03 100%)',
+      mystery: 'linear-gradient(135deg, #030712 0%, #0f172a 50%, #0c4a6e 100%)',
+      comedy: 'linear-gradient(135deg, #451a03 0%, #78350f 50%, #713f12 100%)'
+    };
+
+    const gradient = themeGradients[storybook.theme] || themeGradients.dramatic;
+
+    try {
+      // 1. Cover Page
+      container.innerHTML = `
+        <div style="width: 650px; height: 920px; padding: 48px; background: ${gradient}; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-sizing: border-box; font-family: 'Georgia', serif; text-align: center; border: 2px solid rgba(255,255,255,0.2);">
+          <div style="font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.7); padding-top: 16px;">
+            MINDDIARY MEMOIR
+          </div>
+          <div style="max-width: 520px; margin: auto 0;">
+            <h1 style="font-size: 34px; line-height: 1.35; margin: 0 0 16px 0; font-weight: bold; color: #ffffff;">
+              ${storybook.title}
+            </h1>
+            ${storybook.protagonist?.name ? `<p style="font-size: 16px; font-style: italic; color: rgba(255,255,255,0.85); margin: 0;">A journey of ${storybook.protagonist.name}</p>` : ''}
+            <div style="width: 60px; height: 2px; background: rgba(255,255,255,0.3); margin: 20px auto;"></div>
+          </div>
+          <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; font-size: 12px; display: flex; justify-content: space-between; color: rgba(255,255,255,0.6); font-family: sans-serif;">
+            <span style="text-transform: capitalize;">${storybook.theme} Theme</span>
+            <span>Created with MindDiary AI</span>
+          </div>
+        </div>
+      `;
+
+      const coverCanvas = await html2canvas(container.firstElementChild as HTMLElement, { scale: 2 });
+      pdf.addImage(coverCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageWidth, pageHeight);
+
+      // 2. Chapters (with shaped Hindi / Devanagari text)
+      const chapters = storybook.chapters && storybook.chapters.length > 0
+        ? storybook.chapters
+        : [{ chapterNumber: 1, title: 'Reflections', content: storybook.generatedContent || '' }];
+
+      for (let i = 0; i < chapters.length; i++) {
+        pdf.addPage();
+        const ch = chapters[i];
+        container.innerHTML = `
+          <div style="width: 650px; min-height: 920px; padding: 56px 48px; background: #faf8f5; color: #1c1917; box-sizing: border-box; font-family: 'Georgia', 'Noto Sans Devanagari', serif;">
+            <div style="border-bottom: 2px solid #e7e5e4; padding-bottom: 16px; margin-bottom: 28px;">
+              <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #78716c; font-family: sans-serif;">
+                CHAPTER ${ch.chapterNumber || i + 1}
+              </div>
+              <h2 style="font-size: 26px; line-height: 1.3; margin: 8px 0 0 0; color: #0c0a09; font-weight: bold;">
+                ${ch.title}
+              </h2>
+            </div>
+            <div style="font-size: 17px; line-height: 1.85; color: #292524; white-space: pre-line; text-align: justify;">
+              ${ch.content}
+            </div>
+            <div style="margin-top: 48px; padding-top: 16px; border-top: 1px solid #e7e5e4; display: flex; justify-content: space-between; font-size: 11px; color: #a8a29e; font-family: sans-serif;">
+              <span>${storybook.title}</span>
+              <span>Chapter ${i + 1} of ${chapters.length}</span>
+            </div>
+          </div>
+        `;
+        const chCanvas = await html2canvas(container.firstElementChild as HTMLElement, { scale: 2 });
+        pdf.addImage(chCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageWidth, pageHeight);
+      }
+    } finally {
+      document.body.removeChild(container);
+    }
+  }
+
+  private static async exportStandardWithCover(
+    pdf: jsPDF,
+    storybook: StorybookExport,
+    pageWidth: number,
+    pageHeight: number,
+    html2canvas: (element: HTMLElement, options?: object) => Promise<HTMLCanvasElement>
+  ): Promise<void> {
+    // Generate themed visual cover for Page 1
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '650px';
+    container.style.height = '920px';
+    container.style.zIndex = '-100';
+    document.body.appendChild(container);
+
+    const themeGradients: Record<string, string> = {
+      romantic: 'linear-gradient(135deg, #4c0519 0%, #831843 50%, #500724 100%)',
+      dramatic: 'linear-gradient(135deg, #020617 0%, #1e1b4b 50%, #0f172a 100%)',
+      adventure: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #451a03 100%)',
+      mystery: 'linear-gradient(135deg, #030712 0%, #0f172a 50%, #0c4a6e 100%)',
+      comedy: 'linear-gradient(135deg, #451a03 0%, #78350f 50%, #713f12 100%)'
+    };
+    const gradient = themeGradients[storybook.theme] || themeGradients.dramatic;
+
+    try {
+      container.innerHTML = `
+        <div style="width: 650px; height: 920px; padding: 48px; background: ${gradient}; color: #ffffff; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-sizing: border-box; font-family: 'Georgia', serif; text-align: center; border: 2px solid rgba(255,255,255,0.2);">
+          <div style="font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,0.7); padding-top: 16px;">
+            MINDDIARY MEMOIR
+          </div>
+          <div style="max-width: 520px; margin: auto 0;">
+            <h1 style="font-size: 34px; line-height: 1.35; margin: 0 0 16px 0; font-weight: bold; color: #ffffff;">
+              ${storybook.title}
+            </h1>
+            ${storybook.protagonist?.name ? `<p style="font-size: 16px; font-style: italic; color: rgba(255,255,255,0.85); margin: 0;">A journey of ${storybook.protagonist.name}</p>` : ''}
+            <div style="width: 60px; height: 2px; background: rgba(255,255,255,0.3); margin: 20px auto;"></div>
+          </div>
+          <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 16px; font-size: 12px; display: flex; justify-content: space-between; color: rgba(255,255,255,0.6); font-family: sans-serif;">
+            <span style="text-transform: capitalize;">${storybook.theme} Theme</span>
+            <span>Created with MindDiary AI</span>
+          </div>
+        </div>
+      `;
+      const coverCanvas = await html2canvas(container.firstElementChild as HTMLElement, { scale: 2 });
+      pdf.addImage(coverCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pageWidth, pageHeight);
+    } finally {
+      document.body.removeChild(container);
+    }
+
+    // Page 2: Dedication & Preface
     pdf.addPage();
-    pageNumber++;
-    this.createDedicationPage(pdf, storybook, pageWidth, pageHeight, margin);
+    let pageNumber = 2;
+    this.createDedicationPage(pdf, storybook, pageWidth, pageHeight);
 
-     
+    // Page 3: Table of contents
     pdf.addPage();
     pageNumber++;
     const chapters = this.extractChapters(storybook.generatedContent);
-    this.createProfessionalTableOfContents(pdf, chapters, pageWidth, pageHeight, margin);
+    this.createProfessionalTableOfContents(pdf, chapters, pageWidth, pageHeight, 30);
 
-   
+    // Page 4+: Chapters
     pdf.addPage();
     pageNumber++;
-    yPosition = margin + 30;
+    const margin = 30;
+    const textWidth = pageWidth - margin * 2;
+    const lineHeight = 7;
+    let yPosition = margin + 30;
 
     const lines = storybook.generatedContent.split('\n');
     let isFirstChapter = true;
@@ -101,105 +250,9 @@ export class ExportService {
     }
 
     this.addProfessionalPageFooter(pdf, pageNumber, pageWidth, pageHeight);
-
-    const filename = `${storybook.title
-      .replace(/[^a-zA-Z0-9\s]/g, '')
-      .replace(/\s+/g, '_')}_Storybook.pdf`;
-    pdf.save(filename);
   }
 
-  private static createProfessionalTitlePage(pdf: jsPDF, storybook: StorybookExport, pageWidth: number, pageHeight: number): void {
-    const centerX = pageWidth / 2;
-     
-    pdf.setDrawColor(60, 60, 60);
-    pdf.setLineWidth(1);
-    pdf.rect(25, 25, pageWidth - 50, pageHeight - 50);
-    
-    pdf.setLineWidth(0.5);
-    pdf.rect(30, 30, pageWidth - 60, pageHeight - 60);
-     
-    this.addCornerDecorations(pdf, pageWidth, pageHeight);
-     
-    pdf.setFontSize(32);
-    pdf.setFont('times', 'bold');
-    pdf.setTextColor(40, 40, 40);
-    
-    const titleLines = pdf.splitTextToSize(storybook.title, pageWidth - 100);
-    let titleY = pageHeight * 0.25;
-    
-    titleLines.forEach((line: string) => {
-      const titleWidth = pdf.getTextWidth(line);
-      pdf.text(line, centerX - (titleWidth / 2), titleY);
-      titleY += 40;
-    });
-     
-    pdf.setDrawColor(120, 120, 120);
-    pdf.setLineWidth(0.8);
-    pdf.line(centerX - 50, titleY + 10, centerX + 50, titleY + 10);
-     
-    pdf.setFontSize(18);
-    pdf.setFont('times', 'italic');
-    pdf.setTextColor(80, 80, 80);
-    const subtitle = `A ${storybook.theme.charAt(0).toUpperCase() + storybook.theme.slice(1)} Story`;
-    const subtitleWidth = pdf.getTextWidth(subtitle);
-    pdf.text(subtitle, centerX - (subtitleWidth / 2), titleY + 55);
-     
-    pdf.setFontSize(14);
-    pdf.setFont('times', 'normal');
-    pdf.setTextColor(100, 100, 100);
-    const startDate = storybook.timeframe.start.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric', 
-      year: 'numeric' 
-    });
-    const endDate = storybook.timeframe.end.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric', 
-      year: 'numeric' 
-    });
-    const dateRange = startDate === endDate ? startDate : `${startDate} — ${endDate}`;
-    const dateWidth = pdf.getTextWidth(dateRange);
-    pdf.text(dateRange, centerX - (dateWidth / 2), titleY + 80);
-     
-    pdf.setFontSize(12);
-    pdf.setFont('times', 'italic');
-    pdf.setTextColor(120, 120, 120);
-    const bottomText = 'A Personal Journey Transformed into Story';
-    const bottomWidth = pdf.getTextWidth(bottomText);
-    pdf.text(bottomText, centerX - (bottomWidth / 2), pageHeight - 60);
-     
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(140, 140, 140);
-    const publisherText = 'Created with MyDiary AI';
-    const publisherWidth = pdf.getTextWidth(publisherText);
-    pdf.text(publisherText, centerX - (publisherWidth / 2), pageHeight - 40);
-  }
-
-  private static addCornerDecorations(pdf: jsPDF, pageWidth: number, pageHeight: number): void {
-     
-    pdf.setDrawColor(180, 180, 180);
-    pdf.setLineWidth(0.3);
-
-    const cornerSize = 10;
-    const offset = 35;
-
-     
-    pdf.line(offset, offset, offset + cornerSize, offset);
-    pdf.line(offset, offset, offset, offset + cornerSize);
-
-   
-    pdf.line(pageWidth - offset, offset, pageWidth - offset - cornerSize, offset);
-    pdf.line(pageWidth - offset, offset, pageWidth - offset, offset + cornerSize);
- 
-    pdf.line(offset, pageHeight - offset, offset + cornerSize, pageHeight - offset);
-    pdf.line(offset, pageHeight - offset, offset, pageHeight - offset - cornerSize);
- 
-    pdf.line(pageWidth - offset, pageHeight - offset, pageWidth - offset - cornerSize, pageHeight - offset);
-    pdf.line(pageWidth - offset, pageHeight - offset, pageWidth - offset, pageHeight - offset - cornerSize);
-  }
-
-  private static createDedicationPage(pdf: jsPDF, _storybook: StorybookExport, pageWidth: number, pageHeight: number, _margin: number): void {
+  private static createDedicationPage(pdf: jsPDF, _storybook: StorybookExport, pageWidth: number, pageHeight: number): void {
     const centerX = pageWidth / 2;
     const centerY = pageHeight / 2;
     
@@ -618,7 +671,7 @@ export class ExportService {
     }).join('\n');
   }
 
-  static exportRawEntries(entries: any[]): void {
+  static exportRawEntries(entries: DiaryEntry[]): void {
     const content = JSON.stringify(entries, null, 2);
     
     const blob = new Blob([content], { type: 'application/json' });
@@ -630,5 +683,178 @@ export class ExportService {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  static async exportWellnessReport(insights: WellnessInsights, isCounselorSummary: boolean = true): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.width;
+    const pageHeight = pdf.internal.pageSize.height;
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    let y = margin;
+
+    // Header banner
+    pdf.setFillColor(243, 246, 244);
+    pdf.roundedRect(margin, y, contentWidth, 32, 3, 3, 'F');
+
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(16);
+    pdf.setTextColor(45, 55, 72);
+    pdf.text(isCounselorSummary ? 'Wellness Summary (Counselor / Clinical Edition)' : 'Personal Wellness Trends Report', margin + 8, y + 12);
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    pdf.setTextColor(100, 116, 139);
+    const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+    pdf.text(`Generated: ${dateStr} • Zero diary entry text is included for privacy`, margin + 8, y + 20);
+    pdf.text(`Scope: ${insights.dataPointsCount} logged checkpoints analyzed`, margin + 8, y + 26);
+    y += 40;
+
+    const printSectionHeading = (title: string) => {
+      if (y > pageHeight - 35) {
+        pdf.addPage();
+        y = margin;
+      }
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(12);
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(title, margin, y);
+      y += 2;
+      pdf.setDrawColor(226, 232, 240);
+      pdf.line(margin, y, margin + contentWidth, y);
+      y += 6;
+    };
+
+    // 1. Overview metrics
+    printSectionHeading('1. Overview & Consistency');
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    pdf.setTextColor(51, 65, 85);
+
+    const avgMoodStr = insights.averageMood !== null ? `${insights.averageMood.toFixed(1)} / 10` : 'Not enough data';
+    pdf.text(`Average Mood Rating: ${avgMoodStr}`, margin, y);
+    y += 6;
+    pdf.text(`Recent Activity (Last 7 Days): ${insights.streak.last7DaysRatio} days logged`, margin, y);
+    y += 6;
+    pdf.setFont('helvetica', 'italic');
+    pdf.setTextColor(100, 116, 139);
+    pdf.text(`Reflection: "${insights.streak.kindMessage}"`, margin, y);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(51, 65, 85);
+    y += 10;
+
+    // 2. Highs & Lows
+    printSectionHeading('2. Notable Days');
+    const bestStr = insights.bestDay
+      ? `${new Date(insights.bestDay.date).toLocaleDateString()} (Score: ${insights.bestDay.moodScore}/10) - Emotions: ${insights.bestDay.emotions.join(', ') || 'None noted'}`
+      : 'None recorded in this period';
+    const hardestStr = insights.hardestDay
+      ? `${new Date(insights.hardestDay.date).toLocaleDateString()} (Score: ${insights.hardestDay.moodScore}/10) - Emotions: ${insights.hardestDay.emotions.join(', ') || 'None noted'}`
+      : 'None recorded in this period';
+
+    pdf.text(`Best Day: ${bestStr}`, margin, y);
+    y += 6;
+    pdf.text(`Hardest Day: ${hardestStr}`, margin, y);
+    y += 10;
+
+    // 3. Observed Trends & Correlations (>= 7 points)
+    printSectionHeading('3. Observed Correlations & Trends');
+    if (insights.findings && insights.findings.length > 0) {
+      insights.findings.forEach(finding => {
+        if (y > pageHeight - 20) {
+          pdf.addPage();
+          y = margin;
+        }
+        pdf.text(`* ${finding}`, margin + 2, y);
+        y += 6;
+      });
+    } else {
+      pdf.setTextColor(148, 163, 184);
+      pdf.text('Fewer than 7 days of combined data available. Correlation trends emerge over time.', margin, y);
+      pdf.setTextColor(51, 65, 85);
+      y += 6;
+    }
+    y += 6;
+
+    // 4. Frequent Emotions
+    printSectionHeading('4. Most Frequent Emotions');
+    if (insights.mostFrequentEmotions && insights.mostFrequentEmotions.length > 0) {
+      const emoList = insights.mostFrequentEmotions.map(e => `${e.emotion} (${e.count}x)`).join(', ');
+      const splitEmo = pdf.splitTextToSize(emoList, contentWidth);
+      pdf.text(splitEmo, margin, y);
+      y += splitEmo.length * 6 + 4;
+    } else {
+      pdf.text('No specific emotions logged during this range.', margin, y);
+      y += 8;
+    }
+
+    // 5. Weekday Averages
+    if (y > pageHeight - 35) {
+      pdf.addPage();
+      y = margin;
+    }
+    printSectionHeading('5. Weekday Pattern');
+    const weekdayStr = insights.weekdayPattern
+      .map(w => `${w.day}: ${w.averageMood !== null ? w.averageMood.toFixed(1) + '/10' : '-'}`)
+      .join('   |   ');
+    pdf.text(weekdayStr, margin, y);
+    y += 12;
+
+    // 6. Day-by-Day Metric Table (No diary text)
+    if (y > pageHeight - 50) {
+      pdf.addPage();
+      y = margin;
+    }
+    printSectionHeading('6. Daily Metrics Breakdown (Numbers Only)');
+    pdf.setFontSize(8);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text('Date               Mood    Sleep    Energy    Stress    Anxiety    Water    Exercise', margin, y);
+    y += 3;
+    pdf.line(margin, y, margin + contentWidth, y);
+    y += 5;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(51, 65, 85);
+    insights.moodPerDay.forEach(day => {
+      if (y > pageHeight - 20) {
+        pdf.addPage();
+        y = margin;
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text('Date               Mood    Sleep    Energy    Stress    Anxiety    Water    Exercise', margin, y);
+        y += 3;
+        pdf.line(margin, y, margin + contentWidth, y);
+        y += 5;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(51, 65, 85);
+      }
+      const d = new Date(day.date).toISOString().slice(0, 10);
+      const m = day.moodScore !== null ? `${day.moodScore}/10`.padEnd(6) : '-     ';
+      const sl = day.sleepHours != null ? `${day.sleepHours}h`.padEnd(7) : '-      ';
+      const en = day.energy != null ? `${day.energy}/5`.padEnd(8) : '-       ';
+      const st = day.stress != null ? `${day.stress}/5`.padEnd(8) : '-       ';
+      const ax = day.anxiety != null ? `${day.anxiety}/5`.padEnd(9) : '-        ';
+      const wt = day.waterGlasses != null ? `${day.waterGlasses}gl`.padEnd(7) : '-      ';
+      const ex = day.exerciseMinutes != null ? `${day.exerciseMinutes}m` : '-';
+
+      pdf.text(`${d}     ${m}  ${sl}  ${en}  ${st}  ${ax}  ${wt}  ${ex}`, margin, y);
+      y += 5;
+    });
+
+    const totalPages = pdf.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      pdf.setPage(p);
+      pdf.setFontSize(8);
+      pdf.setTextColor(148, 163, 184);
+      pdf.text(
+        `Confidential Wellness Report * My AI Diary * Page ${p} of ${totalPages}`,
+        margin,
+        pageHeight - 10
+      );
+    }
+
+    const filename = isCounselorSummary ? 'wellness_counselor_summary.pdf' : 'wellness_report.pdf';
+    pdf.save(filename);
   }
 }

@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -6,20 +7,19 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+  },
   server: {
     port: 5173,
     host: true,
     proxy: {
       '/api': {
-        target: 'https://ai-diary-e2xo.onrender.com/api',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        ws: true,
-        configure: (proxy, _options) => {
-          proxy.on('error', (_err, _req, _res) => {});
-          proxy.on('proxyReq', (_proxyReq, _req, _res) => {});
-          proxy.on('proxyRes', (_proxyRes, _req, _res) => {});
-        },
       },
     },
   },
@@ -36,8 +36,5 @@ export default defineConfig({
         },
       },
     },
-  },
-  define: {
-    'process.env.NODE_ENV': JSON.stringify('Production'),
   },
 });

@@ -1,4 +1,5 @@
-const { DiaryEntry, Storybook } = require('../config/models');
+const { DiaryEntry, Storybook, User } = require('../config/models');
+const { startOfDay, endOfDay } = require('../utils/dates');
 
 const exportEntries = async (req, res, next) => {
   try {
@@ -7,9 +8,11 @@ const exportEntries = async (req, res, next) => {
     let query = { user: req.user.id };
     
     if (startDate || endDate) {
+      const user = await User.findById(req.user.id).select('timezone');
+      const tz = user?.timezone || 'UTC';
       query.entryDate = {};
-      if (startDate) query.entryDate.$gte = new Date(startDate);
-      if (endDate) query.entryDate.$lte = new Date(endDate);
+      if (startDate) query.entryDate.$gte = startOfDay(startDate, tz);
+      if (endDate) query.entryDate.$lte = endOfDay(endDate, tz);
     }
 
     const entries = await DiaryEntry.find(query).sort({ entryDate: -1 });

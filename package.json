@@ -1,0 +1,30 @@
+{
+  "name": "minddiary-monorepo",
+  "version": "1.0.0",
+  "description": "MindDiary - Private, AI-supported journal for mental wellness",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix frontend install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\" --names \"SERVER,CLIENT\" --prefix-colors \"blue,green\"",
+    "dev:server": "npm --prefix server run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix server test",
+    "test:frontend": "npm --prefix frontend test",
+    "test:all": "npm test && npm run test:frontend",
+    "seed:demo": "npm --prefix server run seed:demo",
+    "i18n:check": "npm --prefix frontend run i18n:check",
+    "start": "npm --prefix server run start",
+    "lint": "npm --prefix frontend run lint"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "i18next": "^27.1.5",
+    "react-i18next": "^18.0.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
